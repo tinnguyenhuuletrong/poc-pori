@@ -1,0 +1,21 @@
+import { EventEmitter } from "stream";
+import { Context } from "../type";
+
+export async function getMineInfo({ contract }: Context, mineId) {
+  const mineInfo = await contract.methods.mines(mineId).call();
+  const { state, farmer, helper, rewardMap } = mineInfo;
+  return { state, farmer, helper, rewardMap };
+}
+
+export async function listenEvents({
+  contract,
+}: Context): Promise<EventEmitter> {
+  // To scan pass event from blockA -> blockB
+  // use
+  //  https://web3js.readthedocs.io/en/v1.7.3/web3-eth-contract.html#getpastevents
+
+  // Scan all event from currentTime
+  return contract.events.allEvents().on("connected", function (subscriptionId) {
+    console.log(subscriptionId);
+  });
+}
