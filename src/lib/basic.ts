@@ -1,5 +1,6 @@
 import { EventEmitter } from "stream";
 import { Context } from "../type";
+import { BlockNumber } from "web3-core";
 
 export async function getMineInfo({ contract }: Context, mineId) {
   const mineInfo = await contract.methods.mines(mineId).call();
@@ -17,5 +18,25 @@ export async function listenEvents({
   // Scan all event from currentTime
   return contract.events.allEvents().on("connected", function (subscriptionId) {
     console.log(subscriptionId);
+  });
+}
+
+export async function scanEvents(
+  ctx: Context,
+  {
+    filter = "allEvents",
+    fromBlock,
+    toBlock,
+  }: {
+    filter: string;
+    fromBlock: BlockNumber;
+    toBlock: BlockNumber;
+  }
+) {
+  const contract = ctx.contract;
+
+  return contract.getPastEvents(filter, {
+    fromBlock,
+    toBlock,
   });
 }
