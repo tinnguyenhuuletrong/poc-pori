@@ -112,8 +112,8 @@ Example: queryMineInfo
 
 ## TODO List
 
-- [ ] Query poriant info from nft id -> calculate atk + def
-- [ ] Integrate telegaram bot -> notify us when
+- [x] Query poriant info from nft id -> calculate atk + def
+- [-] Integrate telegaram bot -> notify us when
    - [ ] adventure complete 
    - [ ] got atk
 - [ ] Allow import private key -> auto start adventure

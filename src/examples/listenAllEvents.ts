@@ -1,9 +1,10 @@
 import { close, listenEvents, init } from "..";
+import { ENV } from "../type";
 
 async function main() {
   console.log("Example: listenEvents");
 
-  const ctx = await init();
+  const ctx = await init(ENV.Staging);
   const subObj = await listenEvents(ctx);
   subObj
     .on("data", function (eventInfo) {

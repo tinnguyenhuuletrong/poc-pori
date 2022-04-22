@@ -1,8 +1,8 @@
 import Web3 from "web3";
-import { ABI_IDLE, gameInfo } from "./info/sta-poriverse_info";
-import { Context } from "./type";
+import { getIdleGameAddressSC } from "./info";
+import { Context, ENV } from "./type";
 
-export async function init(): Promise<Context> {
+export async function init(env: ENV): Promise<Context> {
   if (!process.env.NODE_URI) {
     console.error("missing env NODE_URI");
     process.exit(1);
@@ -10,15 +10,15 @@ export async function init(): Promise<Context> {
 
   const provider = new Web3.providers.WebsocketProvider(process.env.NODE_URI);
   const web3 = new Web3(provider);
-  const contract = new web3.eth.Contract(
-    ABI_IDLE,
-    gameInfo.m.app.contractAddress.idleGameAddress
-  );
+
+  const idleGameSc = getIdleGameAddressSC(env);
+  const contract = new web3.eth.Contract(idleGameSc.abi, idleGameSc.address);
 
   const ctx: Context = {
     contract,
     web3,
     provider,
+    env,
   };
 
   return ctx;
@@ -29,3 +29,5 @@ export async function close(ctx: Context) {
 }
 
 export * from "./lib/basic";
+export * from "./lib/nftBodyPart";
+export * from "./lib/queryPoriApi";
