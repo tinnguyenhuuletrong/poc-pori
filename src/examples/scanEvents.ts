@@ -36,7 +36,7 @@ async function main() {
   console.log("connected");
 
   // Staging Contract create on 25777543
-  const path = "./allEvents.stag.json";
+  const path = "./archived/allEvents.stag.json";
   const scData = readSnapshotData(path);
   let from = scData._metadata.head || scData._metadata.createdBlock;
   let saveInterval = 0;
@@ -58,7 +58,7 @@ async function main() {
     scData._metadata.head = to;
     scData.events = scData.events.concat(events);
     saveInterval++;
-    if (saveInterval % 10) {
+    if (saveInterval % 10 === 0) {
       saveSnapshot(path, scData);
       saveInterval = 0;
     }
