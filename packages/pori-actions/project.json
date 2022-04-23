@@ -1,0 +1,32 @@
+{
+  "root": "packages/pori-actions",
+  "sourceRoot": "packages/pori-actions/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/pori-actions",
+        "main": "packages/pori-actions/src/index.ts",
+        "tsConfig": "packages/pori-actions/tsconfig.lib.json",
+        "assets": ["packages/pori-actions/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/pori-actions/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/pori-actions"],
+      "options": {
+        "jestConfig": "packages/pori-actions/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

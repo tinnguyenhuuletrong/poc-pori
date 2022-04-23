@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "projects": {
+    "examples-parse-nft": "packages/examples/parse-nft",
+    "examples-query-mine-info": "packages/examples/query-mine-info",
+    "examples-scan-idle-game-events": "packages/examples/scan-idle-game-events",
+    "examples-simple-tele-bot": "packages/examples/simple-tele-bot",
+    "examples-stream-idle-game-events": "packages/examples/stream-idle-game-events",
+    "pori-actions": "packages/pori-actions",
+    "pori-metadata": "packages/pori-metadata",
+    "utils": "packages/utils"
+  }
+}
