@@ -1,0 +1,24 @@
+import { getAPILink } from '@pori-and-friends/pori-metadata';
+import { ENV, NftInfo } from '@pori-and-friends/pori-metadata';
+import { axiosIns } from '@pori-and-friends/utils';
+
+export async function queryNftInfo(
+  id: string | number,
+  ctx: {
+    env: ENV;
+  } = {
+    env: ENV.Staging,
+  }
+): Promise<NftInfo> {
+  const baseURL = getAPILink(ctx.env);
+
+  const res = await axiosIns.request({
+    method: 'get',
+    baseURL,
+    url: `/api/v1/assets/${id}`,
+  });
+  if (res.status !== 200)
+    throw new Error(`Request failed status ${res.status} - ${res.data}`);
+
+  return JSON.parse(res.data);
+}

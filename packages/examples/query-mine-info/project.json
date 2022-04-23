@@ -1,0 +1,58 @@
+{
+  "root": "packages/examples/query-mine-info",
+  "sourceRoot": "packages/examples/query-mine-info/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/examples/query-mine-info",
+        "main": "packages/examples/query-mine-info/src/main.ts",
+        "tsConfig": "packages/examples/query-mine-info/tsconfig.app.json"
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/examples/query-mine-info/src/environments/environment.ts",
+              "with": "packages/examples/query-mine-info/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "run": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-query-mine-info:build"
+      }
+    },
+    "dev": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-query-mine-info:build",
+        "watch": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/examples/query-mine-info/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/examples/query-mine-info"],
+      "options": {
+        "jestConfig": "packages/examples/query-mine-info/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
