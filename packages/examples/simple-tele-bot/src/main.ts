@@ -1,5 +1,14 @@
 import * as os from 'os';
 import TelegramBot from 'node-telegram-bot-api';
+import process from 'process';
+
+const Memory = {
+  activeChats: [],
+};
+
+function captureChatId(chatId) {
+  if (!Memory.activeChats.includes(chatId)) Memory.activeChats.push(chatId);
+}
 
 async function main() {
   const token = process.env.TELEGRAM_TOKEN;
@@ -10,6 +19,8 @@ async function main() {
   const bot = new TelegramBot(token, { polling: true });
 
   bot.onText(/\/whoami/, function onEchoText(msg) {
+    captureChatId(msg.chat.id);
+
     const resp = `i am 🤖. 
     <code>
       uptime: ${process.uptime()}
@@ -23,6 +34,8 @@ async function main() {
 
   // Matches /love
   bot.onText(/\/love/, function onLoveText(msg) {
+    captureChatId(msg.chat.id);
+
     const opts = {
       reply_to_message_id: msg.message_id,
       reply_markup: {
@@ -37,6 +50,8 @@ async function main() {
 
   // Matches /echo [whatever]
   bot.onText(/\/echo (.+)/, function onEchoText(msg, match) {
+    captureChatId(msg.chat.id);
+
     // console.log(msg);
     const resp = match[1];
     bot.sendMessage(msg.chat.id, resp);
@@ -44,6 +59,8 @@ async function main() {
 
   // Matches /editable
   bot.onText(/\/editable/, function onEditableText(msg) {
+    captureChatId(msg.chat.id);
+
     const opts = {
       reply_markup: {
         inline_keyboard: [
@@ -91,5 +108,20 @@ async function main() {
   });
 
   console.log('🤖 started');
+
+  // --------
+  // Cleanup
+  async function close() {
+    console.log('cleanup start');
+    for (const id of Memory.activeChats) {
+      await bot.sendMessage(id, 'bye 👋!');
+    }
+
+    console.log('bye 👋!');
+  }
+  process.once('SIGINT', async () => {
+    await close();
+    process.exit(0);
+  });
 }
 main();
