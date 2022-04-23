@@ -1,0 +1,52 @@
+{
+  "root": "packages/examples/simple-tele-bot",
+  "sourceRoot": "packages/examples/simple-tele-bot/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/examples/simple-tele-bot",
+        "main": "packages/examples/simple-tele-bot/src/main.ts",
+        "tsConfig": "packages/examples/simple-tele-bot/tsconfig.app.json",
+        "assets": ["packages/examples/simple-tele-bot/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/examples/simple-tele-bot/src/environments/environment.ts",
+              "with": "packages/examples/simple-tele-bot/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "run": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-simple-tele-bot:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/examples/simple-tele-bot/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/examples/simple-tele-bot"],
+      "options": {
+        "jestConfig": "packages/examples/simple-tele-bot/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

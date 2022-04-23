@@ -1,0 +1,32 @@
+{
+  "root": "packages/pori-metadata",
+  "sourceRoot": "packages/pori-metadata/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/pori-metadata",
+        "main": "packages/pori-metadata/src/index.ts",
+        "tsConfig": "packages/pori-metadata/tsconfig.lib.json",
+        "assets": ["packages/pori-metadata/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/pori-metadata/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/pori-metadata"],
+      "options": {
+        "jestConfig": "packages/pori-metadata/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

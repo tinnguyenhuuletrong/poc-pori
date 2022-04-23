@@ -1,0 +1,52 @@
+{
+  "root": "packages/examples/parse-nft",
+  "sourceRoot": "packages/examples/parse-nft/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/examples/parse-nft",
+        "main": "packages/examples/parse-nft/src/main.ts",
+        "tsConfig": "packages/examples/parse-nft/tsconfig.app.json",
+        "assets": ["packages/examples/parse-nft/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/examples/parse-nft/src/environments/environment.ts",
+              "with": "packages/examples/parse-nft/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "run": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-parse-nft:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/examples/parse-nft/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/examples/parse-nft"],
+      "options": {
+        "jestConfig": "packages/examples/parse-nft/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

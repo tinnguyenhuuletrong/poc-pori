@@ -1,0 +1,54 @@
+{
+  "root": "packages/examples/stream-idle-game-events",
+  "sourceRoot": "packages/examples/stream-idle-game-events/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/examples/stream-idle-game-events",
+        "main": "packages/examples/stream-idle-game-events/src/main.ts",
+        "tsConfig": "packages/examples/stream-idle-game-events/tsconfig.app.json",
+        "assets": ["packages/examples/stream-idle-game-events/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/examples/stream-idle-game-events/src/environments/environment.ts",
+              "with": "packages/examples/stream-idle-game-events/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "run": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-stream-idle-game-events:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/examples/stream-idle-game-events/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/examples/stream-idle-game-events"],
+      "options": {
+        "jestConfig": "packages/examples/stream-idle-game-events/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
