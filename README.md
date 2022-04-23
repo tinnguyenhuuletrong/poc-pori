@@ -60,11 +60,21 @@ Locate in packages/examples
 # better to test before build :p
 yarn run nx test
 
+# dev
+yarn run nx run-many --target=build --all
 
-yarn run nx build
+# prod
+yarn run nx run-many --target=build --all --prod
 ```
 
-distribute js src in `./dist` folder
+distribute js src in `./dist` folder. All code bundle into 1 file. Can easy to dist with
+ package.json + target file
+
+```sh
+
+# Run
+node dist/packages/examples/scan-idle-game-events/main.js
+```
 
 ## TODO List
 
