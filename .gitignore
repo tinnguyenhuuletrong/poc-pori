@@ -1,3 +1,6 @@
 *.env
 node_modules
 dist
+archived/*.json
+archived/*.js
+*.DS_Store
