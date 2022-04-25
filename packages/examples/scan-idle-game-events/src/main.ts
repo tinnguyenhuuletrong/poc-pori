@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as AppEnv from './environments/environment';
 import { close, scanEvents, init } from '@pori-and-friends/pori-actions';
-import { ENV } from '@pori-and-friends/pori-metadata';
+import { ENV, IdleGameSc } from '@pori-and-friends/pori-metadata';
 
 type SCStructure = {
   _metadata: {
@@ -57,7 +57,11 @@ async function main() {
 
     from = to;
     scData._metadata.head = to;
-    scData.events = scData.events.concat(events);
+
+    const transformedEvents = events
+      .map((itm) => IdleGameSc.parseIdleGameScEvent(itm))
+      .filter(Boolean);
+    scData.events = scData.events.concat(transformedEvents);
     saveInterval++;
     if (saveInterval % 10 === 0) {
       saveSnapshot(path, scData);

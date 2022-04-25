@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parse idleGameScEvent 1`] = `
+Array [
+  Object {
+    "blockNo": 25786299,
+    "data": Object {
+      "farmer": "0xf9209B6F49BB9fD73422BA834f4cD444aE7ceacE",
+      "indexes": Array [
+        2,
+        3,
+        7,
+      ],
+      "mineId": 6,
+      "porians": Array [
+        24,
+        38,
+        37,
+      ],
+      "rewardLevels": Array [
+        3,
+        1,
+        4,
+      ],
+      "startTime": 1649006285,
+    },
+    "txHash": "0x97ea12da694c241a29ea893676a6f964b29d9a4d92e38ba152e06003aa38481c",
+    "type": "AdventureStarted",
+  },
+  Object {
+    "blockNo": 25786571,
+    "data": Object {
+      "farmerReward1": 43600000000000000000,
+      "farmerReward2": 4360000000000000000,
+      "fragments": 0,
+      "helperReward1": 82400000000000000000,
+      "helperReward2": 8240000000000000000,
+      "mineId": 6,
+      "winner": "0x1F8A3F6083F90f5FeF56AC3D3F22822C41C9488a",
+    },
+    "txHash": "0x9f8a3470f045d389a21948d5aa72231b9da5fa4f32905e80eb23dd967fe7f19a",
+    "type": "AdventureFinished",
+  },
+  Object {
+    "blockNo": 25799104,
+    "data": Object {
+      "blockedTime": 1649088619,
+      "index": 7,
+      "mineId": 17,
+      "porian": 27,
+      "rewardLevel": 4,
+    },
+    "txHash": "0x4f91872215a9822cd300c0d0f11dd28083aa2383734797355b3dcce2048171cf",
+    "type": "AdventureFortified",
+  },
+  Object {
+    "blockNo": 25799448,
+    "data": Object {
+      "blockedTime": 1649090860,
+      "helper": "0xf9209B6F49BB9fD73422BA834f4cD444aE7ceacE",
+      "indexes": Array [
+        7,
+        8,
+        9,
+      ],
+      "mineId": 18,
+      "porians": Array [
+        30,
+        34,
+        27,
+      ],
+      "rewardLevels": Array [
+        4,
+        3,
+        3,
+      ],
+    },
+    "txHash": "0x2aebec81d7a633a90959194ecdc861824a392693e263baf5c6d8fe6961fc3fba",
+    "type": "AdventureSupported1",
+  },
+  Object {
+    "blockNo": 25799513,
+    "data": Object {
+      "blockedTime": 1649090860,
+      "index": 7,
+      "mineId": 18,
+      "porian": 350,
+      "rewardLevel": 4,
+    },
+    "txHash": "0xeea65ae96f82956d8cd0b1b004f120f72c2ca010129663ad5afbf8667ea934fc",
+    "type": "AdventureSupported2",
+  },
+  Object {
+    "blockNo": 25799529,
+    "data": Object {
+      "expiredAt": 7955107200,
+      "from": "0x8d1A4b353d80f31757CC2264f6a163c410B2fBF2",
+      "porian": 102,
+    },
+    "txHash": "0xa0e86ebf2f6e0a484a0428db7f5f6f9e0cbda347eb4f06b1cfa21aa7afb83408",
+    "type": "PorianDeposited",
+  },
+  Object {
+    "blockNo": 25836477,
+    "data": Object {
+      "porian": 9116,
+      "to": "0x0a674eB963646bE42F9F071B8F5Cd79Bb744bD32",
+    },
+    "txHash": "0xd2162717f59565bbd9f6c3b3a385c861a96bac487a7e4eeca3d5ef899542defa",
+    "type": "PorianWithdrawed",
+  },
+  null,
+  Object {
+    "blockNo": 25777545,
+    "data": Object {
+      "adventureDuration": 1500,
+      "turnDuration": 300,
+    },
+    "txHash": "0xf59a96c14408acef73996d4e76278bf5830a60fa0139188d66f15788a2270891",
+    "type": "GameDurationChanged",
+  },
+]
+`;

@@ -9,6 +9,8 @@ async function main() {
   const mineInfo = await getMineInfo(ctx, mineId);
   console.log(`mineInfo ${mineId} ->`, mineInfo);
 
+  console.dir(ctx.contract, { depth: 100 });
+
   await close(ctx);
 }
 main();

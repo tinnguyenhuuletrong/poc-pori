@@ -212,7 +212,50 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'mineId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'winner',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'fragments',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'farmerReward1',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'farmerReward2',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'helperReward1',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'helperReward2',
+        type: 'uint256'
+      }
+    ],
     name: 'AdventureFinished',
     type: 'event',
     constant: undefined,
@@ -221,7 +264,38 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'mineId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'porian',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint8',
+        name: 'index',
+        type: 'uint8'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: 'rewardLevel',
+        type: 'uint8'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'blockedTime',
+        type: 'uint256'
+      }
+    ],
     name: 'AdventureFortified',
     type: 'event',
     constant: undefined,
@@ -230,7 +304,50 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'mineId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'farmer',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'startTime',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256[3]',
+        name: 'porians',
+        type: 'uint256[3]'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8[3]',
+        name: 'indexes',
+        type: 'uint8[3]'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8[3]',
+        name: 'rewardLevels',
+        type: 'uint8[3]'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'blockedTime',
+        type: 'uint256'
+      }
+    ],
     name: 'AdventureStarted',
     type: 'event',
     constant: undefined,
@@ -239,7 +356,44 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'mineId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'helper',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256[3]',
+        name: 'porians',
+        type: 'uint256[3]'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8[3]',
+        name: 'indexes',
+        type: 'uint8[3]'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8[3]',
+        name: 'rewardLevels',
+        type: 'uint8[3]'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'blockedTime',
+        type: 'uint256'
+      }
+    ],
     name: 'AdventureSupported1',
     type: 'event',
     constant: undefined,
@@ -248,7 +402,38 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'mineId',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'porian',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint8',
+        name: 'index',
+        type: 'uint8'
+      },
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: 'rewardLevel',
+        type: 'uint8'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'blockedTime',
+        type: 'uint256'
+      }
+    ],
     name: 'AdventureSupported2',
     type: 'event',
     constant: undefined,
@@ -257,7 +442,26 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'rate',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'token',
+        type: 'address'
+      }
+    ],
     name: 'FragmentConfigsChanged',
     type: 'event',
     constant: undefined,
@@ -266,7 +470,20 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'adventureDuration',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'turnDuration',
+        type: 'uint256'
+      }
+    ],
     name: 'GameDurationChanged',
     type: 'event',
     constant: undefined,
@@ -275,7 +492,14 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint8',
+        name: 'env',
+        type: 'uint8'
+      }
+    ],
     name: 'GameEnvChanged',
     type: 'event',
     constant: undefined,
@@ -293,7 +517,20 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'previousOwner',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address'
+      }
+    ],
     name: 'OwnershipTransferred',
     type: 'event',
     constant: undefined,
@@ -302,7 +539,26 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'porianNFT',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'porianPower',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'rentalCentre',
+        type: 'address'
+      }
+    ],
     name: 'PorianContractAddressChanged',
     type: 'event',
     constant: undefined,
@@ -311,7 +567,26 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'from',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'porian',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'expiredAt',
+        type: 'uint256'
+      }
+    ],
     name: 'PorianDeposited',
     type: 'event',
     constant: undefined,
@@ -320,7 +595,20 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'to',
+        type: 'address'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'porian',
+        type: 'uint256'
+      }
+    ],
     name: 'PorianWithdrawed',
     type: 'event',
     constant: undefined,
@@ -329,7 +617,20 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'rentalFee',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'reservePool',
+        type: 'address'
+      }
+    ],
     name: 'RentalConfigsSet',
     type: 'event',
     constant: undefined,
@@ -338,7 +639,38 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'rigyToken',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'rikenToken',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'rigyReward',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'rikenReward',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'winRatio',
+        type: 'uint256'
+      }
+    ],
     name: 'RewardConfigsChanged',
     type: 'event',
     constant: undefined,
@@ -347,7 +679,26 @@ _jsonInterface: [
   },
   {
     anonymous: false,
-    inputs: [Array],
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'rewardLevel',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'rewardRatio',
+        type: 'uint256'
+      },
+      {
+        indexed: true,
+        internalType: 'uint256',
+        name: 'amountCell',
+        type: 'uint256'
+      }
+    ],
     name: 'RewardLevelChanged',
     type: 'event',
     constant: undefined,
@@ -357,7 +708,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'adventureDuration',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -365,9 +716,9 @@ _jsonInterface: [
     signature: '0x1e9ca15e'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     name: 'blockedTime',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -377,7 +728,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'env',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint8', name: '', type: 'uint8' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -387,7 +738,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'fragmentAmount',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -397,7 +748,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'fragmentRate',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -407,7 +758,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'fragmentToken',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -415,9 +766,70 @@ _jsonInterface: [
     signature: '0xa8126c66'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     name: 'mines',
-    outputs: [Array],
+    outputs: [
+      {
+        internalType: 'enum IdleGame.MiningState',
+        name: 'state',
+        type: 'uint8'
+      },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'player',
+            type: 'address'
+          },
+          {
+            internalType: 'bytes12',
+            name: 'selectedCells',
+            type: 'bytes12'
+          },
+          {
+            internalType: 'uint128',
+            name: 'porianId1',
+            type: 'uint128'
+          },
+          {
+            internalType: 'uint128',
+            name: 'porianId2',
+            type: 'uint128'
+          }
+        ],
+        internalType: 'struct IdleGame.PlayerInfo',
+        name: 'farmer',
+        type: 'tuple'
+      },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'player',
+            type: 'address'
+          },
+          {
+            internalType: 'bytes12',
+            name: 'selectedCells',
+            type: 'bytes12'
+          },
+          {
+            internalType: 'uint128',
+            name: 'porianId1',
+            type: 'uint128'
+          },
+          {
+            internalType: 'uint128',
+            name: 'porianId2',
+            type: 'uint128'
+          }
+        ],
+        internalType: 'struct IdleGame.PlayerInfo',
+        name: 'helper',
+        type: 'tuple'
+      },
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -427,7 +839,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'owner',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -437,7 +849,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'porianNFT',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -447,7 +859,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'porianPower',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -467,7 +879,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'rentalCentre',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -477,7 +889,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'rentalFee',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -485,9 +897,13 @@ _jsonInterface: [
     signature: '0x4876956b'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     name: 'rentalPriceOf',
-    outputs: [Array],
+    outputs: [
+      { internalType: 'address', name: 'owner', type: 'address' },
+      { internalType: 'uint128', name: 'price', type: 'uint128' },
+      { internalType: 'uint128', name: 'endTime', type: 'uint128' }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -497,7 +913,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'reservePool',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -505,9 +921,20 @@ _jsonInterface: [
     signature: '0x0266f044'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     name: 'rewardLevels',
-    outputs: [Array],
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'rewardRatio',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'amountCell',
+        type: 'uint256'
+      }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -517,7 +944,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'rigyReward',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -527,7 +954,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'rigyToken',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -537,7 +964,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'rikenReward',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -547,7 +974,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'rikenToken',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -555,7 +982,9 @@ _jsonInterface: [
     signature: '0x8584b423'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'address', name: 'newOwner', type: 'address' }
+    ],
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -567,7 +996,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'turnDuration',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -577,7 +1006,7 @@ _jsonInterface: [
   {
     inputs: [],
     name: 'winRatio',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -585,7 +1014,7 @@ _jsonInterface: [
     signature: '0x82bb8a7d'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'address', name: '_owner', type: 'address' } ],
     name: 'initialize',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -595,7 +1024,18 @@ _jsonInterface: [
     signature: '0xc4d66de8'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '_adventureDuration',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: '_turnDuration',
+        type: 'uint256'
+      }
+    ],
     name: 'setGameDuration',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -605,7 +1045,7 @@ _jsonInterface: [
     signature: '0x54b6239b'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'uint8', name: '_env', type: 'uint8' } ],
     name: 'setGameEnv',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -615,7 +1055,18 @@ _jsonInterface: [
     signature: '0x8f709230'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'uint256[4]',
+        name: 'rewardRatios',
+        type: 'uint256[4]'
+      },
+      {
+        internalType: 'uint256[4]',
+        name: 'amountCells',
+        type: 'uint256[4]'
+      }
+    ],
     name: 'setRewardLevels',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -625,7 +1076,29 @@ _jsonInterface: [
     signature: '0xc125ffd2'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_rigyToken',
+        type: 'address'
+      },
+      {
+        internalType: 'address',
+        name: '_rikenToken',
+        type: 'address'
+      },
+      {
+        internalType: 'uint256',
+        name: '_rigyReward',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: '_rikenReward',
+        type: 'uint256'
+      },
+      { internalType: 'uint256', name: '_winRatio', type: 'uint256' }
+    ],
     name: 'setRewardConfigs',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -635,7 +1108,23 @@ _jsonInterface: [
     signature: '0x213fd494'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_porianNFT',
+        type: 'address'
+      },
+      {
+        internalType: 'address',
+        name: '_porianPower',
+        type: 'address'
+      },
+      {
+        internalType: 'address',
+        name: '_rentalCentre',
+        type: 'address'
+      }
+    ],
     name: 'setPorianContractAddress',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -645,7 +1134,23 @@ _jsonInterface: [
     signature: '0x8c592903'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '_fragmentRate',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: '_fragmentAmount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: '_fragmentToken',
+        type: 'address'
+      }
+    ],
     name: 'setFragmentConfigs',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -655,9 +1160,16 @@ _jsonInterface: [
     signature: '0xafc99853'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'address', name: 'from', type: 'address' },
+      { internalType: 'address', name: 'to', type: 'address' },
+      { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+      { internalType: 'uint256', name: 'expiredAt', type: 'uint256' },
+      { internalType: 'bytes12', name: 'flags', type: 'bytes12' },
+      { internalType: 'bytes', name: '_data', type: 'bytes' }
+    ],
     name: 'onAuthorized',
-    outputs: [Array],
+    outputs: [ { internalType: 'bytes4', name: '', type: 'bytes4' } ],
     stateMutability: 'nonpayable',
     type: 'function',
     constant: undefined,
@@ -665,7 +1177,13 @@ _jsonInterface: [
     signature: '0x5a199e45'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'uint256[]',
+        name: 'porians',
+        type: 'uint256[]'
+      }
+    ],
     name: 'withdrawPorians',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -675,9 +1193,12 @@ _jsonInterface: [
     signature: '0x3444663a'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'porianID', type: 'uint256' },
+      { internalType: 'uint256', name: 'atTime', type: 'uint256' }
+    ],
     name: 'getOwnerOf',
-    outputs: [Array],
+    outputs: [ { internalType: 'address', name: '', type: 'address' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -685,7 +1206,15 @@ _jsonInterface: [
     signature: '0x99321e12'
   },
   {
-    inputs: [Array],
+    inputs: [
+      {
+        internalType: 'uint256[3]',
+        name: 'porians',
+        type: 'uint256[3]'
+      },
+      { internalType: 'uint8[3]', name: 'indexes', type: 'uint8[3]' },
+      { internalType: 'bool', name: 'notPortal', type: 'bool' }
+    ],
     name: 'startAdventure',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -695,7 +1224,16 @@ _jsonInterface: [
     signature: '0x30057802'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'mineId', type: 'uint256' },
+      {
+        internalType: 'uint256[3]',
+        name: 'porians',
+        type: 'uint256[3]'
+      },
+      { internalType: 'uint8[3]', name: 'indexes', type: 'uint8[3]' },
+      { internalType: 'bool', name: 'notPortal', type: 'bool' }
+    ],
     name: 'support1',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -705,7 +1243,11 @@ _jsonInterface: [
     signature: '0xf163a51c'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'mineId', type: 'uint256' },
+      { internalType: 'uint256', name: 'porian', type: 'uint256' },
+      { internalType: 'uint8', name: 'index', type: 'uint8' }
+    ],
     name: 'fortify',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -715,7 +1257,11 @@ _jsonInterface: [
     signature: '0xf9977794'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'mineId', type: 'uint256' },
+      { internalType: 'uint256', name: 'porian', type: 'uint256' },
+      { internalType: 'uint8', name: 'index', type: 'uint8' }
+    ],
     name: 'support2',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -725,7 +1271,7 @@ _jsonInterface: [
     signature: '0xa1745737'
   },
   {
-    inputs: [Array],
+    inputs: [ { internalType: 'uint256', name: 'mineId', type: 'uint256' } ],
     name: 'finish',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -735,9 +1281,19 @@ _jsonInterface: [
     signature: '0xd353a1cb'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' },
+      {
+        internalType: 'bytes12',
+        name: '_selectedCells',
+        type: 'bytes12'
+      }
+    ],
     name: '_calculateNormalReward',
-    outputs: [Array],
+    outputs: [
+      { internalType: 'uint256', name: 'reward1', type: 'uint256' },
+      { internalType: 'uint256', name: 'reward2', type: 'uint256' }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -745,9 +1301,18 @@ _jsonInterface: [
     signature: '0x8f30ec1c'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'fPorian1', type: 'uint256' },
+      { internalType: 'uint256', name: 'fPorian2', type: 'uint256' },
+      { internalType: 'uint256', name: 'hPorian1', type: 'uint256' },
+      { internalType: 'uint256', name: 'hPorian2', type: 'uint256' },
+      { internalType: 'uint8', name: '_env', type: 'uint8' }
+    ],
     name: '_calculateBigReward',
-    outputs: [Array],
+    outputs: [
+      { internalType: 'bool', name: 'isFarmer', type: 'bool' },
+      { internalType: 'uint256', name: 'fragments', type: 'uint256' }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -755,9 +1320,14 @@ _jsonInterface: [
     signature: '0x450fe7c9'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'uint8', name: '_env', type: 'uint8' }
+    ],
     name: 'atkPowerOf',
-    outputs: [Array],
+    outputs: [
+      { internalType: 'uint256', name: 'atkPower', type: 'uint256' }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -765,9 +1335,14 @@ _jsonInterface: [
     signature: '0x4a0fb891'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'uint8', name: '_env', type: 'uint8' }
+    ],
     name: 'defPowerOf',
-    outputs: [Array],
+    outputs: [
+      { internalType: 'uint256', name: 'defPower', type: 'uint256' }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -775,9 +1350,11 @@ _jsonInterface: [
     signature: '0x717ea8e5'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' }
+    ],
     name: 'randomRewardLevel',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint8', name: 'rewardLevel', type: 'uint8' } ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -785,9 +1362,14 @@ _jsonInterface: [
     signature: '0xa1c6b957'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' },
+      { internalType: 'uint8', name: 'index', type: 'uint8' },
+      { internalType: 'uint8', name: 'level', type: 'uint8' },
+      { internalType: 'uint8', name: 'joined', type: 'uint8' }
+    ],
     name: 'setRewardMap',
-    outputs: [Array],
+    outputs: [ { internalType: 'bytes32', name: '', type: 'bytes32' } ],
     stateMutability: 'pure',
     type: 'function',
     constant: true,
@@ -795,9 +1377,15 @@ _jsonInterface: [
     signature: '0x190cac33'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' },
+      { internalType: 'uint8', name: 'index', type: 'uint8' }
+    ],
     name: 'getRewardInfo',
-    outputs: [Array],
+    outputs: [
+      { internalType: 'uint8', name: 'level', type: 'uint8' },
+      { internalType: 'uint8', name: 'joined', type: 'uint8' }
+    ],
     stateMutability: 'pure',
     type: 'function',
     constant: true,
@@ -805,9 +1393,12 @@ _jsonInterface: [
     signature: '0xba3d0b3b'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' },
+      { internalType: 'uint8', name: '_env', type: 'uint8' }
+    ],
     name: 'setEnv2RewardMap',
-    outputs: [Array],
+    outputs: [ { internalType: 'bytes32', name: '', type: 'bytes32' } ],
     stateMutability: 'pure',
     type: 'function',
     constant: true,
@@ -815,9 +1406,11 @@ _jsonInterface: [
     signature: '0x4708d883'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' }
+    ],
     name: 'getEnvOf',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint8', name: '', type: 'uint8' } ],
     stateMutability: 'pure',
     type: 'function',
     constant: true,
@@ -825,9 +1418,12 @@ _jsonInterface: [
     signature: '0x99ec4ce0'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' },
+      { internalType: 'uint64', name: 'timestamp', type: 'uint64' }
+    ],
     name: 'setStartTime2RewardMap',
-    outputs: [Array],
+    outputs: [ { internalType: 'bytes32', name: '', type: 'bytes32' } ],
     stateMutability: 'pure',
     type: 'function',
     constant: true,
@@ -835,9 +1431,11 @@ _jsonInterface: [
     signature: '0xcb788f78'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' }
+    ],
     name: 'getStartTimeOfRewardMap',
-    outputs: [Array],
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     stateMutability: 'pure',
     type: 'function',
     constant: true,
@@ -845,9 +1443,23 @@ _jsonInterface: [
     signature: '0x0d7f8b69'
   },
   {
-    inputs: [Array],
+    inputs: [
+      { internalType: 'uint256', name: 'level', type: 'uint256' },
+      { internalType: 'uint256', name: 'mode', type: 'uint256' }
+    ],
     name: 'getRewardOf',
-    outputs: [Array],
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '_rigyReward',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: '_rikenReward',
+        type: 'uint256'
+      }
+    ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
@@ -855,3 +1467,4 @@ _jsonInterface: [
     signature: '0x57282550'
   }
 ]
+}

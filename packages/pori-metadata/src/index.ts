@@ -1,4 +1,4 @@
-import { ENV } from './type';
+import { ENV } from './commonTypes';
 import * as stagConfig from './lib/sta-poriverse_info';
 import * as prodConfig from './lib/prod-poriverse_info';
 
@@ -29,4 +29,6 @@ export function getIdleGameAddressSC(env: ENV) {
   };
 }
 
-export * from './type';
+export * from './commonTypes';
+
+export * as IdleGameSc from './lib/idleGameSc';
