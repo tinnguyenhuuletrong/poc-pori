@@ -37,10 +37,6 @@ function cli(realm: Realm, ctx: Context) {
   };
   global.debugCtx = debugCtx;
   console.log('ready to play global.debugCtx');
-
-  //type='PorianDeposited' && data.from="0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA"
-  //type='AdventureStarted'  && data.farmer='0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA'
-  //data.mineId=1716
 }
 
 async function updateDb(realm: Realm, ctx: Context) {

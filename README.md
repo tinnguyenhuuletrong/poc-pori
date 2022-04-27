@@ -84,3 +84,15 @@ node dist/packages/examples/scan-idle-game-events/main.js
    - [ ] got atk
 - [ ] Allow import private key -> auto start adventure
 - [ ] Smarter bot :)) - TBD
+
+
+## Common query
+
+```ts
+
+  //type='PorianDeposited' && data.from="0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA"
+  //type='AdventureStarted' && data.farmer='0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA'
+  //data.mineId=1716
+  //data.farmer='0x3048AA7A4Eb54bdc7f7b35d98603A18718380993' || data.helper='0x3048AA7A4Eb54bdc7f7b35d98603A18718380993'
+
+```
