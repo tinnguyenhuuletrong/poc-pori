@@ -23,17 +23,67 @@ export class IdleGameSCEventDataModel
     super();
   }
 
-  public static readonly NAME = 'IdleGame.Events';
+  public static generate({ type, txHash, blockNo, data }: IdleGameSCEvent) {
+    return {
+      _id: new ObjectID(),
+      type,
+      txHash,
+      blockNo,
+      data,
+    };
+  }
 
+  public static readonly NAME = 'IdleGame.SCEvents';
   static schema = {
-    name: 'IdleGame.SCEvents',
+    name: IdleGameSCEventDataModel.NAME,
     primaryKey: '_id',
     properties: {
       _id: 'objectId',
       type: 'string',
       txHash: 'string',
       blockNo: 'int',
-      data: '{}',
+      data: 'IdleGame.SCEvents.EventPayload',
+    },
+  };
+
+  static embededEventDataSchema = {
+    name: 'IdleGame.SCEvents.EventPayload',
+    embedded: true,
+    properties: {
+      mineId: 'int?',
+      farmer: 'string?',
+      startTime: 'int?',
+      porians: {
+        type: 'list',
+        objectType: 'int',
+        optional: true,
+      },
+      indexes: {
+        type: 'list',
+        objectType: 'int',
+        optional: true,
+      },
+      winner: 'string?',
+      fragments: 'int?',
+      farmerReward1: 'int?',
+      farmerReward2: 'int?',
+      helperReward1: 'int?',
+      helperReward2: 'int?',
+      porian: 'int?',
+      index: 'int?',
+      rewardLevel: 'int?',
+      blockedTime: 'int?',
+      helper: 'string?',
+      rewardLevels: {
+        type: 'list',
+        objectType: 'int',
+        optional: true,
+      },
+      from: 'string?',
+      expiredAt: 'int?',
+      to: 'string?',
+      adventureDuration: 'int?',
+      turnDuration: 'int?',
     },
   };
 }
@@ -66,4 +116,8 @@ export class IdleGameSCMetadataDataModel extends Realm.Object {
 export const IdleGameSCMetadataRepo =
   CommonReamRepo<IdleGameSCMetadataDataModel>(IdleGameSCMetadataDataModel.NAME);
 
-export const Schemas = [IdleGameSCEventDataModel, IdleGameSCMetadataDataModel];
+export const Schemas = [
+  IdleGameSCEventDataModel.schema,
+  IdleGameSCMetadataDataModel.schema,
+  IdleGameSCEventDataModel.embededEventDataSchema,
+];

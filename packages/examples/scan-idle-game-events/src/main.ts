@@ -1,77 +1,88 @@
-import * as fs from 'fs';
 import * as AppEnv from './environments/environment';
 import { close, scanEvents, init } from '@pori-and-friends/pori-actions';
-import { ENV, IdleGameSc } from '@pori-and-friends/pori-metadata';
-
-type SCStructure = {
-  _metadata: {
-    createdBlock: number;
-    head: number | null;
-  };
-  events: any[];
-};
-
-function readSnapshotData(path): SCStructure {
-  if (!fs.existsSync(path)) {
-    return {
-      _metadata: {
-        // Staging Contract create on 25777543
-        createdBlock: 25777543,
-        head: null,
-      },
-      events: [],
-    };
-  }
-  const data = JSON.parse(fs.readFileSync(path).toString());
-  return data;
-}
-
-function saveSnapshot(path, data: SCStructure) {
-  console.log('saved');
-  fs.writeFileSync(path, JSON.stringify(data, null, 2));
-}
+import { Context, ENV, IdleGameSc } from '@pori-and-friends/pori-metadata';
+import {
+  openRepo,
+  IdleGameSCMetadataRepo,
+  IdleGameSCEventRepo,
+  IdleGameSCEventDataModel,
+} from '@pori-and-friends/pori-repositories';
 
 async function main() {
   console.log('Example: scanEvents');
+  const path = AppEnv.environment.dbPath;
 
   const ctx = await init(ENV.Staging);
   console.log('connected');
 
-  const path = AppEnv.environment.dbPath;
-  const scData = readSnapshotData(path);
-  let from = scData._metadata.head || scData._metadata.createdBlock;
-  let saveInterval = 0;
+  const realm = await openRepo({
+    path,
+  });
 
-  const batchSize = 500;
-  const headBlock = await ctx.web3.eth.getBlockNumber();
-  console.log('top block', headBlock);
-
-  while (from < headBlock) {
-    const to = from + batchSize;
-    console.log('scan from ', { from, to: from + batchSize });
-    const events = await scanEvents(ctx, {
-      filter: 'allEvents',
-      fromBlock: from,
-      toBlock: to,
-    });
-
-    from = to;
-    scData._metadata.head = to;
-
-    const transformedEvents = events
-      .map((itm) => IdleGameSc.parseIdleGameScEvent(itm))
-      .filter(Boolean);
-    scData.events = scData.events.concat(transformedEvents);
-    saveInterval++;
-    if (saveInterval % 10 === 0) {
-      saveSnapshot(path, scData);
-      saveInterval = 0;
-    }
-  }
-  saveSnapshot(path, scData);
-
-  await close(ctx);
-
-  console.log('bye!');
+  await updateDb(realm, ctx);
+  cli(realm, ctx);
 }
 main();
+
+function cli(realm: Realm, ctx: Context) {
+  const debugCtx = {
+    realm,
+    ctx,
+    IdleGameSCMetadataRepo,
+    IdleGameSCEventRepo,
+  };
+  global.debugCtx = debugCtx;
+  console.log('ready to play global.debugCtx');
+
+  //type='PorianDeposited' && data.from="0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA"
+}
+
+async function updateDb(realm: Realm, ctx: Context) {
+  try {
+    const scData = await IdleGameSCMetadataRepo.getOrCreate(realm, 'default', {
+      updatedBlock: AppEnv.environment.createdBlock,
+      createdBlock: AppEnv.environment.createdBlock,
+    });
+
+    let from = scData.updatedBlock;
+
+    const batchSize = 500;
+    const headBlock = await ctx.web3.eth.getBlockNumber();
+    console.log('top block', headBlock);
+    console.log('data', scData.toJSON());
+
+    while (from < headBlock) {
+      const to = from + batchSize;
+      console.log('scan from ', { from, to: from + batchSize });
+      const events = await scanEvents(ctx, {
+        filter: 'allEvents',
+        fromBlock: from,
+        toBlock: to,
+      });
+
+      from = to;
+
+      await IdleGameSCMetadataRepo.tx(realm, () => {
+        scData.updatedBlock = to;
+
+        const transformedEvents = events
+          .map((itm) => IdleGameSc.parseIdleGameScEvent(itm))
+          .filter(Boolean);
+
+        for (const iterator of transformedEvents) {
+          IdleGameSCEventRepo.create(
+            realm,
+            IdleGameSCEventDataModel.generate(iterator)
+          );
+        }
+      });
+    }
+
+    console.log('bye!');
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await close(ctx);
+    realm.close();
+  }
+}

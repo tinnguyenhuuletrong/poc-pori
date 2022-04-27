@@ -11,7 +11,7 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
       return realm.objects(MODEL_NAME);
     }
 
-    public static async create(realm: Realm, data: Partial<T>): Promise<T> {
+    public static create(realm: Realm, data: Partial<T>): T {
       return realm.create<T>(
         MODEL_NAME,
         { ...data },
@@ -63,16 +63,37 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
       });
     }
 
-    static async tx(realm: Realm, handler: () => void): Promise<void> {
+    static async getOrCreate(
+      realm: Realm,
+      id: any,
+      defaultData: Partial<T>
+    ): Promise<T> {
       return new Promise((resolve, reject) => {
         try {
-          realm.write(() => {
+          const res = realm.objectForPrimaryKey<T>(MODEL_NAME, id);
+          if (res) {
+            return resolve(res);
+          }
+
+          return Wrapper.createWithTx(realm, { ...defaultData, _id: id })
+            .then(resolve)
+            .catch(reject);
+        } catch (error) {
+          return reject(error);
+        }
+      });
+    }
+
+    static async tx(realm: Realm, handler: () => void): Promise<void> {
+      return new Promise((resolve, reject) => {
+        realm.write(() => {
+          try {
             handler();
             resolve();
-          });
-        } catch (error) {
-          reject(error);
-        }
+          } catch (error) {
+            reject(error);
+          }
+        });
       });
     }
   };
