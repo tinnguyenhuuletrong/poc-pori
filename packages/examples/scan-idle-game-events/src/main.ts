@@ -1,4 +1,5 @@
 import * as AppEnv from './environments/environment';
+import * as AppEnvProd from './environments/environment.prod';
 import { close, scanEvents, init } from '@pori-and-friends/pori-actions';
 import { Context, ENV, IdleGameSc } from '@pori-and-friends/pori-metadata';
 import {
@@ -7,12 +8,15 @@ import {
   IdleGameSCEventRepo,
   IdleGameSCEventDataModel,
 } from '@pori-and-friends/pori-repositories';
+const env = ENV.Prod;
+const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
 
 async function main() {
+  console.log(env, activeEnv);
   console.log('Example: scanEvents');
-  const path = AppEnv.environment.dbPath;
+  const path = activeEnv.environment.dbPath;
 
-  const ctx = await init(ENV.Staging);
+  const ctx = await init(ENV.Prod);
   console.log('connected');
 
   const realm = await openRepo({
@@ -35,13 +39,15 @@ function cli(realm: Realm, ctx: Context) {
   console.log('ready to play global.debugCtx');
 
   //type='PorianDeposited' && data.from="0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA"
+  //type='AdventureStarted'  && data.farmer='0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA'
+  //data.mineId=1716
 }
 
 async function updateDb(realm: Realm, ctx: Context) {
   try {
     const scData = await IdleGameSCMetadataRepo.getOrCreate(realm, 'default', {
-      updatedBlock: AppEnv.environment.createdBlock,
-      createdBlock: AppEnv.environment.createdBlock,
+      updatedBlock: activeEnv.environment.createdBlock,
+      createdBlock: activeEnv.environment.createdBlock,
     });
 
     let from = scData.updatedBlock;
@@ -52,7 +58,7 @@ async function updateDb(realm: Realm, ctx: Context) {
     console.log('data', scData.toJSON());
 
     while (from < headBlock) {
-      const to = from + batchSize;
+      const to = Math.min(from + batchSize, headBlock);
       console.log('scan from ', { from, to: from + batchSize });
       const events = await scanEvents(ctx, {
         filter: 'allEvents',
