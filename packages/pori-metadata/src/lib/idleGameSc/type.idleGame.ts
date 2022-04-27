@@ -11,16 +11,16 @@ export enum EIdleGameSCEventType {
   GameDurationChanged = 'GameDurationChanged',
 }
 
-export type AdventureStartedData = {
+export interface AdventureStartedData {
   mineId: number;
   farmer: string;
   startTime: number;
   porians: number[];
   indexes: number[];
   rewardLevels: number[];
-};
+}
 
-export type AdventureFinishedData = {
+export interface AdventureFinishedData {
   mineId: number;
   winner: string;
   fragments: number;
@@ -28,48 +28,48 @@ export type AdventureFinishedData = {
   farmerReward2: number;
   helperReward1: number;
   helperReward2: number;
-};
+}
 
-export type AdventureFortifiedData = {
+export interface AdventureFortifiedData {
   mineId: number;
   porian: number;
   index: number;
   rewardLevel: number;
   blockedTime: number;
-};
+}
 
-export type AdventureSupported1Data = {
+export interface AdventureSupported1Data {
   mineId: number;
   helper: string;
   porians: number[];
   indexes: number[];
   rewardLevels: number[];
   blockedTime: number;
-};
+}
 
-export type AdventureSupported2Data = {
+export interface AdventureSupported2Data {
   mineId: number;
   porian: number;
   index: number;
   rewardLevel: number;
   blockedTime: number;
-};
+}
 
-export type PorianDepositedData = {
+export interface PorianDepositedData {
   from: string;
   porian: number;
   expiredAt: number;
-};
+}
 
-export type PorianWithdrawedData = {
+export interface PorianWithdrawedData {
   to: string;
   porian: number;
-};
+}
 
-export type GameDurationChangedData = {
+export interface GameDurationChangedData {
   adventureDuration: number;
   turnDuration: number;
-};
+}
 
 export type AllIdleGameSCEventData =
   | AdventureStartedData
@@ -81,12 +81,12 @@ export type AllIdleGameSCEventData =
   | PorianWithdrawedData
   | GameDurationChangedData;
 
-export type IdleGameSCEvent = {
+export interface IdleGameSCEvent {
   type: EIdleGameSCEventType;
   txHash: string;
   blockNo: number;
   data: AllIdleGameSCEventData;
-};
+}
 
 export const IdleGameSCEventSignatureTable: Record<
   EIdleGameSCEventType,

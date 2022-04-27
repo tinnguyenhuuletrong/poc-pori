@@ -8,6 +8,7 @@
     "examples-stream-idle-game-events": "packages/examples/stream-idle-game-events",
     "pori-actions": "packages/pori-actions",
     "pori-metadata": "packages/pori-metadata",
+    "pori-repositories": "packages/pori-repositories",
     "utils": "packages/utils"
   }
 }

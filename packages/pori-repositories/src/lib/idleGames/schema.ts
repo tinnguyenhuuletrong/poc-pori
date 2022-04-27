@@ -1,0 +1,69 @@
+/* eslint-disable @nrwl/nx/enforce-module-boundaries */
+import {
+  AllIdleGameSCEventData,
+  EIdleGameSCEventType,
+  IdleGameSCEvent,
+} from 'packages/pori-metadata/src/lib/idleGameSc/type.idleGame';
+
+import Realm from 'realm';
+import { CommonReamRepo } from '../common/baseDataModel';
+const { ObjectID } = Realm.BSON;
+
+export class IdleGameSCEventDataModel
+  extends Realm.Object
+  implements IdleGameSCEvent
+{
+  constructor(
+    public readonly _id: Realm.BSON.ObjectId = new ObjectID(),
+    public type: EIdleGameSCEventType,
+    public txHash: string,
+    public blockNo: number,
+    public data: AllIdleGameSCEventData
+  ) {
+    super();
+  }
+
+  public static readonly NAME = 'IdleGame.Events';
+
+  static schema = {
+    name: 'IdleGame.SCEvents',
+    primaryKey: '_id',
+    properties: {
+      _id: 'objectId',
+      type: 'string',
+      txHash: 'string',
+      blockNo: 'int',
+      data: '{}',
+    },
+  };
+}
+export const IdleGameSCEventRepo = CommonReamRepo<IdleGameSCEventDataModel>(
+  IdleGameSCEventDataModel.NAME
+);
+
+export class IdleGameSCMetadataDataModel extends Realm.Object {
+  constructor(
+    public readonly _id: string,
+    public createdBlock: number,
+    public updatedBlock: number,
+    public extras: Record<string, any> = {}
+  ) {
+    super();
+  }
+  public static readonly NAME = 'IdleGame.Metadata';
+
+  static schema = {
+    name: IdleGameSCMetadataDataModel.NAME,
+    primaryKey: '_id',
+    properties: {
+      _id: 'string',
+      createdBlock: 'int',
+      updatedBlock: 'int',
+      extras: '{}',
+    },
+  };
+}
+export const IdleGameSCMetadataRepo =
+  CommonReamRepo<IdleGameSCMetadataDataModel>(IdleGameSCMetadataDataModel.NAME);
+
+export const Schemas = [IdleGameSCEventDataModel, IdleGameSCMetadataDataModel];
