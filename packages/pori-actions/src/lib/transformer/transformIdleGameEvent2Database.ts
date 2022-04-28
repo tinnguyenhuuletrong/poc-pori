@@ -70,6 +70,23 @@ export async function transformIdleGameEvent2Database(
         }
         break;
 
+      case IdleGameSc.EIdleGameSCEventType.GameDurationChanged:
+        {
+          const data = it.data as IdleGameSc.GameDurationChangedData;
+          const metadata = await Repos.IdleGameSCMetadataRepo.findOne(
+            realm,
+            'default'
+          );
+
+          if (!metadata) break;
+
+          Repos.IdleGameSCMetadataRepo.tx(realm, () => {
+            metadata.extras['turnDuration'] = data.turnDuration;
+            metadata.extras['adventureDuration'] = data.adventureDuration;
+          });
+        }
+        break;
+
       default:
         break;
     }

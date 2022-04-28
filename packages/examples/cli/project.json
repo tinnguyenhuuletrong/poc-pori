@@ -1,0 +1,53 @@
+{
+  "root": "packages/examples/cli",
+  "sourceRoot": "packages/examples/cli/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/examples/cli",
+        "main": "packages/examples/cli/src/main.ts",
+        "tsConfig": "packages/examples/cli/tsconfig.app.json",
+        "assets": ["packages/examples/cli/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/examples/cli/src/environments/environment.ts",
+              "with": "packages/examples/cli/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "run": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-cli:build",
+        "runtimeArgs": ["--experimental-repl-await"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/examples/cli/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/examples/cli"],
+      "options": {
+        "jestConfig": "packages/examples/cli/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
