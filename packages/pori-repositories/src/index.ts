@@ -5,6 +5,10 @@ import {
   IdleGameSCMetadataDataModel,
   IdleGameSCEventRepo,
   IdleGameSCEventDataModel,
+  PlayerRepo,
+  PlayerDataModel,
+  PoriRepo,
+  PoriDataModel,
 } from './lib/idleGames/schema';
 
 export async function openRepo(opt: ConfigurationWithoutSync) {
@@ -21,4 +25,8 @@ export {
   IdleGameSCEventDataModel,
   IdleGameSCMetadataRepo,
   IdleGameSCEventRepo,
+  PlayerRepo,
+  PlayerDataModel,
+  PoriRepo,
+  PoriDataModel,
 };

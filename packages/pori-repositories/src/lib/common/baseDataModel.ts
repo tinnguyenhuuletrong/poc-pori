@@ -8,7 +8,7 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
     }
 
     public static async findAll(realm: Realm) {
-      return realm.objects(MODEL_NAME);
+      return realm.objects<T>(MODEL_NAME);
     }
 
     public static create(realm: Realm, data: Partial<T>): T {
@@ -17,6 +17,14 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
         { ...data },
         Realm.UpdateMode.Modified
       );
+    }
+
+    static getOrCreate(realm: Realm, id: any, defaultData: Partial<T>): T {
+      const res = realm.objectForPrimaryKey<T>(MODEL_NAME, id);
+      if (res) {
+        return res;
+      }
+      return Wrapper.create(realm, { ...defaultData, _id: id });
     }
 
     public static async createWithTx(
@@ -63,7 +71,7 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
       });
     }
 
-    static async getOrCreate(
+    static async getOrCreateWithTx(
       realm: Realm,
       id: any,
       defaultData: Partial<T>
