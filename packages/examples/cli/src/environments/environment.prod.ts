@@ -8,6 +8,10 @@ export const environment = {
     __dirname,
     '../../../../archived/repo/prod/allEvents.prod.realm'
   ),
+  walletConnectSessionStoragePath: path.join(
+    __dirname,
+    '../../../../archived/repo/.web3session'
+  ),
   createdBlock: 27503296,
   production: true,
 };

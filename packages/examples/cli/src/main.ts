@@ -20,6 +20,11 @@ async function main() {
   const ctx = await init(ENV.Prod);
   console.log('connected');
 
+  await addWalletConnectToContext(
+    ctx,
+    activeEnv.environment.walletConnectSessionStoragePath
+  );
+
   const realm = await Repos.openRepo({
     path: activeEnv.environment.dbPath,
   });
@@ -38,6 +43,11 @@ async function main() {
   server.setupHistory(process.env.NODE_REPL_HISTORY, () => {
     // noop;
   });
+
+  //-----------------------------------------//
+  // Cli Cmds
+  //-----------------------------------------//
+
   server.defineCommand('exit', {
     help: 'Gracefull exit',
     action: async () => {
@@ -63,8 +73,18 @@ async function main() {
   server.defineCommand('wallet.start', {
     help: 'Start walletconnect',
     action: async () => {
-      if (ctx.walletConnectChannel?.connected) return;
-      await addWalletConnectToContext(ctx);
+      if (ctx.walletConnectChannel?.connected) {
+        console.warn('wallet channel already connected');
+        return;
+      }
+
+      console.warn('trying to reset wallet channel');
+
+      ctx.walletConnectChannel = null;
+      await addWalletConnectToContext(
+        ctx,
+        activeEnv.environment.walletConnectSessionStoragePath
+      );
     },
   });
 

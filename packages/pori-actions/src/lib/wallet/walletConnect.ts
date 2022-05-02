@@ -1,11 +1,42 @@
 import { Context } from '@pori-and-friends/pori-metadata';
 import WalletConnect from '@walletconnect/client';
 import QRCodeModal from '@walletconnect/qrcode-modal';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 
-export async function addWalletConnectToContext(ctx: Context) {
+class MySessionStorage {
+  storageId?: string;
+  constructor(storagePath?: string) {
+    console.log('MySessionStorage new', storagePath);
+    this.storageId = storagePath;
+  }
+  getSession() {
+    if (this.storageId) {
+      if (existsSync(this.storageId)) {
+        const data = JSON.parse(readFileSync(this.storageId).toString());
+        return data;
+      }
+    }
+    return null;
+  }
+  setSession(session: any) {
+    if (this.storageId) writeFileSync(this.storageId, JSON.stringify(session));
+    return session;
+  }
+  removeSession() {
+    if (this.storageId) unlinkSync(this.storageId);
+  }
+}
+
+export async function addWalletConnectToContext(
+  ctx: Context,
+  sessionStoragePath?: string
+) {
+  const storage = new MySessionStorage(sessionStoragePath);
+
   const connector = new WalletConnect({
     bridge: 'https://bridge.walletconnect.org', // Required
     qrcodeModal: QRCodeModal,
+    session: storage.getSession(),
     clientMeta: {
       description: 'Pori-Poc',
       url: 'https://nodejs.org/en/',
@@ -13,6 +44,10 @@ export async function addWalletConnectToContext(ctx: Context) {
       name: 'Pori-Poc',
     },
   });
+
+  // injected hack b/c in version 1.8.x - typedef is wrong
+  (connector as any)._sessionStorage = storage;
+
   ctx.walletConnectChannel = connector;
 
   // Check if connection is already established
@@ -29,7 +64,7 @@ export async function addWalletConnectToContext(ctx: Context) {
 
     // Get provided accounts and chainId
     const { accounts, chainId } = payload.params[0];
-    console.log('wallet connect channel connected', { accounts, chainId });
+    console.info('wallet connect channel connected', { accounts, chainId });
   });
 
   connector.on('session_update', (error, payload) => {
@@ -39,7 +74,7 @@ export async function addWalletConnectToContext(ctx: Context) {
 
     // Get updated accounts and chainId
     const { accounts, chainId } = payload.params[0];
-    console.log('wallet connect channel session updated', {
+    console.info('wallet connect channel session updated', {
       accounts,
       chainId,
     });
@@ -49,7 +84,7 @@ export async function addWalletConnectToContext(ctx: Context) {
     if (error) {
       throw error;
     }
-
+    console.info('wallet connect channel disconnected', { error, payload });
     // Delete connector
   });
 }
