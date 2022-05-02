@@ -8,6 +8,8 @@
   },
   "private": true,
   "dependencies": {
+    "@walletconnect/client": "^1.7.8",
+    "@walletconnect/qrcode-modal": "^1.7.8",
     "axios": "^0.26.1",
     "lodash": "^4.17.21",
     "node-telegram-bot-api": "^0.56.0",

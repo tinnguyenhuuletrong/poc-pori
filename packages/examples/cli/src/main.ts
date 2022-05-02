@@ -1,7 +1,12 @@
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
-import { init, close, Input } from '@pori-and-friends/pori-actions';
-import { ENV } from '@pori-and-friends/pori-metadata';
+import {
+  init,
+  close,
+  Input,
+  addWalletConnectToContext,
+} from '@pori-and-friends/pori-actions';
+import { ENV, getIdleGameAddressSC } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
 
@@ -52,6 +57,44 @@ async function main() {
         createdBlock: activeEnv.environment.createdBlock,
       });
       console.log('updateKnowleage end');
+    },
+  });
+
+  server.defineCommand('wallet.start', {
+    help: 'Start walletconnect',
+    action: async () => {
+      if (ctx.walletConnectChannel?.connected) return;
+      await addWalletConnectToContext(ctx);
+    },
+  });
+
+  server.defineCommand('wallet.sign.tx', {
+    help: 'sign tx request',
+    action: async () => {
+      if (!ctx.walletConnectChannel?.connected) {
+        console.warn(
+          'wallet channel not ready. Please run .wallet.start first'
+        );
+        return;
+      }
+
+      const tx = {
+        from: ctx.walletConnectChannel.accounts[0],
+        to: getIdleGameAddressSC(env).address,
+        data: '0x30057802000000000000000000000000000000000000000000000000000000000000152c000000000000000000000000000000000000000000000000000000000000075400000000000000000000000000000000000000000000000000000000000005420000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000', // Required
+      };
+
+      // Sign transaction
+      ctx.walletConnectChannel
+        .signTransaction(tx)
+        .then((result) => {
+          // Returns signed transaction
+          console.log(result);
+        })
+        .catch((error) => {
+          // Error returned when rejected
+          console.error(error);
+        });
     },
   });
 }
