@@ -1,9 +1,8 @@
-/* eslint-disable @nrwl/nx/enforce-module-boundaries */
 import {
   AllIdleGameSCEventData,
   EIdleGameSCEventType,
   IdleGameSCEvent,
-} from 'packages/pori-metadata/src/lib/idleGameSc/type.idleGame';
+} from '@pori-and-friends/pori-metadata';
 import Realm from 'realm';
 import { CommonReamRepo } from '../common/baseDataModel';
 const { ObjectID } = Realm.BSON;

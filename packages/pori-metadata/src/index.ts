@@ -32,3 +32,4 @@ export function getIdleGameAddressSC(env: ENV) {
 export * from './commonTypes';
 
 export * as IdleGameSc from './lib/idleGameSc';
+export * from './lib/idleGameSc/type.idleGame';

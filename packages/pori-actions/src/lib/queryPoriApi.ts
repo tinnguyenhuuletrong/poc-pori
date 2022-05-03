@@ -1,7 +1,7 @@
 import { getAPILink } from '@pori-and-friends/pori-metadata';
 import { ENV, NftInfo } from '@pori-and-friends/pori-metadata';
 import { axiosIns } from '@pori-and-friends/utils';
-import { toChecksumAddress } from '@pori-and-friends/utils/lib/web3utils';
+import { toChecksumAddress } from './util/web3utils';
 
 export async function queryNftInfo(
   id: string | number,

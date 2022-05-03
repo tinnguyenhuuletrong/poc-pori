@@ -1,11 +1,13 @@
 import { IdleGameSc } from '@pori-and-friends/pori-metadata';
 import { IdleGameSCEventDataModel } from '@pori-and-friends/pori-repositories';
+import Realm from 'realm';
+const { ObjectID } = Realm.BSON;
 
 // User deposit 2 Poris
 
 export const EVENTS = [
   new IdleGameSCEventDataModel(
-    undefined,
+    new ObjectID(),
     IdleGameSc.EIdleGameSCEventType.PorianDeposited,
     '0x123',
     1,
@@ -17,7 +19,7 @@ export const EVENTS = [
   ),
 
   new IdleGameSCEventDataModel(
-    undefined,
+    new ObjectID(),
     IdleGameSc.EIdleGameSCEventType.PorianDeposited,
     '0x123',
     1,
@@ -29,7 +31,7 @@ export const EVENTS = [
   ),
 
   new IdleGameSCEventDataModel(
-    undefined,
+    new ObjectID(),
     IdleGameSc.EIdleGameSCEventType.PorianWithdrawed,
     '0x123',
     1,

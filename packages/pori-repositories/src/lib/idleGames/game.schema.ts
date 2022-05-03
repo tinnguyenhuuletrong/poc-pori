@@ -1,5 +1,3 @@
-/* eslint-disable @nrwl/nx/enforce-module-boundaries */
-
 import Realm from 'realm';
 import { CommonReamRepo } from '../common/baseDataModel';
 import { NftInfo } from '@pori-and-friends/pori-metadata';
