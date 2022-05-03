@@ -98,15 +98,26 @@ async function main() {
         return;
       }
 
+      const callData = ctx.contract.methods
+        .startAdventure(
+          // poriants
+          ['1346', '5420', '1876'],
+          // index
+          ['1', '2', '3'],
+          // notPortal
+          true
+        )
+        .encodeABI();
+
       const tx = {
         from: ctx.walletConnectChannel.accounts[0],
         to: getIdleGameAddressSC(env).address,
-        data: '0x30057802000000000000000000000000000000000000000000000000000000000000152c000000000000000000000000000000000000000000000000000000000000075400000000000000000000000000000000000000000000000000000000000005420000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000', // Required
+        data: callData, // Required
       };
 
       // Sign transaction
       ctx.walletConnectChannel
-        .signTransaction(tx)
+        .sendTransaction(tx)
         .then((result) => {
           // Returns signed transaction
           console.log(result);

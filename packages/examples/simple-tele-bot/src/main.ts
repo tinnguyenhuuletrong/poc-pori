@@ -26,6 +26,7 @@ async function main() {
       uptime: ${process.uptime()}
       pid: ${process.pid}
       hostname: ${os.hostname()}
+      _v: 3
     </code>
     Have fun!
     `;
@@ -119,7 +120,7 @@ async function main() {
 
     console.log('bye 👋!');
   }
-  process.once('SIGINT', async () => {
+  process.once('SIGTERM', async () => {
     await close();
     process.exit(0);
   });

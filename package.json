@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {
     "nx": "nx",
-    "nx-prod": "NODE_ENV=prod nx"
+    "nx-prod": "NODE_ENV=prod nx",
+    "build:tele-bot": "node ci/build-bot-image.js",
+    "script:backup": "node ci/update-archive.js"
   },
   "private": true,
   "dependencies": {
