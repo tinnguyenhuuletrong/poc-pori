@@ -15,6 +15,7 @@ export async function openRepo(opt: ConfigurationWithoutSync) {
   const schemas = opt.schema ?? [];
   const ins = await Realm.open({
     ...opt,
+    schemaVersion: 2,
     schema: [...schemas, ...IdleGameSchemas],
   });
   return ins;

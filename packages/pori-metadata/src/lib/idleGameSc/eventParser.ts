@@ -1,4 +1,5 @@
 import {
+  toDecimal128,
   toNumber,
   transformArrayElementToNumber,
 } from '@pori-and-friends/utils';
@@ -42,10 +43,10 @@ export function parseIdleGameScEvent(
         mineId: toNumber(eventInfo.returnValues['mineId']),
         winner: eventInfo.returnValues['winner'],
         fragments: toNumber(eventInfo.returnValues['fragments']),
-        farmerReward1: toNumber(eventInfo.returnValues['farmerReward1']),
-        farmerReward2: toNumber(eventInfo.returnValues['farmerReward2']),
-        helperReward1: toNumber(eventInfo.returnValues['helperReward1']),
-        helperReward2: toNumber(eventInfo.returnValues['helperReward2']),
+        farmerReward1: toDecimal128(eventInfo.returnValues['farmerReward1']),
+        farmerReward2: toDecimal128(eventInfo.returnValues['farmerReward2']),
+        helperReward1: toDecimal128(eventInfo.returnValues['helperReward1']),
+        helperReward2: toDecimal128(eventInfo.returnValues['helperReward2']),
       };
       break;
 

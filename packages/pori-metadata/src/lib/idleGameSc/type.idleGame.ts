@@ -25,10 +25,10 @@ export interface AdventureFinishedData {
   mineId: number;
   winner: string;
   fragments: number;
-  farmerReward1: number;
-  farmerReward2: number;
-  helperReward1: number;
-  helperReward2: number;
+  farmerReward1: Realm.BSON.Decimal128;
+  farmerReward2: Realm.BSON.Decimal128;
+  helperReward1: Realm.BSON.Decimal128;
+  helperReward2: Realm.BSON.Decimal128;
 }
 
 export interface AdventureFortifiedData {
