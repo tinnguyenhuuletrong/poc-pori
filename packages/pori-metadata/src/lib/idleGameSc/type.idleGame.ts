@@ -15,6 +15,7 @@ export interface AdventureStartedData {
   mineId: number;
   farmer: string;
   startTime: number;
+  blockedTime: number;
   porians: number[];
   indexes: number[];
   rewardLevels: number[];

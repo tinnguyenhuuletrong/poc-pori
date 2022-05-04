@@ -24,6 +24,7 @@ export function parseIdleGameScEvent(
         mineId: toNumber(eventInfo.returnValues['mineId']),
         farmer: eventInfo.returnValues['farmer'],
         startTime: toNumber(eventInfo.returnValues['startTime']),
+        blockedTime: toNumber(eventInfo.returnValues['blockedTime']),
         porians: transformArrayElementToNumber(
           eventInfo.returnValues['porians']
         ),
