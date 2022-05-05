@@ -148,3 +148,27 @@ export type NftInfo = {
     publicAddress: string;
   };
 };
+
+export type AdventureInfo = {
+  mineId: number;
+
+  state?: string;
+
+  isFarmer: boolean;
+  farmerAddress?: string;
+  startTime?: Date;
+  farmerEndTime: Date;
+
+  isSupporter?: boolean;
+  supporterAddress?: string;
+  supporterEndTime?: Date;
+  winnerAddress?: string;
+
+  farmerPories?: number[];
+  farmerRewardLevel?: number[];
+  farmerSlots?: number[];
+
+  supporterPories?: number[];
+  supporterRewardLevel?: number[];
+  supporterSlots?: number[];
+};

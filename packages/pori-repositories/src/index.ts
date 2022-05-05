@@ -9,6 +9,8 @@ import {
   PlayerDataModel,
   PoriRepo,
   PoriDataModel,
+  DataViewModel,
+  DataViewRepo,
 } from './lib/idleGames/schema';
 
 export async function openRepo(opt: ConfigurationWithoutSync) {
@@ -30,4 +32,6 @@ export {
   PlayerDataModel,
   PoriRepo,
   PoriDataModel,
+  DataViewModel,
+  DataViewRepo,
 };

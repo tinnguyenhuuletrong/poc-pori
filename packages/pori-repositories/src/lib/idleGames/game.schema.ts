@@ -166,3 +166,39 @@ export class PoriDataModel extends Realm.Object {
   };
 }
 export const PoriRepo = CommonReamRepo<PoriDataModel>(PoriDataModel.NAME);
+
+// -------------------------------------------------
+//  Players
+// -------------------------------------------------
+export class DataViewModel extends Realm.Object {
+  constructor(
+    public readonly _id: string,
+    public cursor: string,
+    public _v: string,
+    public data: string
+  ) {
+    super();
+  }
+  public static readonly NAME = 'DataView';
+
+  static generate(_id: string, cursor: string, data: any, version = '1') {
+    return {
+      _id,
+      cursor,
+      _v: version,
+      data: JSON.stringify(data),
+    };
+  }
+
+  static schema = {
+    name: DataViewModel.NAME,
+    primaryKey: '_id',
+    properties: {
+      _id: 'string',
+      cursor: 'string',
+      _v: 'string',
+      data: 'string',
+    },
+  };
+}
+export const DataViewRepo = CommonReamRepo<DataViewModel>(DataViewModel.NAME);

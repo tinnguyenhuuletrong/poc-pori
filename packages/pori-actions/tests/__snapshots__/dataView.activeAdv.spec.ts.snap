@@ -1,0 +1,121 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`data_view active_adv_dataset_1 1`] = `
+Object {
+  "res": Object {
+    "activeAdventures": Object {},
+    "finishedAdventures": Object {
+      "10530": Object {
+        "farmerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+        "farmerEndTime": 2022-05-05T04:05:20.000Z,
+        "farmerPories": Array [
+          1876,
+          1346,
+          5420,
+        ],
+        "farmerRewardLevel": Array [
+          2,
+          2,
+          3,
+        ],
+        "farmerSlots": Array [
+          3,
+          6,
+          9,
+        ],
+        "isFarmer": true,
+        "isSupporter": false,
+        "mineId": 10530,
+        "startTime": 2022-05-05T01:05:20.000Z,
+        "state": "AdventureFinished",
+        "supporterAddress": "0x3048AA7A4Eb54bdc7f7b35d98603A18718380993",
+        "supporterEndTime": 2022-05-05T04:05:20.000Z,
+        "supporterPories": Array [
+          4430,
+          2768,
+          2334,
+          1586,
+        ],
+        "supporterRewardLevel": Array [
+          1,
+          3,
+          4,
+          2,
+        ],
+        "supporterSlots": Array [
+          2,
+          5,
+          8,
+          7,
+        ],
+      },
+    },
+    "playerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+  },
+}
+`;
+
+exports[`data_view active_adv_dataset_2 1`] = `
+Object {
+  "res": Object {
+    "activeAdventures": Object {
+      "10530": Object {
+        "farmerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+        "farmerEndTime": 2022-05-05T04:05:20.000Z,
+        "farmerPories": Array [
+          1876,
+          1346,
+          5420,
+        ],
+        "farmerRewardLevel": Array [
+          2,
+          2,
+          3,
+        ],
+        "farmerSlots": Array [
+          3,
+          6,
+          9,
+        ],
+        "isFarmer": true,
+        "isSupporter": false,
+        "mineId": 10530,
+        "startTime": 2022-05-05T01:05:20.000Z,
+        "state": "AdventureSupported2",
+        "supporterAddress": "0x3048AA7A4Eb54bdc7f7b35d98603A18718380993",
+        "supporterEndTime": 2022-05-05T04:05:20.000Z,
+        "supporterPories": Array [
+          4430,
+          2768,
+          2334,
+          1586,
+        ],
+        "supporterRewardLevel": Array [
+          1,
+          3,
+          4,
+          2,
+        ],
+        "supporterSlots": Array [
+          2,
+          5,
+          8,
+          7,
+        ],
+      },
+    },
+    "finishedAdventures": Object {},
+    "playerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+  },
+}
+`;
+
+exports[`data_view active_adv_dataset_3 1`] = `
+Object {
+  "res": Object {
+    "activeAdventures": Object {},
+    "finishedAdventures": Object {},
+    "playerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+  },
+}
+`;

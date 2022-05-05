@@ -4,17 +4,28 @@ import {
   init,
   close,
   Input,
+  DataView,
   addWalletConnectToContext,
 } from '@pori-and-friends/pori-actions';
-import { ENV, getIdleGameAddressSC } from '@pori-and-friends/pori-metadata';
+import {
+  AdventureInfo,
+  ENV,
+  getIdleGameAddressSC,
+} from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
-
+const playerAddress = process.env.PLAYER_ADDRESS;
 async function main() {
   console.log(env, activeEnv);
+
+  if (!playerAddress) {
+    console.log('missing process.env.PLAYER_ADDRESS');
+    process.exit(1);
+  }
+  console.log('PlayerAddress:', playerAddress);
   console.log('Example: cli');
 
   const ctx = await init(ENV.Prod);
@@ -67,6 +78,46 @@ async function main() {
         createdBlock: activeEnv.environment.createdBlock,
       });
       console.log('updateKnowleage end');
+    },
+  });
+
+  server.defineCommand('stats.my_adv', {
+    help: 'Show my adv',
+    action: async () => {
+      console.log('updateKnowleage begin');
+
+      await Input.updateEventDb(realm, ctx, {
+        createdBlock: activeEnv.environment.createdBlock,
+      });
+
+      const viewData = await DataView.computePlayerAdventure({
+        realm,
+        playerAddress,
+        realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
+      });
+      console.log('updateKnowleage end');
+
+      // humanView
+      const humanView = {
+        // my active adventures
+        mines: {},
+
+        // protential target
+        targets: {},
+      };
+      for (const k of Object.keys(viewData.activeAdventures)) {
+        const value = viewData.activeAdventures[k] as AdventureInfo;
+        if (
+          value.farmerAddress === playerAddress ||
+          value.supporterAddress === playerAddress
+        )
+          humanView.mines[k] = DataView.humanrizeAdventureInfo(value);
+        else if (value.state === 'AdventureStarted') {
+          humanView.targets[k] = DataView.humanrizeAdventureInfo(value);
+        }
+      }
+
+      console.dir(humanView, { depth: 5 });
     },
   });
 
