@@ -4,19 +4,11 @@ import * as prodConfig from './lib/prod-poriverse_info';
 
 export function getWeb3NodeUri(env: ENV) {
   const key = `NODE_URI_${env}`.toUpperCase();
-  if (!process.env[key]) {
-    console.error(`missing env ${key}`);
-    process.exit(1);
-  }
   return process.env[key] as string;
 }
 
 export function getWeb3NodeUriHttp(env: ENV) {
   const key = `NODE_URI_${env}_HTTP`.toUpperCase();
-  if (!process.env[key]) {
-    console.error(`missing env ${key}`);
-    process.exit(1);
-  }
   return process.env[key] as string;
 }
 

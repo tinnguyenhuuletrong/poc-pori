@@ -11,9 +11,19 @@ export async function init(env: ENV): Promise<Context> {
   const uriws = getWeb3NodeUri(env);
   const urihttp = getWeb3NodeUriHttp(env);
 
+  if (!uriws && !urihttp) {
+    console.error(`missing env NODE_URI_${env} or NODE_URI_${env}_HTTP`);
+    process.exit(1);
+  }
+
   const provider = uriws
     ? new Web3.providers.WebsocketProvider(uriws)
     : new Web3.providers.HttpProvider(urihttp);
+
+  console.log(
+    'use web3 provider',
+    provider instanceof Web3.providers.WebsocketProvider ? 'wss' : 'http'
+  );
 
   const web3 = new Web3(provider);
 

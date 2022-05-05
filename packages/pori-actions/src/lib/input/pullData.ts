@@ -32,7 +32,7 @@ export async function updateEventDb(
 
     while (from < headBlock) {
       const to = Math.min(from + batchSize, headBlock);
-      console.log('scan from ', { from, to: from + batchSize });
+      console.log('scan from ', { from, to });
       const events = await scanEvents(ctx, {
         filter: 'allEvents',
         fromBlock: from,
