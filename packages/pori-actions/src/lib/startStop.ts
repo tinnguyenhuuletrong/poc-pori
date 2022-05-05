@@ -3,12 +3,18 @@ import {
   ENV,
   getIdleGameAddressSC,
   getWeb3NodeUri,
+  getWeb3NodeUriHttp,
 } from '@pori-and-friends/pori-metadata';
 import Web3 from 'web3';
 
 export async function init(env: ENV): Promise<Context> {
-  const uri = getWeb3NodeUri(env);
-  const provider = new Web3.providers.WebsocketProvider(uri);
+  const uriws = getWeb3NodeUri(env);
+  const urihttp = getWeb3NodeUriHttp(env);
+
+  const provider = uriws
+    ? new Web3.providers.WebsocketProvider(uriws)
+    : new Web3.providers.HttpProvider(urihttp);
+
   const web3 = new Web3(provider);
 
   const idleGameSc = getIdleGameAddressSC(env);

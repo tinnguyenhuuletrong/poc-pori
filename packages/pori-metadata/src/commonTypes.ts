@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import type { Contract } from 'web3-eth-contract';
 import type WalletConnect from '@walletconnect/client';
-import type { WebsocketProvider } from 'web3-core';
+import type { WebsocketProvider, HttpProvider } from 'web3-core';
 
 export enum ENV {
   Staging = 'STAG',
@@ -11,7 +11,7 @@ export enum ENV {
 export type Context = {
   contract: Contract;
   web3: Web3;
-  provider: WebsocketProvider;
+  provider: WebsocketProvider | HttpProvider;
   walletConnectChannel?: WalletConnect;
   env: ENV;
 };

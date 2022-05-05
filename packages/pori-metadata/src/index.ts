@@ -11,6 +11,15 @@ export function getWeb3NodeUri(env: ENV) {
   return process.env[key] as string;
 }
 
+export function getWeb3NodeUriHttp(env: ENV) {
+  const key = `NODE_URI_${env}_HTTP`.toUpperCase();
+  if (!process.env[key]) {
+    console.error(`missing env ${key}`);
+    process.exit(1);
+  }
+  return process.env[key] as string;
+}
+
 export function getAPILink(env: ENV) {
   if (env === ENV.Staging) return stagConfig.gameInfo.m.app.apiUrl;
   else return prodConfig.gameInfo.m.app.apiUrl;
