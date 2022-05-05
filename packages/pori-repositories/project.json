@@ -1,5 +1,4 @@
 {
-  "root": "packages/pori-repositories",
   "sourceRoot": "packages/pori-repositories/src",
   "targets": {
     "build": {

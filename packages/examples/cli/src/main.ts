@@ -70,14 +70,9 @@ async function main() {
     },
   });
 
-  server.defineCommand('wallet.start', {
+  server.defineCommand('wallet.reset', {
     help: 'Start walletconnect',
     action: async () => {
-      if (ctx.walletConnectChannel?.connected) {
-        console.warn('wallet channel already connected');
-        return;
-      }
-
       console.warn('trying to reset wallet channel');
 
       ctx.walletConnectChannel = null;

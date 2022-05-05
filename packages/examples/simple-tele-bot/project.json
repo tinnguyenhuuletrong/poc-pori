@@ -1,5 +1,4 @@
 {
-  "root": "packages/examples/simple-tele-bot",
   "sourceRoot": "packages/examples/simple-tele-bot/src",
   "projectType": "application",
   "targets": {

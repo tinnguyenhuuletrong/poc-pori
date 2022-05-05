@@ -1,5 +1,4 @@
 {
-  "root": "packages/pori-metadata",
   "sourceRoot": "packages/pori-metadata/src",
   "targets": {
     "build": {

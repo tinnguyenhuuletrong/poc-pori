@@ -1,5 +1,4 @@
 {
-  "root": "packages/examples/parse-nft",
   "sourceRoot": "packages/examples/parse-nft/src",
   "projectType": "application",
   "targets": {

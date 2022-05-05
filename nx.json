@@ -9,7 +9,11 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/nx-cloud"
+      "runner": "@nrwl/nx-cloud",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "accessToken": "YzRlY2Y0ZjYtMDBhOC00ZGQ1LWE0MTgtYTU0M2FiYjU2ODZifHJlYWQtd3JpdGU="
+      }
     }
   },
   "defaultProject": "examples-query-mine-info"

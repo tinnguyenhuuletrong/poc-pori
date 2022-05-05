@@ -1,5 +1,4 @@
 {
-  "root": "packages/examples/stream-idle-game-events",
   "sourceRoot": "packages/examples/stream-idle-game-events/src",
   "projectType": "application",
   "targets": {

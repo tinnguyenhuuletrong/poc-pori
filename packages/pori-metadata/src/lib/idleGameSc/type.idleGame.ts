@@ -1,4 +1,5 @@
 // Idle Game Events
+import type Realm from 'realm';
 
 export enum EIdleGameSCEventType {
   AdventureFinished = 'AdventureFinished',

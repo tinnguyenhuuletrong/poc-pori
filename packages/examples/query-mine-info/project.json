@@ -1,5 +1,4 @@
 {
-  "root": "packages/examples/query-mine-info",
   "sourceRoot": "packages/examples/query-mine-info/src",
   "projectType": "application",
   "targets": {

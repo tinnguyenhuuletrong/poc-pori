@@ -1,5 +1,4 @@
 {
-  "root": "packages/examples/scan-idle-game-events",
   "sourceRoot": "packages/examples/scan-idle-game-events/src",
   "projectType": "application",
   "targets": {

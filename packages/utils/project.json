@@ -1,5 +1,4 @@
 {
-  "root": "packages/utils",
   "sourceRoot": "packages/utils/src",
   "targets": {
     "build": {
