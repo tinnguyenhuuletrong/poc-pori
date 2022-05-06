@@ -6,15 +6,18 @@
     "nx": "nx",
     "nx-prod": "NODE_ENV=prod nx",
     "build:tele-bot": "node ci/build-bot-image.js",
-    "script:backup": "node ci/update-archive.js"
+    "script:backup": "node ci/update-archive.js",
+    "postinstall": "patch-package"
   },
   "private": true,
   "dependencies": {
     "@walletconnect/client": "^1.7.8",
     "@walletconnect/qrcode-modal": "^1.7.8",
     "axios": "^0.26.1",
+    "inquirer": "^8.2.4",
     "lodash": "^4.17.21",
     "node-telegram-bot-api": "^0.56.0",
+    "patch-package": "^6.4.7",
     "realm": "^10.16.0",
     "tslib": "^2.3.0",
     "web3": "^1.7.3"
@@ -28,6 +31,7 @@
     "@nrwl/node": "14.1.1",
     "@nrwl/nx-cloud": "14.0.3",
     "@nrwl/workspace": "14.1.1",
+    "@types/inquirer": "^8.2.1",
     "@types/jest": "27.4.1",
     "@types/lodash": "^4.14.182",
     "@types/node": "16.11.7",

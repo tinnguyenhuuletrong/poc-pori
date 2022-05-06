@@ -5,6 +5,7 @@ import {
   close,
   Input,
   DataView,
+  Adventure,
   addWalletConnectToContext,
 } from '@pori-and-friends/pori-actions';
 import {
@@ -14,6 +15,7 @@ import {
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
+import inquirer from 'inquirer';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
@@ -59,6 +61,10 @@ async function main() {
   // Cli Cmds
   //-----------------------------------------//
 
+  const prompt = inquirer.createPromptModule({
+    rl: server,
+  } as any);
+
   server.defineCommand('exit', {
     help: 'Gracefull exit',
     action: async () => {
@@ -67,6 +73,27 @@ async function main() {
       realm.close();
       console.log('bye!');
       process.exit(0);
+    },
+  });
+
+  server.defineCommand('test', {
+    help: 'test',
+    action: async () => {
+      const answer = await prompt([
+        {
+          type: 'list',
+          name: 'confirmExist',
+          message: 'Do you want to quit ?',
+          choices: ['yes', 'no'],
+          default() {
+            return 'yes';
+          },
+        },
+      ]);
+
+      console.log(answer);
+      server.displayPrompt();
+      console.log((prompt as any).activePromptObj);
     },
   });
 
@@ -83,39 +110,8 @@ async function main() {
 
   server.defineCommand('stats.my_adv', {
     help: 'Show my adv',
-    action: async () => {
-      console.log('updateKnowleage begin');
-
-      await Input.updateEventDb(realm, ctx, {
-        createdBlock: activeEnv.environment.createdBlock,
-      });
-
-      const viewData = await DataView.computePlayerAdventure({
-        realm,
-        playerAddress,
-        realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
-      });
-      console.log('updateKnowleage end');
-
-      // humanView
-      const humanView = {
-        // my active adventures
-        mines: {},
-
-        // protential target
-        targets: {},
-      };
-      for (const k of Object.keys(viewData.activeAdventures)) {
-        const value = viewData.activeAdventures[k] as AdventureInfo;
-        if (
-          value.farmerAddress === playerAddress ||
-          value.supporterAddress === playerAddress
-        )
-          humanView.mines[k] = DataView.humanrizeAdventureInfo(value);
-        else if (value.state === 'AdventureStarted') {
-          humanView.targets[k] = DataView.humanrizeAdventureInfo(value);
-        }
-      }
+    action: async (addr) => {
+      const humanView = await refreshAdventureStatsForAddress(addr);
 
       console.dir(humanView, { depth: 5 });
     },
@@ -134,8 +130,8 @@ async function main() {
     },
   });
 
-  server.defineCommand('wallet.sign.tx', {
-    help: 'sign tx request',
+  server.defineCommand('wallet.new.mine', {
+    help: 'send new mine request',
     action: async () => {
       if (!ctx.walletConnectChannel?.connected) {
         console.warn(
@@ -144,16 +140,26 @@ async function main() {
         return;
       }
 
+      const poriants = ['1346', '5420', '1876'];
+      const index = Adventure.randAdventureSlot(3);
+
       const callData = ctx.contract.methods
         .startAdventure(
           // poriants
-          ['1346', '5420', '1876'],
+          poriants,
+
           // index
-          ['1', '2', '3'],
+          index,
+
           // notPortal
           true
         )
         .encodeABI();
+
+      console.log({
+        poriants: ['1346', '5420', '1876'],
+        index: Adventure.randAdventureSlot(3),
+      });
 
       const tx = {
         from: ctx.walletConnectChannel.accounts[0],
@@ -174,6 +180,44 @@ async function main() {
         });
     },
   });
+
+  async function refreshAdventureStatsForAddress(addr: string) {
+    console.log('refreshAdventureStatsForAddress begin');
+
+    await Input.updateEventDb(realm, ctx, {
+      createdBlock: activeEnv.environment.createdBlock,
+    });
+
+    const viewData = await DataView.computePlayerAdventure({
+      realm,
+      playerAddress: addr || playerAddress,
+      realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
+    });
+    console.log('refreshAdventureStatsForAddress end');
+
+    // humanView
+    const humanView = {
+      note: DataView.humanrizeNote(viewData),
+
+      // my active adventures
+      mines: {},
+
+      // protential target
+      targets: {},
+    };
+    for (const k of Object.keys(viewData.activeAdventures)) {
+      const value = viewData.activeAdventures[k] as AdventureInfo;
+      if (
+        value.farmerAddress === playerAddress ||
+        value.supporterAddress === playerAddress
+      )
+        humanView.mines[k] = DataView.humanrizeAdventureInfo(value);
+      else if (value.state === 'AdventureStarted') {
+        humanView.targets[k] = DataView.humanrizeAdventureInfo(value);
+      }
+    }
+    return humanView;
+  }
 }
 
 main();

@@ -23,6 +23,10 @@ export interface IComputePlayerAdventureProps {
 
 export interface ActiveAdventureComputed {
   playerAddress: string;
+  note: {
+    lastMine?: number;
+    lastMineUnlockAt?: Date;
+  };
   activeAdventures: Record<number, AdventureInfo>;
   finishedAdventures: Record<number, AdventureInfo>;
 }
@@ -184,6 +188,16 @@ export async function computePlayerAdventure(
 
             // todo add reward
           };
+
+          // add note
+          const prevNote = viewData.note ?? {};
+          viewData.note = {
+            ...prevNote,
+            lastMine: mineInfo.mineId,
+            lastMineUnlockAt: mineInfo.isSupporter
+              ? mineInfo.supporterEndTime
+              : mineInfo.farmerEndTime,
+          };
         }
         break;
 
@@ -229,6 +243,7 @@ function defaultViewData(
     playerAddress: options.playerAddress,
     activeAdventures: {},
     finishedAdventures: {},
+    note: {},
   };
 }
 
@@ -267,6 +282,20 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo) {
     farmerEndTime,
     supporterEndTime,
   };
+}
+
+export function humanrizeNote(data: ActiveAdventureComputed) {
+  const note = data.note || {};
+  const res: any = {
+    ...note,
+  };
+
+  if (note.lastMineUnlockAt) {
+    const tmp = new Date(note.lastMineUnlockAt);
+    res.lastMineUnlockAt = tmp.toLocaleString();
+    res.readyToStart = Date.now() > tmp.valueOf();
+  }
+  return res;
 }
 
 //--------------------------------------------------------------
