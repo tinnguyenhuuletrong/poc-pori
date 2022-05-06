@@ -188,9 +188,11 @@ async function main() {
       createdBlock: activeEnv.environment.createdBlock,
     });
 
+    const activeAddr = addr || playerAddress;
+
     const viewData = await DataView.computePlayerAdventure({
       realm,
-      playerAddress: addr || playerAddress,
+      playerAddress: activeAddr,
       realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
     });
     console.log('refreshAdventureStatsForAddress end');
@@ -208,8 +210,8 @@ async function main() {
     for (const k of Object.keys(viewData.activeAdventures)) {
       const value = viewData.activeAdventures[k] as AdventureInfo;
       if (
-        value.farmerAddress === playerAddress ||
-        value.supporterAddress === playerAddress
+        value.farmerAddress === activeAddr ||
+        value.supporterAddress === activeAddr
       )
         humanView.mines[k] = DataView.humanrizeAdventureInfo(value);
       else if (value.state === 'AdventureStarted') {

@@ -5,6 +5,7 @@
   "scripts": {
     "nx": "nx",
     "nx-prod": "NODE_ENV=prod nx",
+    "build:all:prod": "nx run-many --target=build --all --prod",
     "build:tele-bot": "node ci/build-bot-image.js",
     "script:backup": "node ci/update-archive.js",
     "postinstall": "patch-package"
