@@ -15,7 +15,6 @@ import {
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
-import inquirer from 'inquirer';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
@@ -61,10 +60,6 @@ async function main() {
   // Cli Cmds
   //-----------------------------------------//
 
-  const prompt = inquirer.createPromptModule({
-    rl: server,
-  } as any);
-
   server.defineCommand('exit', {
     help: 'Gracefull exit',
     action: async () => {
@@ -79,21 +74,9 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const answer = await prompt([
-        {
-          type: 'list',
-          name: 'confirmExist',
-          message: 'Do you want to quit ?',
-          choices: ['yes', 'no'],
-          default() {
-            return 'yes';
-          },
-        },
-      ]);
-
-      console.log(answer);
-      server.displayPrompt();
-      console.log((prompt as any).activePromptObj);
+      const answer = server.question('are you sure ? -> ', () => {
+        console.log('answer');
+      });
     },
   });
 
@@ -108,7 +91,7 @@ async function main() {
     },
   });
 
-  server.defineCommand('stats.my_adv', {
+  server.defineCommand('stats', {
     help: 'Show my adv',
     action: async (addr) => {
       const humanView = await refreshAdventureStatsForAddress(addr);
@@ -130,15 +113,18 @@ async function main() {
     },
   });
 
-  server.defineCommand('wallet.new.mine', {
+  server.defineCommand('new.mine', {
     help: 'send new mine request',
-    action: async () => {
+    action: async (args) => {
       if (!ctx.walletConnectChannel?.connected) {
         console.warn(
           'wallet channel not ready. Please run .wallet.start first'
         );
         return;
       }
+
+      const tmp = args.split(' ');
+      const usePortal = !!tmp[0];
 
       const poriants = ['1346', '5420', '1876'];
       const index = Adventure.randAdventureSlot(3);
@@ -152,13 +138,98 @@ async function main() {
           index,
 
           // notPortal
-          true
+          !usePortal
         )
         .encodeABI();
 
       console.log({
-        poriants: ['1346', '5420', '1876'],
-        index: Adventure.randAdventureSlot(3),
+        poriants,
+        index,
+        usePortal,
+      });
+
+      const tx = {
+        from: ctx.walletConnectChannel.accounts[0],
+        to: getIdleGameAddressSC(env).address,
+        data: callData, // Required
+      };
+
+      // Sign transaction
+      ctx.walletConnectChannel
+        .sendTransaction(tx)
+        .then((result) => {
+          // Returns signed transaction
+          console.log(result);
+        })
+        .catch((error) => {
+          // Error returned when rejected
+          console.error(error);
+        });
+    },
+  });
+
+  server.defineCommand('new.atk', {
+    help: 'send new mine request',
+    action: async (args) => {
+      if (!ctx.walletConnectChannel?.connected) {
+        console.warn(
+          'wallet channel not ready. Please run .wallet.start first'
+        );
+        return;
+      }
+      const tmp = args.split(' ');
+      const mineId = tmp[0];
+      const usePortal = !!tmp[1];
+      if (!mineId) {
+        console.warn('\tUsage: .new.atk <mineId> [usePortal = false]');
+        return;
+      }
+
+      const addvStats = await refreshAdventureStatsForAddress(playerAddress);
+
+      console.log('STATS');
+      console.dir(
+        {
+          protentialTarget: addvStats.protentialTarget,
+          activeMines: addvStats.activeMines,
+        },
+        { depth: 5 }
+      );
+
+      console.log('EXEC');
+      console.log({ mineId, usePortal });
+      const mineInfo = addvStats.targets[mineId];
+
+      if (!mineInfo) {
+        console.log('opps. Mine status changed');
+        return;
+      }
+
+      const poriants = ['1346', '5420', '1876'];
+      const index = Adventure.randAdventureSlot(3, mineInfo.farmerSlots);
+
+      const callData = ctx.contract.methods
+        .support1(
+          // mineId
+          mineId,
+          // poriants
+          poriants,
+
+          // index
+          index,
+
+          // notPortal
+          !usePortal
+        )
+        .encodeABI();
+
+      console.log({
+        method: 'support1',
+        mineId,
+        poriants,
+        index,
+        usePortal,
+        callData,
       });
 
       const tx = {
@@ -206,6 +277,8 @@ async function main() {
 
       // protential target
       targets: {},
+      protentialTarget: [],
+      activeMines: 0,
     };
     for (const k of Object.keys(viewData.activeAdventures)) {
       const value = viewData.activeAdventures[k] as AdventureInfo;
@@ -218,6 +291,26 @@ async function main() {
         humanView.targets[k] = DataView.humanrizeAdventureInfo(value);
       }
     }
+
+    humanView.protentialTarget = Object.keys(humanView.targets)
+      .map((key) => {
+        const val = humanView.targets[key];
+        const sinceSec =
+          (Date.now() - new Date(val.startTime).valueOf()) / 1000;
+        return {
+          mineId: val.mineId,
+          hasBigReward: val.hasBigReward,
+          startTimeLocalTime: new Date(val.startTime).toLocaleString(),
+          startTime: new Date(val.startTime),
+          sinceSec,
+        };
+      })
+      .sort((a, b) => {
+        return a.hasBigReward - b.hasBigReward;
+      });
+
+    humanView.activeMines = Object.keys(humanView.mines).length;
+
     return humanView;
   }
 }

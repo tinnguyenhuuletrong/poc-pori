@@ -7,18 +7,15 @@
     "nx-prod": "NODE_ENV=prod nx",
     "build:all:prod": "nx run-many --target=build --all --prod",
     "build:tele-bot": "node ci/build-bot-image.js",
-    "script:backup": "node ci/update-archive.js",
-    "postinstall": "patch-package"
+    "script:backup": "node ci/update-archive.js"
   },
   "private": true,
   "dependencies": {
     "@walletconnect/client": "^1.7.8",
     "@walletconnect/qrcode-modal": "^1.7.8",
     "axios": "^0.26.1",
-    "inquirer": "^8.2.4",
     "lodash": "^4.17.21",
     "node-telegram-bot-api": "^0.56.0",
-    "patch-package": "^6.4.7",
     "realm": "^10.16.0",
     "tslib": "^2.3.0",
     "web3": "^1.7.3"
