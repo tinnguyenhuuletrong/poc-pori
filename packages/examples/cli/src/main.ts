@@ -15,10 +15,13 @@ import {
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
+import type { ITxData } from '@walletconnect/types';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
 const playerAddress = process.env.PLAYER_ADDRESS;
+const MINE_ATK_PRICE_FACTOR = 1.2;
+
 async function main() {
   console.log(env, activeEnv);
 
@@ -91,6 +94,15 @@ async function main() {
     },
   });
 
+  server.defineCommand('gas', {
+    help: 'calculate gasPrice',
+    action: async () => {
+      const web3GasPrice = await currentGasPrice();
+
+      console.log(ctx.web3.utils.fromWei(web3GasPrice, 'gwei'), 'gwei');
+    },
+  });
+
   server.defineCommand('stats', {
     help: 'Show my adv',
     action: async (addr) => {
@@ -113,7 +125,7 @@ async function main() {
     },
   });
 
-  server.defineCommand('new.mine', {
+  server.defineCommand('mine', {
     help: 'send new mine request',
     action: async (args) => {
       if (!ctx.walletConnectChannel?.connected) {
@@ -155,20 +167,11 @@ async function main() {
       };
 
       // Sign transaction
-      ctx.walletConnectChannel
-        .sendTransaction(tx)
-        .then((result) => {
-          // Returns signed transaction
-          console.log(result);
-        })
-        .catch((error) => {
-          // Error returned when rejected
-          console.error(error);
-        });
+      await sendRequestForWalletConnectTx(tx);
     },
   });
 
-  server.defineCommand('new.atk', {
+  server.defineCommand('atk', {
     help: 'send new mine request',
     action: async (args) => {
       if (!ctx.walletConnectChannel?.connected) {
@@ -232,29 +235,42 @@ async function main() {
         callData,
       });
 
-      const tx = {
+      const web3GasPrice = await ctx.web3.eth.getGasPrice();
+      const factor = MINE_ATK_PRICE_FACTOR;
+
+      const tx: ITxData = {
         from: ctx.walletConnectChannel.accounts[0],
         to: getIdleGameAddressSC(env).address,
         data: callData, // Required
+        gasPrice: +web3GasPrice * factor,
       };
 
       // Sign transaction
-      ctx.walletConnectChannel
-        .sendTransaction(tx)
-        .then((result) => {
-          // Returns signed transaction
-          console.log(result);
-        })
-        .catch((error) => {
-          // Error returned when rejected
-          console.error(error);
-        });
+      await sendRequestForWalletConnectTx(tx);
     },
   });
 
-  async function refreshAdventureStatsForAddress(addr: string) {
-    console.log('refreshAdventureStatsForAddress begin');
+  async function currentGasPrice() {
+    return await ctx.web3.eth.getGasPrice();
+  }
 
+  function sendRequestForWalletConnectTx(tx: ITxData) {
+    return ctx.walletConnectChannel
+      .sendTransaction(tx)
+      .then((result) => {
+        console.log(result);
+        return ctx.web3.eth.getTransactionReceipt(result);
+      })
+      .then((txInfo) => {
+        console.log(txInfo);
+      })
+      .catch((error) => {
+        // Error returned when rejected
+        console.error(error);
+      });
+  }
+
+  async function refreshAdventureStatsForAddress(addr: string) {
     await Input.updateEventDb(realm, ctx, {
       createdBlock: activeEnv.environment.createdBlock,
     });
@@ -266,7 +282,6 @@ async function main() {
       playerAddress: activeAddr,
       realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
     });
-    console.log('refreshAdventureStatsForAddress end');
 
     // humanView
     const humanView = {
@@ -279,6 +294,7 @@ async function main() {
       targets: {},
       protentialTarget: [],
       activeMines: 0,
+      gasPriceGWEI: '',
     };
     for (const k of Object.keys(viewData.activeAdventures)) {
       const value = viewData.activeAdventures[k] as AdventureInfo;
@@ -310,6 +326,12 @@ async function main() {
       });
 
     humanView.activeMines = Object.keys(humanView.mines).length;
+
+    // mine completed by farmer. But our poriant still lock
+    if (humanView.note.readyToStart === false) humanView.activeMines++;
+
+    const web3GasPrice = await currentGasPrice();
+    humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
 
     return humanView;
   }
