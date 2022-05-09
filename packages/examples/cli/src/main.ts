@@ -352,9 +352,11 @@ async function main() {
     )?.blockedTo;
 
     humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
-    humanView.nextActionAt = `${nextActionAt.toLocaleString()} - ${moment(
-      nextActionAt
-    ).fromNow()}`;
+    if (nextActionAt) {
+      humanView.nextActionAt = `${nextActionAt.toLocaleString()} - ${moment(
+        nextActionAt
+      ).fromNow()}`;
+    }
 
     return humanView;
   }

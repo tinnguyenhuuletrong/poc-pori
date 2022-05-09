@@ -13,6 +13,7 @@ import {
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfo,
+  AdventureInfoEx,
   Context,
   ENV,
   getIdleGameAddressSC,
@@ -20,6 +21,8 @@ import {
 import * as Repos from '@pori-and-friends/pori-repositories';
 import type { ITxData } from '@walletconnect/types';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { maxBy } from 'lodash';
+import moment from 'moment';
 
 interface BotMemoryStructure {
   activeChats: string[];
@@ -79,168 +82,235 @@ async function main() {
       pid: ${process.pid}
       hostname: ${os.hostname()}
       playerAddress: ${playerAddress}
-      _v: 4
+      _v: 5
     </code>
     Have fun!
     `;
     bot.sendMessage(msg.chat.id, resp, { parse_mode: 'HTML' });
   });
 
-  bot.onText(/\/stats/, async (msg, match) => {
+  bot.onText(/\/wallet_reset/, async function (msg) {
     if (!requireBotMaster(msg)) return;
     captureChatId(msg.chat.id);
 
-    const addr = playerAddress;
-    await bot.sendMessage(msg.chat.id, 'refreshing....');
-    const humanView = await refreshAdventureStatsForAddress(
-      { realm, ctx },
-      addr
+    await bot.sendMessage(msg.chat.id, 'trying to reset wallet channel...');
+    ctx.walletConnectChannel = null;
+    await addWalletConnectToContext(
+      ctx,
+      activeEnv.environment.walletConnectSessionStoragePath
     );
+  });
 
-    const resp = '```json' + JSON.stringify(humanView, null, 2) + '```';
+  bot.onText(/\/stats/, async (msg, match) => {
+    await withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
 
-    await bot.sendMessage(msg.chat.id, 'finish....');
-    await bot.sendMessage(msg.chat.id, resp, { parse_mode: 'MarkdownV2' });
+      const addr = playerAddress;
+      await bot.sendMessage(msg.chat.id, 'refreshing....');
+      const humanView = await refreshAdventureStatsForAddress(
+        { realm, ctx },
+        addr
+      );
+
+      // targets:
+      // ${humanView.protentialTarget.map(
+      //   (itm) => `\n\t \\- ${itm.mineId} ${itm.hasBigReward} ${itm.sinceSec}`
+      // )}
+
+      const protentialTarget = humanView.protentialTarget;
+      const mines = Object.values(humanView.mines);
+      const adventureRender = (inp: AdventureInfoEx) => {
+        return `  * <a href="${inp.link}">${inp.mineId}</a>
+          - supporterAddr: ${inp.supporterAddress}
+          - blockTo: ${inp.blockedTo.toLocaleString()}
+          - hasBigReward: ${inp.hasBigReward}
+          - isFarmer: ${inp.isFarmer}
+          - farmerRewardLevel: ${inp.farmerRewardLevel?.join(',')}
+          - supporterRewardLevel: ${inp.farmerRewardLevel?.join(',')}
+        `;
+      };
+
+      const resp = `
+<b>Mines:</b>      
+${mines.map((itm) => adventureRender(itm)).join('\n')}
+<b>Targets:</b>
+${protentialTarget
+  .map(
+    (itm) =>
+      `\t\t - ${itm.mineId} bigReward-${itm.hasBigReward} since-${itm.sinceSec} sec`
+  )
+  .join('\n')}
+<b>Summary:</b>
+  - <i>canDoNextAction: </i> <b>${humanView.canDoNextAction}</b>
+  - <i>activeMine: </i> ${humanView.activeMines}
+  - <i>nextActionAt: </i> ${humanView.nextActionAt}
+  - <i>gasPriceGWEI: </i> ${humanView.gasPriceGWEI}
+      `;
+
+      await bot.sendMessage(msg.chat.id, 'finish....');
+      await bot.sendMessage(msg.chat.id, resp, { parse_mode: 'HTML' });
+    });
   });
 
   bot.onText(/\/mine (.*)/, async (msg, match) => {
-    if (!requireBotMaster(msg)) return;
-    captureChatId(msg.chat.id);
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
 
-    const args = match[1];
+      const args = match[1];
 
-    if (!ctx.walletConnectChannel?.connected) {
-      console.warn('wallet channel not ready. Please run .wallet.start first');
-      return;
-    }
+      if (!ctx.walletConnectChannel?.connected) {
+        console.warn(
+          'wallet channel not ready. Please run .wallet.start first'
+        );
+        return;
+      }
 
-    const tmp = args.split(' ');
-    const usePortal = boolFromString(tmp[0]);
+      const tmp = args.split(' ');
+      const usePortal = boolFromString(tmp[0]);
 
-    const poriants = ['1346', '5420', '1876'];
-    const index = Adventure.randAdventureSlot(3);
+      const poriants = ['1346', '5420', '1876'];
+      const index = Adventure.randAdventureSlot(3);
 
-    await bot.sendMessage(
-      msg.chat.id,
-      `roger that!. Start new mine. usePortal:${usePortal}`
-    );
+      await bot.sendMessage(
+        msg.chat.id,
+        `roger that!. Start new mine. usePortal:${usePortal}`
+      );
 
-    const callData = ctx.contract.methods
-      .startAdventure(
-        // poriants
+      const callData = ctx.contract.methods
+        .startAdventure(
+          // poriants
+          poriants,
+
+          // index
+          index,
+
+          // notPortal
+          !usePortal
+        )
+        .encodeABI();
+
+      console.log({
         poriants,
-
-        // index
         index,
+        usePortal,
+      });
 
-        // notPortal
-        !usePortal
-      )
-      .encodeABI();
+      const tx = {
+        from: ctx.walletConnectChannel.accounts[0],
+        to: getIdleGameAddressSC(env).address,
+        data: callData, // Required
+      };
 
-    console.log({
-      poriants,
-      index,
-      usePortal,
+      await bot.sendMessage(
+        msg.chat.id,
+        `Sir! please accept tx in trust wallet`
+      );
+
+      // Sign transaction
+      const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+      await bot.sendMessage(
+        msg.chat.id,
+        `https://polygonscan.com/tx/${txHash}`
+      );
     });
-
-    const tx = {
-      from: ctx.walletConnectChannel.accounts[0],
-      to: getIdleGameAddressSC(env).address,
-      data: callData, // Required
-    };
-
-    await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
-
-    // Sign transaction
-    const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
-    await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
   });
 
   bot.onText(/\/atk (.+)/, async (msg, match) => {
-    if (!requireBotMaster(msg)) return;
-    captureChatId(msg.chat.id);
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
 
-    const args = match[1];
+      const args = match[1];
 
-    if (!ctx.walletConnectChannel?.connected) {
-      console.warn('wallet channel not ready. Please run .wallet.start first');
-      return;
-    }
-    const tmp = args.split(' ');
-    const mineId = tmp[0];
-    const usePortal = !!tmp[1];
-    if (!mineId) {
+      if (!ctx.walletConnectChannel?.connected) {
+        console.warn(
+          'wallet channel not ready. Please run .wallet.start first'
+        );
+        return;
+      }
+      const tmp = args.split(' ');
+      const mineId = tmp[0];
+      const usePortal = !!tmp[1];
+      if (!mineId) {
+        await bot.sendMessage(
+          msg.chat.id,
+          '\tUsage: /atk <mineId> [usePortal = false]'
+        );
+        return;
+      }
+
+      const addvStats = await refreshAdventureStatsForAddress(
+        { realm, ctx },
+        playerAddress
+      );
+
       await bot.sendMessage(
         msg.chat.id,
-        '\tUsage: /atk <mineId> [usePortal = false]'
+        `roger that!. Start atk mineId:${mineId} usePortal:${usePortal}`
       );
-      return;
-    }
+      console.log({ mineId, usePortal });
+      const mineInfo = addvStats.targets[mineId];
 
-    const addvStats = await refreshAdventureStatsForAddress(
-      { realm, ctx },
-      playerAddress
-    );
+      if (!mineInfo) {
+        console.log('opps. Mine status changed');
+        await bot.sendMessage(
+          msg.chat.id,
+          `opps. Mine status changed. Retreat....`
+        );
+        return;
+      }
 
-    await bot.sendMessage(
-      msg.chat.id,
-      `roger that!. Start atk mineId:${mineId} usePortal:${usePortal}`
-    );
-    console.log({ mineId, usePortal });
-    const mineInfo = addvStats.targets[mineId];
+      const poriants = ['1346', '5420', '1876'];
+      const index = Adventure.randAdventureSlot(3, mineInfo.farmerSlots);
 
-    if (!mineInfo) {
-      console.log('opps. Mine status changed');
-      await bot.sendMessage(
-        msg.chat.id,
-        `opps. Mine status changed. Retreat....`
-      );
-      return;
-    }
+      const callData = ctx.contract.methods
+        .support1(
+          // mineId
+          mineId,
+          // poriants
+          poriants,
 
-    const poriants = ['1346', '5420', '1876'];
-    const index = Adventure.randAdventureSlot(3, mineInfo.farmerSlots);
+          // index
+          index,
 
-    const callData = ctx.contract.methods
-      .support1(
-        // mineId
+          // notPortal
+          !usePortal
+        )
+        .encodeABI();
+
+      console.log({
+        method: 'support1',
         mineId,
-        // poriants
         poriants,
-
-        // index
         index,
+        usePortal,
+        callData,
+      });
 
-        // notPortal
-        !usePortal
-      )
-      .encodeABI();
+      const web3GasPrice = await ctx.web3.eth.getGasPrice();
+      const factor = MINE_ATK_PRICE_FACTOR;
 
-    console.log({
-      method: 'support1',
-      mineId,
-      poriants,
-      index,
-      usePortal,
-      callData,
+      const tx: ITxData = {
+        from: ctx.walletConnectChannel.accounts[0],
+        to: getIdleGameAddressSC(env).address,
+        data: callData, // Required
+        gasPrice: +web3GasPrice * factor,
+      };
+
+      await bot.sendMessage(
+        msg.chat.id,
+        `Sir! please accept tx in trust wallet`
+      );
+
+      // Sign transaction
+      const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+      await bot.sendMessage(
+        msg.chat.id,
+        `https://polygonscan.com/tx/${txHash}`
+      );
     });
-
-    const web3GasPrice = await ctx.web3.eth.getGasPrice();
-    const factor = MINE_ATK_PRICE_FACTOR;
-
-    const tx: ITxData = {
-      from: ctx.walletConnectChannel.accounts[0],
-      to: getIdleGameAddressSC(env).address,
-      data: callData, // Required
-      gasPrice: +web3GasPrice * factor,
-    };
-
-    await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
-
-    // Sign transaction
-    const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
-    await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
   });
 
   // --------------------
@@ -338,6 +408,7 @@ async function refreshAdventureStatsForAddress(
   });
 
   const activeAddr = addr || playerAddress;
+  const now = Date.now();
 
   const viewData = await DataView.computePlayerAdventure({
     realm,
@@ -350,14 +421,17 @@ async function refreshAdventureStatsForAddress(
     note: DataView.humanrizeNote(viewData),
 
     // my active adventures
-    mines: {},
+    mines: {} as Record<string, AdventureInfoEx>,
 
     // protential target
     targets: {},
     protentialTarget: [],
     activeMines: 0,
+    canDoNextAction: false,
+    nextActionAt: '',
     gasPriceGWEI: '',
   };
+
   for (const k of Object.keys(viewData.activeAdventures)) {
     const value = viewData.activeAdventures[k] as AdventureInfo;
     if (
@@ -373,8 +447,9 @@ async function refreshAdventureStatsForAddress(
   humanView.protentialTarget = Object.keys(humanView.targets)
     .map((key) => {
       const val = humanView.targets[key];
-      const sinceSec = (Date.now() - new Date(val.startTime).valueOf()) / 1000;
+      const sinceSec = (now - new Date(val.startTime).valueOf()) / 1000;
       return {
+        link: val.link,
         mineId: val.mineId,
         hasBigReward: val.hasBigReward,
         startTimeLocalTime: new Date(val.startTime).toLocaleString(),
@@ -393,6 +468,22 @@ async function refreshAdventureStatsForAddress(
 
   const web3GasPrice = await currentGasPrice({ ctx });
   humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
+
+  // next action timeline
+  const timeViewMine = Object.values(humanView.mines);
+  const noBlock = timeViewMine.every((itm) => {
+    return !!itm.canCollect;
+  });
+  const nextActionAt = maxBy(timeViewMine, (v) =>
+    v.blockedTo.valueOf()
+  )?.blockedTo;
+
+  humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
+  if (nextActionAt) {
+    humanView.nextActionAt = `${nextActionAt.toLocaleString()} - ${moment(
+      nextActionAt
+    ).fromNow()}`;
+  }
 
   return humanView;
 }
@@ -416,6 +507,18 @@ function sendRequestForWalletConnectTx({ ctx }: { ctx: Context }, tx: ITxData) {
 
 async function currentGasPrice({ ctx }: { ctx: Context }) {
   return await ctx.web3.eth.getGasPrice();
+}
+
+async function withErrorWrapper(
+  { chatId, bot }: { chatId: number; bot: TelegramBot },
+  handler: () => Promise<any>
+) {
+  try {
+    await handler();
+  } catch (error) {
+    console.error(error);
+    await bot.sendMessage(chatId, `Error: ${error.message}`);
+  }
 }
 
 main();
