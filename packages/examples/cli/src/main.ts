@@ -10,12 +10,16 @@ import {
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfo,
+  AdventureInfoEx,
   ENV,
   getIdleGameAddressSC,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
 import type { ITxData } from '@walletconnect/types';
+import { AddressInfo } from 'net';
+import { max, maxBy } from 'lodash';
+import moment from 'moment';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
@@ -107,7 +111,8 @@ async function main() {
     help: 'Show my adv',
     action: async (addr) => {
       const humanView = await refreshAdventureStatsForAddress(addr);
-
+      delete humanView.targets;
+      delete humanView.note;
       console.dir(humanView, { depth: 5 });
     },
   });
@@ -276,6 +281,7 @@ async function main() {
     });
 
     const activeAddr = addr || playerAddress;
+    const now = Date.now();
 
     const viewData = await DataView.computePlayerAdventure({
       realm,
@@ -288,14 +294,17 @@ async function main() {
       note: DataView.humanrizeNote(viewData),
 
       // my active adventures
-      mines: {},
+      mines: {} as Record<string, AdventureInfoEx>,
 
       // protential target
       targets: {},
       protentialTarget: [],
       activeMines: 0,
+      canDoNextAction: false,
+      nextActionAt: '',
       gasPriceGWEI: '',
     };
+
     for (const k of Object.keys(viewData.activeAdventures)) {
       const value = viewData.activeAdventures[k] as AdventureInfo;
       if (
@@ -311,9 +320,9 @@ async function main() {
     humanView.protentialTarget = Object.keys(humanView.targets)
       .map((key) => {
         const val = humanView.targets[key];
-        const sinceSec =
-          (Date.now() - new Date(val.startTime).valueOf()) / 1000;
+        const sinceSec = (now - new Date(val.startTime).valueOf()) / 1000;
         return {
+          link: val.link,
           mineId: val.mineId,
           hasBigReward: val.hasBigReward,
           startTimeLocalTime: new Date(val.startTime).toLocaleString(),
@@ -332,6 +341,20 @@ async function main() {
 
     const web3GasPrice = await currentGasPrice();
     humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
+
+    // next action timeline
+    const timeViewMine = Object.values(humanView.mines);
+    const noBlock = timeViewMine.every((itm) => {
+      return !!itm.canCollect;
+    });
+    const nextActionAt = maxBy(timeViewMine, (v) =>
+      v.blockedTo.valueOf()
+    )?.blockedTo;
+
+    humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
+    humanView.nextActionAt = `${nextActionAt.toLocaleString()} - ${moment(
+      nextActionAt
+    ).fromNow()}`;
 
     return humanView;
   }

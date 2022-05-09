@@ -172,3 +172,16 @@ export type AdventureInfo = {
   supporterRewardLevel?: number[];
   supporterSlots?: number[];
 };
+
+export type AdventureInfoEx = Omit<
+  AdventureInfo,
+  'startTime' | 'farmerEndTime' | 'supporterEndTime'
+> & {
+  link: string;
+  canCollect?: boolean;
+  hasBigReward: boolean;
+  startTime?: string;
+  farmerEndTime?: string;
+  supporterEndTime?: string;
+  blockedTo: Date;
+};

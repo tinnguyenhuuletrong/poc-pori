@@ -8,6 +8,7 @@ import {
   AdventureFinishedData,
   AdventureFortifiedData,
   AdventureInfo,
+  AdventureInfoEx,
   AdventureStartedData,
   AdventureSupported1Data,
   AdventureSupported2Data,
@@ -247,7 +248,7 @@ function defaultViewData(
   };
 }
 
-export function humanrizeAdventureInfo(advIno: AdventureInfo) {
+export function humanrizeAdventureInfo(advIno: AdventureInfo): AdventureInfoEx {
   const startTime = advIno.startTime
     ? new Date(advIno.startTime).toLocaleString()
     : undefined;
@@ -267,6 +268,10 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo) {
     canCollect = now > new Date(advIno.supporterEndTime).valueOf();
   }
 
+  const blockedTo = advIno.isFarmer
+    ? new Date(advIno.farmerEndTime)
+    : new Date(advIno.supporterEndTime as any);
+
   const link = `https://adventure.poriverse.io/missions/${advIno.mineId}`;
   const hasBigRewardFarmer =
     (advIno.farmerRewardLevel?.filter((itm) => itm >= 4).length ?? 0) > 0;
@@ -281,6 +286,7 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo) {
     startTime,
     farmerEndTime,
     supporterEndTime,
+    blockedTo,
   };
 }
 
