@@ -172,16 +172,19 @@ ${protentialTarget
       `;
 
       let keyboardActions: InlineKeyboardButton[] = [];
+      const hasPortal = canUsePortal(humanView);
 
       keyboardActions = protentialTarget.slice(0, 5).map((itm) => {
         return {
           text: `${itm.mineId} - ${itm.hasBigReward ? 1 : 0}`,
-          switch_inline_query_current_chat: `/atk ${itm.mineId}`,
+          switch_inline_query_current_chat: hasPortal
+            ? `/atk ${itm.mineId} 1`
+            : `/atk ${itm.mineId} 0`,
         };
       });
       const newMineAction: InlineKeyboardButton = {
         text: `new mine`,
-        switch_inline_query_current_chat: `/mine 0`,
+        switch_inline_query_current_chat: hasPortal ? `/mine 1` : `/mine 0`,
       };
 
       await bot.sendMessage(msg.chat.id, 'finish....');
@@ -221,6 +224,21 @@ ${protentialTarget
 
   for (const id of Memory.activeChats) {
     await bot.sendMessage(id, 'hi 👋!');
+  }
+
+  function canUsePortal(humanView: {
+    note: any;
+    // my active adventures
+    mines: Record<string, AdventureInfoEx>;
+    // protential target
+    targets: any;
+    protentialTarget: any[];
+    activeMines: number;
+    canDoNextAction: boolean;
+    nextActionAt: string;
+    gasPriceGWEI: string;
+  }) {
+    return humanView.activeMines <= 0;
   }
 
   // --------
@@ -350,7 +368,7 @@ async function cmdDoAtk({
   }
   const tmp = args.split(' ');
   const mineId = tmp[0];
-  const usePortal = !!tmp[1];
+  const usePortal = boolFromString(tmp[1]);
   if (!mineId) {
     await bot.sendMessage(
       msg.chat.id,
