@@ -106,6 +106,7 @@ async function main() {
         keyboard: [
           [{ text: '/stats' }, { text: '/wallet_reset' }, { text: '/whoami' }],
         ],
+        resize_keyboard: true,
       },
     });
   });
