@@ -11,7 +11,7 @@ COPY ["package.json", "package-lock.json*", "./"]
 
 RUN npm install --production
 
-COPY ./dist ./dist
+COPY ./dist/packages/examples/simple-tele-bot ./dist/packages/examples/simple-tele-bot
 COPY ./archived/repo ./archived/repo
 
 CMD [ "node", "./dist/packages/examples/simple-tele-bot/main.js" ]
