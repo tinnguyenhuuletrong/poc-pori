@@ -48,9 +48,15 @@ async function main() {
     path: activeEnv.environment.dbPath,
   });
 
+  const scheduler = new Repos.Services.SchedulerService();
+  await scheduler.start(realm);
+
   global.realm = realm;
   global.ctx = ctx;
   global.Repos = Repos;
+  global.Services = {
+    scheduler,
+  };
 
   const server = repl.start({
     prompt: '>',
@@ -78,12 +84,94 @@ async function main() {
     },
   });
 
+  server.defineCommand('schedule.list', {
+    help: 'List pending schedule',
+    action: async () => {
+      const jobs = await scheduler.listPendingJob(realm);
+      console.log(
+        jobs.map(({ _id, codeName, params, runAt }) => ({
+          _id,
+          runAt,
+          codeName,
+          params,
+        }))
+      );
+    },
+  });
+
+  server.defineCommand('schedule.create', {
+    help: 'create schedule',
+    action: async (args) => {
+      const tmp = args.split(' ');
+      const jobId = tmp[0];
+      const codeName = tmp[1];
+      const afterMs = parseInt(tmp[2]);
+      const data = tmp[3] ?? '';
+      if (!codeName || Number.isNaN(afterMs)) {
+        console.warn(
+          '\tUsage: schedule.create <id> <codeName> <afterMs> [data]'
+        );
+        return;
+      }
+      await scheduler.scheduleJob(realm, {
+        _id: jobId,
+        codeName,
+        params: data,
+        runAt: new Date(Date.now() + afterMs),
+      });
+
+      const jobs = await scheduler.listPendingJob(realm);
+      console.log(
+        jobs.map(({ _id, codeName, params }) => ({ _id, codeName, params }))
+      );
+    },
+  });
+
+  server.defineCommand('schedule.delete', {
+    help: 'delete schedule',
+    action: async (args) => {
+      const id = args;
+      await scheduler.deleteJob(realm, id);
+      const jobs = await scheduler.listPendingJob(realm);
+      console.log(
+        jobs.map(({ _id, codeName, params }) => ({ _id, codeName, params }))
+      );
+    },
+  });
+
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const answer = server.question('are you sure ? -> ', () => {
-        console.log('answer');
+      const usePortal = false;
+      const poriants = ['1346', '5420', '1876'];
+      const index = Adventure.randAdventureSlot(3);
+
+      const callData = ctx.contract.methods
+        .startAdventure(
+          // poriants
+          poriants,
+
+          // index
+          index,
+
+          // notPortal
+          !usePortal
+        )
+        .encodeABI();
+
+      console.log({
+        poriants,
+        index,
+        usePortal,
       });
+
+      const tx = {
+        from: ctx.walletConnectChannel.accounts[0],
+        to: getIdleGameAddressSC(env).address,
+        data: callData, // Required
+      };
+      const res = await ctx.walletConnectChannel.signTransaction(tx);
+      console.log(res);
     },
   });
 

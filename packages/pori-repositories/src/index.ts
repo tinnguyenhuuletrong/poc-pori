@@ -12,16 +12,26 @@ import {
   DataViewModel,
   DataViewRepo,
 } from './lib/idleGames/schema';
+import {
+  ScheduleJobModel,
+  SchedulerServiceSchema,
+  SchedulerRepo,
+  SchedulerService,
+} from './lib/services/scheduler';
 
 export async function openRepo(opt: ConfigurationWithoutSync) {
   const schemas = opt.schema ?? [];
   const ins = await Realm.open({
     ...opt,
-    schemaVersion: 2,
-    schema: [...schemas, ...IdleGameSchemas],
+    schemaVersion: 3,
+    schema: [...schemas, ...IdleGameSchemas, ...SchedulerServiceSchema],
   });
   return ins;
 }
+
+const Services = {
+  SchedulerService,
+};
 
 export {
   IdleGameSCMetadataDataModel,
@@ -34,4 +44,8 @@ export {
   PoriDataModel,
   DataViewModel,
   DataViewRepo,
+  ScheduleJobModel,
+  SchedulerRepo,
+  SchedulerService,
+  Services,
 };

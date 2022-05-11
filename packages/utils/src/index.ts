@@ -1,5 +1,4 @@
-import { promisify } from 'util';
 export * from './lib/axiosHelper';
 export * from './lib/typeConvertHelper';
 
-export const waitForMs = promisify(setTimeout);
+export const waitForMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
