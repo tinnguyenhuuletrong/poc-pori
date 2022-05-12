@@ -9,13 +9,19 @@ import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
 import * as os from 'os';
 import process from 'process';
-import { cmdDoAtk, cmdDoMine, cmdScheduleOpenMine } from './app/cmds';
+import {
+  cmdDoAtk,
+  cmdDoFinish,
+  cmdDoMine,
+  cmdScheduleOpenMine,
+} from './app/cmds';
 import { refreshAdventureStatsForAddress } from './app/computed';
 import { activeEnv, botMasterUid, env, playerAddress } from './app/config';
 import { withErrorWrapper } from './app/utils';
 import {
   addWorkerTaskForMineEndNotify,
   registerWorkerNotify,
+  registerWorkerStartNewMine,
 } from './app/worker';
 
 interface BotMemoryStructure {
@@ -54,6 +60,7 @@ async function main() {
 
   // worker register
   registerWorkerNotify({ ctx, realm, scheduler, bot });
+  registerWorkerStartNewMine({ ctx, realm, scheduler, bot });
 
   // --------------------
   // cmds begin
@@ -98,6 +105,8 @@ async function main() {
         keyboard: [
           [{ text: '/stats' }, { text: '/wallet_reset' }],
           [{ text: '/sch_list' }, { text: '/whoami' }],
+          [{ text: '/finish mineId' }],
+          [{ text: '/sch_mine usePortal gasPrice' }],
         ],
         resize_keyboard: true,
       },
@@ -212,11 +221,21 @@ ${protentialTarget
     });
   });
 
-  bot.onText(/\/sch_mine/, async (msg, match) => {
+  bot.onText(/\/finish (.+)/, async (msg, match) => {
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
-      const args = '0';
+
+      const args = match[1];
+      await cmdDoFinish({ ctx, realm, bot, msg, args });
+    });
+  });
+
+  bot.onText(/\/sch_mine (.*)/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+      const args = match[1];
       await cmdScheduleOpenMine({ ctx, realm, scheduler, bot, msg, args });
     });
   });

@@ -14,6 +14,7 @@ import {
 } from './config';
 import {
   boolFromString,
+  currentGasPrice,
   sendRequestForWalletConnectTx,
   sendSignRequestForWalletConnectTx,
 } from './utils';
@@ -68,6 +69,59 @@ export async function cmdDoMine({
     poriants,
     index,
     usePortal,
+  });
+
+  const tx = {
+    from: ctx.walletConnectChannel.accounts[0],
+    to: getIdleGameAddressSC(env).address,
+    data: callData, // Required
+  };
+
+  await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
+
+  // Sign transaction
+  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+  if (txHash)
+    await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
+  else await bot.sendMessage(msg.chat.id, `Ố ồ..`);
+}
+
+//------------------------------------------------------------------------//
+//
+//------------------------------------------------------------------------//
+
+export async function cmdDoFinish({
+  ctx,
+  realm,
+  bot,
+  msg,
+  args,
+}: {
+  ctx: Context;
+  realm: Realm;
+  args: string;
+  bot: TelegramBot;
+  msg: TelegramBot.Message;
+}) {
+  if (!ctx.walletConnectChannel?.connected) {
+    console.warn('wallet channel not ready. Please run .wallet.start first');
+    return;
+  }
+
+  const tmp = args.split(' ');
+  const mineId = tmp[0];
+
+  await bot.sendMessage(msg.chat.id, `roger that!. Finish mine: ${mineId}`);
+
+  const callData = ctx.contract.methods
+    .finish(
+      // poriants
+      mineId
+    )
+    .encodeABI();
+
+  console.log({
+    mineId,
   });
 
   const tx = {
@@ -209,6 +263,7 @@ export async function cmdScheduleOpenMine({
   }
   const tmp = args.split(' ');
   const usePortal = boolFromString(tmp[0]);
+  const gasPrice = tmp[1] ? parseInt(tmp[1]) : await currentGasPrice({ ctx });
 
   const addvStats = await refreshAdventureStatsForAddress(
     { realm, ctx },
@@ -216,7 +271,7 @@ export async function cmdScheduleOpenMine({
   );
 
   const now = new Date();
-  const nextActionTime = new Date(addvStats.nextActionAt);
+  const nextActionTime = new Date(addvStats.nextActionAtDate);
 
   if (now.valueOf() > nextActionTime.valueOf()) {
     await bot.sendMessage(
@@ -231,9 +286,20 @@ export async function cmdScheduleOpenMine({
   const index = Adventure.randAdventureSlot(3);
   const scheduleId = schedulerNewMineId();
 
+  const nonce =
+    (await ctx.web3.eth.getTransactionCount(
+      ctx.walletConnectChannel.accounts[0]
+    )) + 1;
+
   await bot.sendMessage(
     msg.chat.id,
-    `roger that!. Schedule to start new mine. schedulerId:${scheduleId} usePortal:${usePortal} at ${scheduleAt.toLocaleString()}`
+    `roger that!. Schedule to start new mine. 
+    schedulerId:${scheduleId} 
+    usePortal:*${usePortal}* 
+    at: ${scheduleAt.toLocaleString()}
+    gas: ${gasPrice}
+    nonce: ${nonce}
+    `
   );
 
   const callData = ctx.contract.methods
@@ -255,19 +321,22 @@ export async function cmdScheduleOpenMine({
     usePortal,
   });
 
-  const tx = {
+  const tx: ITxData = {
     from: ctx.walletConnectChannel.accounts[0],
     to: getIdleGameAddressSC(env).address,
     data: callData, // Required
+    nonce: nonce,
+    gasPrice: gasPrice,
   };
 
   await bot.sendMessage(msg.chat.id, `Sir! please sign tx in trust wallet`);
 
   const signedTx = await sendSignRequestForWalletConnectTx({ ctx }, tx);
+  if (!signedTx) await bot.sendMessage(msg.chat.id, `Ó Ò`);
   await scheduler.scheduleJob(realm, {
     codeName: schedulerNewMineType,
     runAt: scheduleAt,
-    params: signedTx,
+    params: JSON.stringify({ signedTx: signedTx, chatId: msg.chat.id }),
     _id: scheduleId,
   });
 

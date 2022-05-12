@@ -30,13 +30,10 @@ export function sendSignRequestForWalletConnectTx(
     .then((result) => {
       return result;
     })
-    .then((txInfo) => {
-      console.log(txInfo);
-      return txInfo;
-    })
     .catch((error) => {
       // Error returned when rejected
       console.error(error);
+      return null;
     });
 }
 
