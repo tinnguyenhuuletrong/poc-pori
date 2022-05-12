@@ -109,7 +109,10 @@ export async function cmdDoFinish({
   }
 
   const tmp = args.split(' ');
-  const mineId = tmp[0];
+  const mineId = parseInt(tmp[0]);
+  if (Number.isNaN(mineId)) {
+    return await bot.sendMessage(msg.chat.id, `Usage: /finish <mineId>`);
+  }
 
   await bot.sendMessage(msg.chat.id, `roger that!. Finish mine: ${mineId}`);
 
@@ -261,9 +264,24 @@ export async function cmdScheduleOpenMine({
     console.warn('wallet channel not ready. Please run .wallet.start first');
     return;
   }
+  const currentGasWei = await currentGasPrice({ ctx });
+
   const tmp = args.split(' ');
+  if (tmp.length !== 2) {
+    return await bot.sendMessage(
+      msg.chat.id,
+      `Usage: /sch_mine <usePortal> [gasPriceGwei]`
+    );
+  }
+
   const usePortal = boolFromString(tmp[0]);
-  const gasPrice = tmp[1] ? parseInt(tmp[1]) : await currentGasPrice({ ctx });
+  let gasPriceInWei: string | number = parseInt(tmp[1]);
+
+  if (Number.isNaN(gasPriceInWei)) {
+    gasPriceInWei = currentGasWei;
+  } else {
+    gasPriceInWei = ctx.web3.utils.toWei(gasPriceInWei.toString(), 'gwei');
+  }
 
   const addvStats = await refreshAdventureStatsForAddress(
     { realm, ctx },
@@ -286,18 +304,17 @@ export async function cmdScheduleOpenMine({
   const index = Adventure.randAdventureSlot(3);
   const scheduleId = schedulerNewMineId();
 
-  const nonce =
-    (await ctx.web3.eth.getTransactionCount(
-      ctx.walletConnectChannel.accounts[0]
-    )) + 1;
+  const nonce = await ctx.web3.eth.getTransactionCount(
+    ctx.walletConnectChannel.accounts[0]
+  );
 
   await bot.sendMessage(
     msg.chat.id,
     `roger that!. Schedule to start new mine. 
     schedulerId:${scheduleId} 
-    usePortal:*${usePortal}* 
+    usePortal:**${usePortal}**
     at: ${scheduleAt.toLocaleString()}
-    gas: ${gasPrice}
+    gas: **${gasPriceInWei}**
     nonce: ${nonce}
     `
   );
@@ -326,13 +343,14 @@ export async function cmdScheduleOpenMine({
     to: getIdleGameAddressSC(env).address,
     data: callData, // Required
     nonce: nonce,
-    gasPrice: gasPrice,
+    gasPrice: gasPriceInWei,
   };
 
   await bot.sendMessage(msg.chat.id, `Sir! please sign tx in trust wallet`);
 
   const signedTx = await sendSignRequestForWalletConnectTx({ ctx }, tx);
-  if (!signedTx) await bot.sendMessage(msg.chat.id, `Ó Ò`);
+  if (!signedTx) return await bot.sendMessage(msg.chat.id, `Ó Ò`);
+
   await scheduler.scheduleJob(realm, {
     codeName: schedulerNewMineType,
     runAt: scheduleAt,

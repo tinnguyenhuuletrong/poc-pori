@@ -105,8 +105,8 @@ async function main() {
         keyboard: [
           [{ text: '/stats' }, { text: '/wallet_reset' }],
           [{ text: '/sch_list' }, { text: '/whoami' }],
-          [{ text: '/finish mineId' }],
-          [{ text: '/sch_mine usePortal gasPrice' }],
+          [{ text: '/finish' }],
+          [{ text: '/sch_mine' }],
         ],
         resize_keyboard: true,
       },
