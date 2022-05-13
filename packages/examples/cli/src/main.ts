@@ -7,12 +7,16 @@ import {
   DataView,
   Adventure,
   addWalletConnectToContext,
+  getKyberPoolRIGYPrice,
+  getKyberPoolRIKENPrice,
+  queryMarketInfo,
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfo,
   AdventureInfoEx,
   ENV,
   getIdleGameAddressSC,
+  TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
@@ -194,6 +198,47 @@ async function main() {
       console.log(ctx.web3.utils.fromWei(web3GasPrice, 'gwei'), 'gwei');
     },
   });
+
+  server.defineCommand('price', {
+    help: 'Kyberswap token price',
+    action: async () => {
+      const rigyPoolInfo = await getKyberPoolRIGYPrice({ ctx });
+      const rikenPoolInfo = await getKyberPoolRIKENPrice({ ctx });
+      console.log({
+        ...rigyPoolInfo,
+        ...rikenPoolInfo,
+      });
+    },
+  });
+
+  server.defineCommand('market', {
+    help: 'marketplace',
+    action: async () => {
+      const sellingItems = await queryMarketInfo({ ctx });
+
+      const formatedData = sellingItems.slice(0, 5).map((itm) => {
+        const {
+          tokenId,
+          price,
+          helpPower,
+          minePower,
+          numOfBreeds,
+          maxOfBreeds,
+        } = itm;
+        return {
+          link: `https://marketplace.poriverse.io/pori/${tokenId}`,
+          price: (BigInt(price) / TEN_POWER_10_BN).toString() + ' RIGY',
+          minePower,
+          helpPower,
+          breed: `${numOfBreeds} / ${maxOfBreeds}`,
+        };
+      });
+
+      console.log(formatedData);
+    },
+  });
+
+  queryMarketInfo;
 
   server.defineCommand('stats', {
     help: 'Show my adv',

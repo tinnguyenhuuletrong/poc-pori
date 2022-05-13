@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import type { ITxData } from '@walletconnect/types';
 import { Context } from '@pori-and-friends/pori-metadata';
+import { waitForMs } from '@pori-and-friends/utils';
 
 export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
@@ -56,4 +57,36 @@ export async function withErrorWrapper(
 export function boolFromString(inp) {
   if (inp === '1' || inp === 'true') return true;
   return false;
+}
+
+const TIME_4_HOUR_MS = 4 * 60 * 60 * 1000;
+export async function monitorTx({
+  ctx,
+  txHash,
+  timeoutMs = TIME_4_HOUR_MS,
+}: {
+  ctx: Context;
+  txHash: string;
+  timeoutMs?: number;
+}) {
+  let shouldRun = true;
+  const sleepTimeoutMs = 30 * 1000; // 30 sec
+
+  const now = Date.now();
+  const endAt = timeoutMs + now;
+  while (shouldRun) {
+    const info = await ctx.web3.eth.getTransactionReceipt(txHash);
+
+    // not found receipt -> wrong tx
+    if (!info) return false;
+
+    // tx mined
+    if (info.blockNumber && info.status) {
+      return true;
+    }
+
+    // continue waiting
+    await waitForMs(sleepTimeoutMs);
+    shouldRun = Date.now() > endAt;
+  }
 }

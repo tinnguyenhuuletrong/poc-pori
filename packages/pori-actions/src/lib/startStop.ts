@@ -5,6 +5,7 @@ import {
   getWeb3NodeUri,
   getWeb3NodeUriHttp,
 } from '@pori-and-friends/pori-metadata';
+import { EventEmitter } from 'stream';
 import Web3 from 'web3';
 
 export async function init(env: ENV): Promise<Context> {
@@ -35,6 +36,7 @@ export async function init(env: ENV): Promise<Context> {
     web3,
     provider,
     env,
+    emiter: new EventEmitter(),
   };
 
   return ctx;

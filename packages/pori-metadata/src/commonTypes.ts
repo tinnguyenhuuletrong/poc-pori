@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import type { Contract } from 'web3-eth-contract';
 import type WalletConnect from '@walletconnect/client';
 import type { WebsocketProvider, HttpProvider } from 'web3-core';
+import { EventEmitter } from 'stream';
 
 export enum ENV {
   Staging = 'STAG',
@@ -14,6 +15,7 @@ export type Context = {
   provider: WebsocketProvider | HttpProvider;
   walletConnectChannel?: WalletConnect;
   env: ENV;
+  emiter?: EventEmitter;
 };
 
 export type DnaBodyPartInfo = {

@@ -11,6 +11,7 @@
   },
   "private": true,
   "dependencies": {
+    "@dynamic-amm/sdk": "^3.0.33",
     "@walletconnect/client": "^1.7.8",
     "@walletconnect/qrcode-modal": "^1.7.8",
     "axios": "^0.26.1",

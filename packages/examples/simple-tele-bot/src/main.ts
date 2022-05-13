@@ -1,8 +1,15 @@
 import {
   addWalletConnectToContext,
+  getKyberPoolRIGYPrice,
+  getKyberPoolRIKENPrice,
   init,
+  queryMarketInfo,
 } from '@pori-and-friends/pori-actions';
-import { AdventureInfoEx, ENV } from '@pori-and-friends/pori-metadata';
+import {
+  AdventureInfoEx,
+  ENV,
+  TEN_POWER_10_BN,
+} from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import moment from 'moment';
@@ -105,8 +112,8 @@ async function main() {
         keyboard: [
           [{ text: '/stats' }, { text: '/wallet_reset' }],
           [{ text: '/sch_list' }, { text: '/whoami' }],
-          [{ text: '/finish' }],
-          [{ text: '/sch_mine' }],
+          [{ text: '/finish' }, { text: '/price' }],
+          [{ text: '/sch_mine' }, { text: '/market_list' }],
         ],
         resize_keyboard: true,
       },
@@ -280,6 +287,75 @@ ${protentialTarget
       await scheduler.deleteJob(realm, jobId);
 
       bot.sendMessage(msg.chat.id, `jobId ${jobId} deleted`);
+    });
+  });
+
+  bot.onText(/\/price/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      const rigyPoolInfo = await getKyberPoolRIGYPrice({ ctx });
+      const rikenPoolInfo = await getKyberPoolRIKENPrice({ ctx });
+
+      bot.sendMessage(
+        msg.chat.id,
+        `<code>${JSON.stringify(
+          {
+            ...rigyPoolInfo,
+            ...rikenPoolInfo,
+          },
+          null,
+          2
+        )}</code>`,
+        { parse_mode: 'HTML' }
+      );
+    });
+  });
+
+  bot.onText(/\/market_list/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+      const sellingItems = await queryMarketInfo({ ctx });
+
+      const formatedData = sellingItems.slice(0, 5).map((itm) => {
+        const {
+          tokenId,
+          price,
+          helpPower,
+          minePower,
+          numOfBreeds,
+          maxOfBreeds,
+        } = itm;
+        return {
+          tokenId,
+          link: `https://marketplace.poriverse.io/pori/${tokenId}`,
+          price: (BigInt(price) / TEN_POWER_10_BN).toString() + ' RIGY',
+          minePower,
+          helpPower,
+          breed: `${numOfBreeds} / ${maxOfBreeds}`,
+        };
+      });
+
+      const resp = `
+<b>Top 5:</b>
+${formatedData
+  .map((itm) => {
+    const { link, price, minePower, helpPower, breed, tokenId } = itm;
+
+    const appLink = `https://link.trustwallet.com/open_url?url=${link}&coin_id=966`;
+    return `  link: <a href="${appLink}">${tokenId}</a>
+      - price: ${price}
+      - minePower: ${minePower}
+      - helpPower: ${helpPower}
+      - breed: ${breed}
+    `;
+  })
+  .join('\n')}
+`;
+
+      await bot.sendMessage(msg.chat.id, resp, { parse_mode: 'HTML' });
     });
   });
 
