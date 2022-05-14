@@ -3,6 +3,7 @@ import * as stagConfig from './lib/sta-poriverse_info';
 import * as prodConfig from './lib/prod-poriverse_info';
 
 export const TEN_POWER_10_BN = BigInt(10 ** 18);
+export const TURN_DURATION_SEC = 1800;
 
 export function getWeb3NodeUri(env: ENV) {
   const key = `NODE_URI_${env}`.toUpperCase();
@@ -64,6 +65,19 @@ export function getIdleGameAddressSC(env: ENV) {
   return {
     abi: prodConfig.ABI_IDLE,
     address: prodConfig.gameInfo.m.app.contractAddress.idleGameAddress,
+  };
+}
+
+export function calculateMineTurnTime(startTime: Date) {
+  const farmerAtkStartAt = new Date(
+    startTime.valueOf() + TURN_DURATION_SEC * 1000
+  );
+  const supporterAtkStartAt = new Date(
+    startTime.valueOf() + TURN_DURATION_SEC * 2 * 1000
+  );
+  return {
+    farmerAtkStartAt,
+    supporterAtkStartAt,
   };
 }
 

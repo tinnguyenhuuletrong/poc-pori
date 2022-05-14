@@ -5,7 +5,7 @@ import {
   AdventureInfo,
   Context,
 } from '@pori-and-friends/pori-metadata';
-import { maxBy } from 'lodash';
+import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
 import { activeEnv, playerAddress } from './config';
 import { currentGasPrice } from './utils';
@@ -27,7 +27,9 @@ export type AdventureStatsComputed = {
   activeMines: number;
   canDoNextAction: boolean;
   nextActionAt: string;
+  nextAtkAt: string;
   nextActionAtDate: Date;
+  nextAtkAtDate: Date;
   gasPriceGWEI: string;
 };
 
@@ -62,6 +64,8 @@ export async function refreshAdventureStatsForAddress(
     canDoNextAction: false,
     nextActionAt: '',
     nextActionAtDate: new Date(),
+    nextAtkAt: '',
+    nextAtkAtDate: new Date(),
     gasPriceGWEI: '',
   };
 
@@ -110,6 +114,7 @@ export async function refreshAdventureStatsForAddress(
   const nextActionAt = maxBy(timeViewMine, (v) =>
     v.blockedTo.valueOf()
   )?.blockedTo;
+  const nextAtkAt = minBy(timeViewMine, (v) => v.atkAt.valueOf())?.atkAt;
 
   humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
   if (nextActionAt) {
@@ -117,7 +122,12 @@ export async function refreshAdventureStatsForAddress(
       nextActionAt
     ).fromNow()}`;
   }
-  humanView.nextActionAtDate = nextActionAt;
+  if (nextAtkAt) {
+    humanView.nextAtkAt = `${nextAtkAt.toLocaleString()} - ${moment(
+      nextAtkAt
+    ).fromNow()}`;
+  }
+  humanView.nextAtkAtDate = nextAtkAt;
 
   return humanView;
 }

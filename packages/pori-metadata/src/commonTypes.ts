@@ -185,5 +185,8 @@ export type AdventureInfoEx = Omit<
   startTime?: string;
   farmerEndTime?: string;
   supporterEndTime?: string;
+  farmerAtkTime?: string;
+  supporterAtkTime?: string;
   blockedTo: Date;
+  atkAt: Date;
 };

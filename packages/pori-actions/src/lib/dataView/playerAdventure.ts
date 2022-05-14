@@ -12,6 +12,7 @@ import {
   AdventureStartedData,
   AdventureSupported1Data,
   AdventureSupported2Data,
+  calculateMineTurnTime,
   EIdleGameSCEventType,
 } from '@pori-and-friends/pori-metadata';
 
@@ -278,6 +279,14 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo): AdventureInfoEx {
   const hasBigRewardSupporter =
     (advIno.supporterRewardLevel?.filter((itm) => itm >= 4).length ?? 0) > 0;
 
+  const turnTime: any = {};
+  const { farmerAtkStartAt, supporterAtkStartAt } = calculateMineTurnTime(
+    new Date(advIno.startTime || '')
+  );
+
+  turnTime.farmerAtkTime = farmerAtkStartAt.toLocaleString();
+  turnTime.supporterAtkTime = supporterAtkStartAt.toLocaleString();
+
   return {
     link,
     canCollect,
@@ -286,6 +295,8 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo): AdventureInfoEx {
     startTime,
     farmerEndTime,
     supporterEndTime,
+    ...turnTime,
+    atkAt: advIno.isFarmer ? farmerAtkStartAt : supporterAtkStartAt,
     blockedTo,
   };
 }

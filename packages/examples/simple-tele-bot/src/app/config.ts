@@ -14,5 +14,9 @@ export const schedulerNewMineType = 'submit_new_mine_action';
 
 export const schedulerNotifyMineFinishId = (mineId) =>
   `schedule_mine_finish_${mineId}`;
-export const schedulerNotifyMineFinishIdType =
+
+export const schedulerNotifyMineNotifyIdType =
   'schedule_mine_finish_notify_action';
+
+export const schedulerNotifyMineAtkId = (mineId) =>
+  `schedule_mine_atk_${mineId}`;

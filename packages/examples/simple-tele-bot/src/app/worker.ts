@@ -3,8 +3,9 @@ import TelegramBot from 'node-telegram-bot-api';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import {
   schedulerNewMineType,
+  schedulerNotifyMineAtkId,
   schedulerNotifyMineFinishId,
-  schedulerNotifyMineFinishIdType,
+  schedulerNotifyMineNotifyIdType,
 } from './config';
 
 export function registerWorkerNotify({
@@ -28,7 +29,7 @@ export function registerWorkerNotify({
     await bot.sendMessage(chatId, msgData);
   };
 
-  scheduler.addHandler(schedulerNotifyMineFinishIdType, doSendNotify);
+  scheduler.addHandler(schedulerNotifyMineNotifyIdType, doSendNotify);
 }
 
 export async function addWorkerTaskForMineEndNotify({
@@ -62,10 +63,48 @@ export async function addWorkerTaskForMineEndNotify({
 
   // Register new job
   await scheduler.scheduleJob(realm, {
-    codeName: schedulerNotifyMineFinishIdType,
+    codeName: schedulerNotifyMineNotifyIdType,
     runAt: endAt,
     params: JSON.stringify({ chatId, msgData: pnMessage }),
     _id: mineEndSchedulerId,
+  });
+}
+
+export async function addWorkerTaskForMineAtkNotify({
+  ctx,
+  realm,
+  scheduler,
+  chatId,
+  mineId,
+  endAt,
+  pnMessage = 'ready for new action',
+}: {
+  ctx: Context;
+  realm: Realm;
+  scheduler: Repos.SchedulerService;
+  chatId: number;
+  mineId: number;
+  endAt: Date;
+  pnMessage: string;
+}) {
+  const mineAtkSchedulerId = schedulerNotifyMineAtkId(mineId);
+  const jobIns = await scheduler.getJobById(realm, mineAtkSchedulerId);
+
+  // already have it
+  if (
+    jobIns &&
+    !jobIns.hasFinish &&
+    jobIns.runAt.valueOf() === endAt.valueOf()
+  ) {
+    return;
+  }
+
+  // Register new job
+  await scheduler.scheduleJob(realm, {
+    codeName: schedulerNotifyMineNotifyIdType,
+    runAt: endAt,
+    params: JSON.stringify({ chatId, msgData: pnMessage }),
+    _id: mineAtkSchedulerId,
   });
 }
 

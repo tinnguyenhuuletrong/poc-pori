@@ -26,6 +26,7 @@ import { refreshAdventureStatsForAddress } from './app/computed';
 import { activeEnv, botMasterUid, env, playerAddress } from './app/config';
 import { withErrorWrapper } from './app/utils';
 import {
+  addWorkerTaskForMineAtkNotify,
   addWorkerTaskForMineEndNotify,
   registerWorkerNotify,
   registerWorkerStartNewMine,
@@ -156,6 +157,7 @@ async function main() {
         return `  * <a href="${appLink}">${inp.mineId}</a>
           - supporterAddr: ${inp.supporterAddress}
           - blockTo: ${inp.blockedTo.toLocaleString()}
+          - supportTime: ${inp.atkAt.toLocaleString()}
           - hasBigReward: ${inp.hasBigReward}
           - isFarmer: ${inp.isFarmer}
           - farmerRewardLevel: ${inp.farmerRewardLevel?.join(',')}
@@ -176,6 +178,7 @@ ${protentialTarget
 <b>Summary:</b>
   - <i>canDoNextAction: </i> <b>${humanView.canDoNextAction}</b>
   - <i>activeMine: </i> ${humanView.activeMines}
+  - <i>nextSupportAt: </i> ${humanView.nextAtkAt}
   - <i>nextActionAt: </i> ${humanView.nextActionAt}
   - <i>gasPriceGWEI: </i> ${humanView.gasPriceGWEI}
       `;
@@ -215,6 +218,21 @@ ${protentialTarget
       captureChatId(msg.chat.id);
       const args = match[1];
       await cmdDoMine({ ctx, realm, bot, msg, args });
+    });
+  });
+
+  bot.onText(/\/mine_atk (.*)/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      // args: mineId
+      // const args = match[1];
+      // TODO:
+      //      supporter: support2(mineId, porian, index)
+      //      farmer: support1(mineId, porian, index)
+
+      // await cmdDoMine({ ctx, realm, bot, msg, args });
     });
   });
 
@@ -373,6 +391,7 @@ ${formatedData
     mines: AdventureInfoEx[],
     msg: TelegramBot.Message
   ) {
+    const now = Date.now();
     for (const itm of mines) {
       // only register for unfinished mine
       if (!itm.canCollect)
@@ -385,6 +404,19 @@ ${formatedData
           endAt: itm.blockedTo,
           pnMessage: `mine ${itm.mineId} end`,
         });
+
+      // register for can attak target
+      if (itm.atkAt.valueOf() > now) {
+        addWorkerTaskForMineAtkNotify({
+          ctx,
+          realm,
+          scheduler,
+          chatId: msg.chat.id,
+          mineId: itm.mineId,
+          endAt: itm.blockedTo,
+          pnMessage: `mine ${itm.mineId} can atk`,
+        });
+      }
     }
   }
 
