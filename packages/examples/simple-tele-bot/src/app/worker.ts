@@ -24,9 +24,10 @@ export function registerWorkerNotify({
     const paramObj = JSON.parse(params);
     const chatId = paramObj?.chatId;
     const msgData = paramObj?.msgData;
+    const extra = (paramObj?.extra || {}) as TelegramBot.SendMessageOptions;
 
     if (!(chatId && msgData)) return;
-    await bot.sendMessage(chatId, msgData);
+    await bot.sendMessage(chatId, msgData, extra);
   };
 
   scheduler.addHandler(schedulerNotifyMineNotifyIdType, doSendNotify);
@@ -40,6 +41,7 @@ export async function addWorkerTaskForMineEndNotify({
   mineId,
   endAt,
   pnMessage = 'ready for new action',
+  extra = {},
 }: {
   ctx: Context;
   realm: Realm;
@@ -48,6 +50,7 @@ export async function addWorkerTaskForMineEndNotify({
   mineId: number;
   endAt: Date;
   pnMessage: string;
+  extra: TelegramBot.SendMessageOptions;
 }) {
   const mineEndSchedulerId = schedulerNotifyMineFinishId(mineId);
   const jobIns = await scheduler.getJobById(realm, mineEndSchedulerId);
@@ -65,7 +68,7 @@ export async function addWorkerTaskForMineEndNotify({
   await scheduler.scheduleJob(realm, {
     codeName: schedulerNotifyMineNotifyIdType,
     runAt: endAt,
-    params: JSON.stringify({ chatId, msgData: pnMessage }),
+    params: JSON.stringify({ chatId, msgData: pnMessage, extra }),
     _id: mineEndSchedulerId,
   });
 }
@@ -78,6 +81,7 @@ export async function addWorkerTaskForMineAtkNotify({
   mineId,
   endAt,
   pnMessage = 'ready for new action',
+  extra = {},
 }: {
   ctx: Context;
   realm: Realm;
@@ -86,6 +90,7 @@ export async function addWorkerTaskForMineAtkNotify({
   mineId: number;
   endAt: Date;
   pnMessage: string;
+  extra: TelegramBot.SendMessageOptions;
 }) {
   const mineAtkSchedulerId = schedulerNotifyMineAtkId(mineId);
   const jobIns = await scheduler.getJobById(realm, mineAtkSchedulerId);
@@ -103,7 +108,7 @@ export async function addWorkerTaskForMineAtkNotify({
   await scheduler.scheduleJob(realm, {
     codeName: schedulerNotifyMineNotifyIdType,
     runAt: endAt,
-    params: JSON.stringify({ chatId, msgData: pnMessage }),
+    params: JSON.stringify({ chatId, msgData: pnMessage, extra }),
     _id: mineAtkSchedulerId,
   });
 }

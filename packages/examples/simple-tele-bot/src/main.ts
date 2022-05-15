@@ -3,6 +3,7 @@ import {
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   init,
+  queryBinancePrice,
   queryMarketInfo,
 } from '@pori-and-friends/pori-actions';
 import {
@@ -232,6 +233,11 @@ ${protentialTarget
       //      supporter: support2(mineId, porian, index)
       //      farmer: support1(mineId, porian, index)
 
+      // IF has bigReward (level = 4 at index i)
+      //    Support this index
+      // Else
+      //    Random remaining slots
+
       // await cmdDoMine({ ctx, realm, bot, msg, args });
     });
   });
@@ -315,13 +321,16 @@ ${protentialTarget
 
       const rigyPoolInfo = await getKyberPoolRIGYPrice({ ctx });
       const rikenPoolInfo = await getKyberPoolRIKENPrice({ ctx });
+      const lunaBusd = await queryBinancePrice({ ctx, pair: 'LUNABUSD' });
 
       bot.sendMessage(
         msg.chat.id,
-        `<code>${JSON.stringify(
+        `#price
+        <code>${JSON.stringify(
           {
             ...rigyPoolInfo,
             ...rikenPoolInfo,
+            'LUNA->BUSD': lunaBusd.price,
           },
           null,
           2
@@ -403,6 +412,11 @@ ${formatedData
           mineId: itm.mineId,
           endAt: itm.blockedTo,
           pnMessage: `mine ${itm.mineId} end`,
+          extra: {
+            reply_markup: {
+              inline_keyboard: [[{ text: `/finish ${itm.mineId}` }]],
+            },
+          },
         });
 
       // register for can attak target
@@ -413,8 +427,9 @@ ${formatedData
           scheduler,
           chatId: msg.chat.id,
           mineId: itm.mineId,
-          endAt: itm.blockedTo,
+          endAt: itm.atkAt,
           pnMessage: `mine ${itm.mineId} can atk`,
+          extra: {},
         });
       }
     }

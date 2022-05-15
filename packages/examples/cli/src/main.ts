@@ -10,6 +10,7 @@ import {
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   queryMarketInfo,
+  queryBinancePrice,
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfo,
@@ -22,7 +23,7 @@ import * as Repos from '@pori-and-friends/pori-repositories';
 import repl from 'repl';
 import type { ITxData } from '@walletconnect/types';
 import { AddressInfo } from 'net';
-import { max, maxBy } from 'lodash';
+import { max, maxBy, minBy } from 'lodash';
 import moment from 'moment';
 
 const env = ENV.Prod;
@@ -204,9 +205,11 @@ async function main() {
     action: async () => {
       const rigyPoolInfo = await getKyberPoolRIGYPrice({ ctx });
       const rikenPoolInfo = await getKyberPoolRIKENPrice({ ctx });
+      const lunaBusd = await queryBinancePrice({ ctx, pair: 'LUNABUSD' });
       console.log({
         ...rigyPoolInfo,
         ...rikenPoolInfo,
+        'LUNA->BUSD': lunaBusd.price,
       });
     },
   });
@@ -435,6 +438,9 @@ async function main() {
       activeMines: 0,
       canDoNextAction: false,
       nextActionAt: '',
+      nextActionAtDate: new Date(),
+      nextAtkAt: '',
+      nextAtkAtDate: new Date(),
       gasPriceGWEI: '',
     };
 
@@ -484,12 +490,25 @@ async function main() {
       v.blockedTo.valueOf()
     )?.blockedTo;
 
+    const nextAtkAt = minBy(
+      timeViewMine.filter((itm) => itm.atkAt.valueOf() > now),
+      (v) => v.atkAt.valueOf()
+    )?.atkAt;
+
     humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
     if (nextActionAt) {
       humanView.nextActionAt = `${nextActionAt.toLocaleString()} - ${moment(
         nextActionAt
       ).fromNow()}`;
     }
+    humanView.nextActionAtDate = nextActionAt;
+
+    if (nextAtkAt) {
+      humanView.nextAtkAt = `${nextAtkAt.toLocaleString()} - ${moment(
+        nextAtkAt
+      ).fromNow()}`;
+    }
+    humanView.nextAtkAtDate = nextAtkAt;
 
     return humanView;
   }

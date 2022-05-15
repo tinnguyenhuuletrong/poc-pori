@@ -9,5 +9,6 @@ export * from './lib/startStop';
 export * from './lib/transformer/transformIdleGameEvent2Database';
 export * from './lib/wallet/walletConnect';
 export * from './lib/exchange/kyberPool';
+export * from './lib/exchange/binance';
 
 export { Input, DataView, Adventure };

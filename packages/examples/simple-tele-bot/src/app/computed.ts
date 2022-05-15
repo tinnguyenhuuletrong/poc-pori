@@ -114,7 +114,11 @@ export async function refreshAdventureStatsForAddress(
   const nextActionAt = maxBy(timeViewMine, (v) =>
     v.blockedTo.valueOf()
   )?.blockedTo;
-  const nextAtkAt = minBy(timeViewMine, (v) => v.atkAt.valueOf())?.atkAt;
+
+  const nextAtkAt = minBy(
+    timeViewMine.filter((itm) => itm.atkAt.valueOf() > now),
+    (v) => v.atkAt.valueOf()
+  )?.atkAt;
 
   humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
   if (nextActionAt) {
@@ -122,6 +126,8 @@ export async function refreshAdventureStatsForAddress(
       nextActionAt
     ).fromNow()}`;
   }
+  humanView.nextActionAtDate = nextActionAt;
+
   if (nextAtkAt) {
     humanView.nextAtkAt = `${nextAtkAt.toLocaleString()} - ${moment(
       nextAtkAt
