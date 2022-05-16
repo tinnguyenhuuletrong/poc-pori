@@ -25,6 +25,7 @@ import type { ITxData } from '@walletconnect/types';
 import { AddressInfo } from 'net';
 import { max, maxBy, minBy } from 'lodash';
 import moment from 'moment';
+import type { TransactionConfig } from 'web3-core';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
@@ -170,13 +171,22 @@ async function main() {
         usePortal,
       });
 
-      const tx = {
+      const tx: TransactionConfig = {
         from: ctx.walletConnectChannel.accounts[0],
         to: getIdleGameAddressSC(env).address,
         data: callData, // Required
+        gas: '600000',
+        nonce: 174,
       };
-      const res = await ctx.walletConnectChannel.signTransaction(tx);
+      const acc = ctx.web3.eth.accounts.privateKeyToAccount('<Key here>');
+
+      const res = await acc.signTransaction(tx);
+      // const res = await ctx.walletConnectChannel.signTransaction(tx);
       console.log(res);
+
+      const txReceipt = ctx.web3.eth.sendSignedTransaction(res.rawTransaction);
+      txReceipt.on('receipt', console.log);
+      console.log(await txReceipt);
     },
   });
 
