@@ -414,7 +414,14 @@ ${formatedData
           pnMessage: `mine ${itm.mineId} end`,
           extra: {
             reply_markup: {
-              inline_keyboard: [[{ text: `/finish ${itm.mineId}` }]],
+              inline_keyboard: [
+                [
+                  {
+                    text: `finish`,
+                    switch_inline_query_current_chat: `/finish ${itm.mineId}`,
+                  },
+                ],
+              ],
             },
           },
         });
