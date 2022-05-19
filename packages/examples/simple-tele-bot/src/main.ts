@@ -105,6 +105,17 @@ async function main() {
     });
   });
 
+  bot.onText(/\/exit/, async function (msg) {
+    if (!requireBotMaster(msg)) return;
+    captureChatId(msg.chat.id);
+
+    await bot.sendMessage(msg.chat.id, 'shutdown...', {
+      reply_markup: { remove_keyboard: true },
+    });
+
+    process.exit(0);
+  });
+
   bot.onText(/\/help/, async function (msg) {
     if (!requireBotMaster(msg)) return;
     captureChatId(msg.chat.id);

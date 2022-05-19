@@ -26,6 +26,9 @@ import { AddressInfo } from 'net';
 import { max, maxBy, minBy } from 'lodash';
 import moment from 'moment';
 import type { TransactionConfig } from 'web3-core';
+import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
+import { readFile } from 'fs/promises';
+import { createReadStream, readFileSync } from 'fs';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
@@ -48,6 +51,12 @@ async function main() {
   await addWalletConnectToContext(
     ctx,
     activeEnv.environment.walletConnectSessionStoragePath
+  );
+
+  MongoDataStore.addMongodbDataStore(
+    ctx,
+    activeEnv.environment.mongodbDataStoreUri,
+    activeEnv.environment.mongodbDataStoreSSLCer
   );
 
   const realm = await Repos.openRepo({
@@ -87,6 +96,16 @@ async function main() {
       realm.close();
       console.log('bye!');
       process.exit(0);
+    },
+  });
+
+  server.defineCommand('storage.upload', {
+    help: 'upload realm data to storage',
+    action: async () => {
+      const stream = createReadStream(activeEnv.environment.dbPath);
+      console.log('upload snapshot');
+      await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream);
+      console.log('uploaded');
     },
   });
 

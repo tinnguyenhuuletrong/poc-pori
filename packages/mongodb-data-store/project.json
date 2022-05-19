@@ -1,0 +1,31 @@
+{
+  "sourceRoot": "packages/mongodb-data-store/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/mongodb-data-store",
+        "main": "packages/mongodb-data-store/src/index.ts",
+        "tsConfig": "packages/mongodb-data-store/tsconfig.lib.json",
+        "assets": ["packages/mongodb-data-store/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/mongodb-data-store/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/mongodb-data-store"],
+      "options": {
+        "jestConfig": "packages/mongodb-data-store/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

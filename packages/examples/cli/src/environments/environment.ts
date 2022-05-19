@@ -5,6 +5,8 @@ export const environment = {
     __dirname,
     '../../../../archived/repo/stag/allEvents.stag.realm'
   ),
+  mongodbDataStoreUri: '',
+  mongodbDataStoreSSLCer: '',
   walletConnectSessionStoragePath: '',
   createdBlock: 25777543,
   production: false,

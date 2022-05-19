@@ -12,6 +12,11 @@ export const environment = {
     __dirname,
     '../../../../archived/repo/.web3session'
   ),
+  mongodbDataStoreUri: process.env.MONGODB_DATA_STORE_URI,
+  mongodbDataStoreSSLCer: path.join(
+    __dirname,
+    '../../../../archived/repo/mongodb.pem'
+  ),
   createdBlock: 27503296,
   production: true,
 };
