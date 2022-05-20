@@ -1,5 +1,12 @@
 import { Context } from '@pori-and-friends/pori-metadata';
-import { GridFSBucket, MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
+import {
+  GridFSBucket,
+  GridFSBucketReadStream,
+  GridFSFile,
+  MongoClient,
+  ObjectId,
+  ServerApiVersion,
+} from 'mongodb';
 import debug from 'debug';
 import { Stream } from 'stream';
 
@@ -29,10 +36,13 @@ export async function storeBlob(ctx: Context, key: string, dataStream: Stream) {
   const db = ctx.mongoClient.db('storage');
   const bucket = new GridFSBucket(db);
 
-  const writeStream = bucket.openUploadStreamWithId(
-    new ObjectId('628644ff444fce03a34933d6'),
-    key
-  );
+  // TODO: check max revision to keep
+  const oldFiles = await bucket.find({ filename: key }).toArray();
+  for (const it of oldFiles) {
+    await bucket.delete(it._id);
+  }
+
+  const writeStream = bucket.openUploadStream(key);
   dataStream.pipe(writeStream);
 
   return new Promise<void>((resolve, _) => {
@@ -40,4 +50,21 @@ export async function storeBlob(ctx: Context, key: string, dataStream: Stream) {
       resolve();
     });
   });
+}
+
+export async function downloadBlob(
+  ctx: Context,
+  key: string
+): Promise<[GridFSFile, GridFSBucketReadStream]> {
+  if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
+
+  const db = ctx.mongoClient.db('storage');
+  const bucket = new GridFSBucket(db);
+
+  const fileMeta = (
+    await bucket.find({ filename: key }, { sort: { uploadDate: -1 } }).toArray()
+  )[0];
+
+  const readStream = bucket.openDownloadStreamByName(key);
+  return [fileMeta, readStream];
 }

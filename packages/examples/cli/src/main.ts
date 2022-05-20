@@ -1,16 +1,15 @@
-import * as AppEnv from './environments/environment';
-import * as AppEnvProd from './environments/environment.prod';
+import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
 import {
-  init,
-  close,
-  Input,
-  DataView,
-  Adventure,
   addWalletConnectToContext,
+  Adventure,
+  close,
+  DataView,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
-  queryMarketInfo,
+  init,
+  Input,
   queryBinancePrice,
+  queryMarketInfo,
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfo,
@@ -20,15 +19,14 @@ import {
   TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
-import repl from 'repl';
 import type { ITxData } from '@walletconnect/types';
-import { AddressInfo } from 'net';
-import { max, maxBy, minBy } from 'lodash';
+import { createReadStream, createWriteStream } from 'fs';
+import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
+import repl from 'repl';
 import type { TransactionConfig } from 'web3-core';
-import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
-import { readFile } from 'fs/promises';
-import { createReadStream, readFileSync } from 'fs';
+import * as AppEnv from './environments/environment';
+import * as AppEnvProd from './environments/environment.prod';
 
 const env = ENV.Prod;
 const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
@@ -106,6 +104,31 @@ async function main() {
       console.log('upload snapshot');
       await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream);
       console.log('uploaded');
+    },
+  });
+
+  server.defineCommand('storage.download', {
+    help: 'upload realm data to storage',
+    action: async () => {
+      console.log('begin download');
+      const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
+        ctx,
+        'pori-db-realm'
+      );
+
+      const totalBytes = fileMeta.length;
+      let downloaded = 0;
+      console.log('totalBytes', totalBytes);
+      dataStream.prependListener('data', (chunk) => {
+        downloaded += chunk.length;
+        console.log('progress', downloaded / totalBytes);
+      });
+
+      dataStream
+        .pipe(createWriteStream('./tmp/snapshot.realm'))
+        .on('finish', () => {
+          console.log('finish');
+        });
     },
   });
 

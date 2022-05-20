@@ -109,11 +109,13 @@ async function main() {
     if (!requireBotMaster(msg)) return;
     captureChatId(msg.chat.id);
 
-    await bot.sendMessage(msg.chat.id, 'shutdown...', {
+    await bot.sendMessage(msg.chat.id, 'shutdown... in next 2 sec', {
       reply_markup: { remove_keyboard: true },
     });
 
-    process.exit(0);
+    setTimeout(() => {
+      process.exit(0);
+    }, 2000);
   });
 
   bot.onText(/\/help/, async function (msg) {
