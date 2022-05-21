@@ -19,6 +19,12 @@ import {
   TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
+import {
+  decryptAes,
+  encryptAes,
+  generateAesIv,
+  generateAesKey,
+} from '@pori-and-friends/utils';
 import type { ITxData } from '@walletconnect/types';
 import { createReadStream, createWriteStream } from 'fs';
 import { maxBy, minBy } from 'lodash';
@@ -184,6 +190,26 @@ async function main() {
       console.log(
         jobs.map(({ _id, codeName, params }) => ({ _id, codeName, params }))
       );
+    },
+  });
+
+  server.defineCommand('test1', {
+    help: 'test1',
+    action: async () => {
+      // const { key } = generateAesKey('123');
+      const key = Buffer.from(
+        '21d50d0fcba9e9f1ec2a6dc6b2798b238869805d8d962889132a90d91a41f3f0',
+        'hex'
+      );
+      // const iv = Buffer.from('6a8f56f2361addb2ac758b933bb04109', 'hex');
+      const iv = generateAesIv();
+      console.log(key.toString('hex'), iv.toString('hex'));
+
+      const encrypted = await encryptAes({ key, iv, data: 'hello' });
+      console.log(encrypted);
+
+      const decrypted = await decryptAes({ key, iv, encrypted });
+      console.log(decrypted);
     },
   });
 
