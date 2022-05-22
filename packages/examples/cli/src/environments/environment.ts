@@ -5,6 +5,7 @@ export const environment = {
     __dirname,
     '../../../../archived/repo/stag/allEvents.stag.realm'
   ),
+  aesKeyPath: '',
   mongodbDataStoreUri: '',
   mongodbDataStoreSSLCer: '',
   walletConnectSessionStoragePath: '',

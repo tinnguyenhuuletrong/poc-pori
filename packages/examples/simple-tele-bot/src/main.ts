@@ -12,6 +12,7 @@ import {
   TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
+import { decryptAes } from '@pori-and-friends/utils';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
@@ -89,7 +90,8 @@ async function main() {
       pid: ${process.pid}
       hostname: ${os.hostname()}
       playerAddress: ${playerAddress}
-      _v: 5
+      walletUnlock: ${Boolean(ctx.walletAcc)}
+      _v: 6
     </code>
     Have fun!
     `;
@@ -145,6 +147,46 @@ async function main() {
       ctx,
       activeEnv.environment.walletConnectSessionStoragePath
     );
+  });
+
+  bot.onText(/\/wallet_unlock (.+)/, async function (msg, match) {
+    if (!requireBotMaster(msg)) return;
+    captureChatId(msg.chat.id);
+
+    if (!existsSync(activeEnv.environment.aesKeyPath)) {
+      await bot.sendMessage(
+        msg.chat.id,
+        'key not found. Please generate a new key + rebuild docker img...'
+      );
+      return;
+    }
+    const keyObj = JSON.parse(
+      readFileSync(activeEnv.environment.aesKeyPath).toString()
+    );
+    const key = Buffer.from(keyObj.key, 'hex');
+    const iv = Buffer.from(keyObj.iv, 'hex');
+    let privKey = '';
+    try {
+      const encrypted = match[1];
+      privKey = await decryptAes({ key, iv, encrypted });
+    } catch (error) {
+      await bot.sendMessage(msg.chat.id, 'decrypt error...');
+      return;
+    }
+
+    try {
+      const acc = ctx.web3.eth.accounts.privateKeyToAccount(privKey);
+      if (acc.address !== playerAddress)
+        throw new Error('not match playerAddress...');
+
+      ctx.walletAcc = acc;
+    } catch (error) {
+      await bot.sendMessage(msg.chat.id, error.message);
+      return;
+    }
+
+    await bot.sendMessage(msg.chat.id, 'wallet unlocked..');
+    await bot.deleteMessage(msg.chat.id, msg.message_id.toString());
   });
 
   bot.onText(/\/stats/, async (msg, match) => {

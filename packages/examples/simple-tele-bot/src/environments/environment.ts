@@ -7,6 +7,7 @@ export const environment = {
   ),
   walletConnectSessionStoragePath: '',
   botMemoryPath: path.join(__dirname, '../../../../archived/repo/.botMem'),
+  aesKeyPath: '',
   createdBlock: 25777543,
   production: false,
 };

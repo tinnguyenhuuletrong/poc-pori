@@ -26,7 +26,13 @@ import {
   generateAesKey,
 } from '@pori-and-friends/utils';
 import type { ITxData } from '@walletconnect/types';
-import { createReadStream, createWriteStream } from 'fs';
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from 'fs';
 import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
 import repl from 'repl';
@@ -193,23 +199,55 @@ async function main() {
     },
   });
 
-  server.defineCommand('test1', {
-    help: 'test1',
+  server.defineCommand('genKey', {
+    help: 'gen new aes Keypair',
     action: async () => {
-      // const { key } = generateAesKey('123');
-      const key = Buffer.from(
-        '21d50d0fcba9e9f1ec2a6dc6b2798b238869805d8d962889132a90d91a41f3f0',
-        'hex'
-      );
-      // const iv = Buffer.from('6a8f56f2361addb2ac758b933bb04109', 'hex');
+      const { key, algo } = generateAesKey('123');
       const iv = generateAesIv();
       console.log(key.toString('hex'), iv.toString('hex'));
+      writeFileSync(
+        activeEnv.environment.aesKeyPath,
+        JSON.stringify({
+          key: key.toString('hex'),
+          iv: iv.toString('hex'),
+          algo,
+          genAt: new Date(),
+        })
+      );
+    },
+  });
 
-      const encrypted = await encryptAes({ key, iv, data: 'hello' });
-      console.log(encrypted);
+  server.defineCommand('encData', {
+    help: 'enc data',
+    action: async (arg) => {
+      if (!existsSync(activeEnv.environment.aesKeyPath)) {
+        console.error('key not found. need to run .genKey firse');
+        return;
+      }
+      const keyObj = JSON.parse(
+        readFileSync(activeEnv.environment.aesKeyPath).toString()
+      );
 
-      const decrypted = await decryptAes({ key, iv, encrypted });
-      console.log(decrypted);
+      const key = Buffer.from(keyObj.key, 'hex');
+      const iv = Buffer.from(keyObj.iv, 'hex');
+      console.log(`${arg} -> ${await encryptAes({ key, iv, data: arg })}`);
+    },
+  });
+
+  server.defineCommand('decData', {
+    help: 'dec data',
+    action: async (arg) => {
+      if (!existsSync(activeEnv.environment.aesKeyPath)) {
+        console.error('key not found. need to run .genKey firse');
+        return;
+      }
+      const keyObj = JSON.parse(
+        readFileSync(activeEnv.environment.aesKeyPath).toString()
+      );
+
+      const key = Buffer.from(keyObj.key, 'hex');
+      const iv = Buffer.from(keyObj.iv, 'hex');
+      console.log(`${arg} -> ${await decryptAes({ key, iv, encrypted: arg })}`);
     },
   });
 

@@ -10,6 +10,7 @@ export const environment = {
     '../../../../archived/repo/.web3session'
   ),
   botMemoryPath: path.join(__dirname, '../../../../archived/repo/.botMem'),
+  aesKeyPath: path.join(__dirname, '../../../../archived/repo/.aesKey'),
   createdBlock: 27503296,
   production: true,
 };

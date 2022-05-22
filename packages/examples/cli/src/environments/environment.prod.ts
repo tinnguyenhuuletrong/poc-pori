@@ -17,6 +17,7 @@ export const environment = {
     __dirname,
     '../../../../archived/repo/mongodb.pem'
   ),
+  aesKeyPath: path.join(__dirname, '../../../../archived/repo/.aesKey'),
   createdBlock: 27503296,
   production: true,
 };
