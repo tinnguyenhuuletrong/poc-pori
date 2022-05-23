@@ -1,4 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
+import type { TransactionConfig } from 'web3-core';
 import type { ITxData } from '@walletconnect/types';
 import { Context } from '@pori-and-friends/pori-metadata';
 import { waitForMs } from '@pori-and-friends/utils';
@@ -7,6 +8,26 @@ export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
   tx: ITxData
 ) {
+  if (ctx.walletAcc) return useAccountToSendTx(ctx, tx);
+  return useWalletConnectToSendTx(ctx, tx);
+}
+
+async function useAccountToSendTx(ctx: Context, tx: ITxData) {
+  const web3Tx: TransactionConfig = {
+    from: ctx.walletAcc.address,
+    to: tx.to,
+    data: tx.data, // Required
+    gasPrice: tx.gasPrice,
+    nonce: tx.nonce ? parseInt(tx.nonce.toString()) : undefined,
+  };
+  const signedTx = await ctx.walletAcc.signTransaction(web3Tx);
+  const txInfo = await ctx.web3.eth.sendSignedTransaction(
+    signedTx.rawTransaction
+  );
+  return txInfo.transactionHash;
+}
+
+function useWalletConnectToSendTx(ctx: Context, tx: ITxData) {
   return ctx.walletConnectChannel
     .sendTransaction(tx)
     .then((result) => {
@@ -26,6 +47,23 @@ export function sendSignRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
   tx: ITxData
 ) {
+  if (ctx.walletAcc) return useAccountToSignTx(ctx, tx);
+  return useWalletConnectToSignTx(ctx, tx);
+}
+
+async function useAccountToSignTx(ctx: Context, tx: ITxData) {
+  const web3Tx: TransactionConfig = {
+    from: ctx.walletAcc.address,
+    to: tx.to,
+    data: tx.data, // Required
+    gasPrice: tx.gasPrice,
+    nonce: tx.nonce ? parseInt(tx.nonce.toString()) : undefined,
+  };
+  const signedTx = await ctx.walletAcc.signTransaction(web3Tx);
+  return signedTx.rawTransaction;
+}
+
+function useWalletConnectToSignTx(ctx: Context, tx: ITxData) {
   return ctx.walletConnectChannel
     .signTransaction(tx)
     .then((result) => {

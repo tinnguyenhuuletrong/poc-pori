@@ -22,6 +22,7 @@ import {
   cmdDoAtk,
   cmdDoFinish,
   cmdDoMine,
+  cmdDoSupport,
   cmdScheduleOpenMine,
 } from './app/cmds';
 import { refreshAdventureStatsForAddress } from './app/computed';
@@ -277,23 +278,12 @@ ${protentialTarget
     });
   });
 
-  bot.onText(/\/mine_atk (.*)/, async (msg, match) => {
+  bot.onText(/\/support (.+)/, async (msg, match) => {
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
-
-      // args: mineId
-      // const args = match[1];
-      // TODO:
-      //      supporter: support2(mineId, porian, index)
-      //      farmer: support1(mineId, porian, index)
-
-      // IF has bigReward (level = 4 at index i)
-      //    Support this index
-      // Else
-      //    Random remaining slots
-
-      // await cmdDoMine({ ctx, realm, bot, msg, args });
+      const args = match[1];
+      await cmdDoSupport({ ctx, realm, bot, msg, args });
     });
   });
 
@@ -491,7 +481,18 @@ ${formatedData
           mineId: itm.mineId,
           endAt: itm.atkAt,
           pnMessage: `mine ${itm.mineId} can atk`,
-          extra: {},
+          extra: {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: `support`,
+                    switch_inline_query_current_chat: `/support ${itm.mineId}`,
+                  },
+                ],
+              ],
+            },
+          },
         });
       }
     }

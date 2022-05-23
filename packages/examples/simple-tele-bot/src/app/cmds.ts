@@ -2,6 +2,7 @@ import { Adventure } from '@pori-and-friends/pori-actions';
 import { Context, getIdleGameAddressSC } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import type { ITxData } from '@walletconnect/types';
+import { uniq } from 'lodash';
 import TelegramBot from 'node-telegram-bot-api';
 import { refreshAdventureStatsForAddress } from './computed';
 import {
@@ -11,6 +12,7 @@ import {
   playerAddress,
   schedulerNewMineId,
   schedulerNewMineType,
+  SUPPORT_PORI,
 } from './config';
 import {
   boolFromString,
@@ -77,7 +79,8 @@ export async function cmdDoMine({
     data: callData, // Required
   };
 
-  await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
+  if (!ctx.walletAcc)
+    await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
   const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
@@ -133,7 +136,8 @@ export async function cmdDoFinish({
     data: callData, // Required
   };
 
-  await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
+  if (!ctx.walletAcc)
+    await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
   const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
@@ -232,7 +236,8 @@ export async function cmdDoAtk({
     gasPrice: +web3GasPrice * factor,
   };
 
-  await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
+  if (!ctx.walletAcc)
+    await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
   const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
@@ -359,4 +364,111 @@ export async function cmdScheduleOpenMine({
   });
 
   await bot.sendMessage(msg.chat.id, `Schedule registered!`);
+}
+
+//------------------------------------------------------------------------//
+//
+//------------------------------------------------------------------------//
+
+// args: mineId
+// const args = match[1];
+// TODO:
+//      supporter: support2(mineId, porian, index)
+//      farmer: fortify(mineId, porian, index)
+
+// IF has bigReward (level = 4 at index i)
+//    Support this index
+// Else
+//    Random remaining slots
+
+export async function cmdDoSupport({
+  ctx,
+  realm,
+  bot,
+  msg,
+  args,
+}: {
+  ctx: Context;
+  realm: Realm;
+  args: string;
+  bot: TelegramBot;
+  msg: TelegramBot.Message;
+}) {
+  if (!ctx.walletConnectChannel?.connected) {
+    console.warn('wallet channel not ready. Please run .wallet.start first');
+    return;
+  }
+
+  const tmp = args.split(' ');
+  const mineId = tmp[0];
+  if (!mineId) {
+    await bot.sendMessage(msg.chat.id, '\tUsage: /mine_support <mineId>');
+    return;
+  }
+
+  const addvStats = await refreshAdventureStatsForAddress(
+    { realm, ctx },
+    playerAddress
+  );
+
+  const mineInfo = addvStats.mines[mineId];
+  if (!mineInfo) {
+    console.log('opps. Mine status changed');
+    await bot.sendMessage(msg.chat.id, `opps. Mine not found`);
+    return;
+  }
+  const isFarmer = mineInfo.isFarmer;
+  const activeIndexs = [
+    ...(mineInfo?.farmerSlots || []),
+    ...(mineInfo?.supporterSlots || []),
+  ];
+  const activeRewardLevels = [
+    ...(mineInfo?.farmerRewardLevel || []),
+    ...(mineInfo?.supporterRewardLevel || []),
+  ];
+
+  const bigRewardIndex = activeIndexs[activeRewardLevels.indexOf(4)];
+
+  const pori = SUPPORT_PORI;
+  const slotIndex = bigRewardIndex
+    ? bigRewardIndex
+    : Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
+
+  console.log({
+    isFarmer,
+    activeIndexs,
+    activeRewardLevels,
+    bigRewardIndex,
+    pori,
+    slotIndex,
+  });
+  await bot.sendMessage(
+    msg.chat.id,
+    `roger that!. send pori ${pori} to support mineId:${mineId} at ${slotIndex} (bigRewardIndex: ${bigRewardIndex})`
+  );
+
+  let callDataAbi = '';
+  if (isFarmer) {
+    callDataAbi = ctx.contract.methods
+      .fortify(mineId, pori, slotIndex)
+      .encodeABI();
+  } else
+    callDataAbi = ctx.contract.methods
+      .support2(mineId, pori, slotIndex)
+      .encodeABI();
+
+  const tx = {
+    from: ctx.walletConnectChannel.accounts[0],
+    to: getIdleGameAddressSC(env).address,
+    data: callDataAbi, // Required
+  };
+
+  if (!ctx.walletAcc)
+    await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
+
+  // Sign transaction
+  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+  if (txHash)
+    await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
+  else await bot.sendMessage(msg.chat.id, `Ố ồ..`);
 }
