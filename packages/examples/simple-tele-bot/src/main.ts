@@ -18,6 +18,7 @@ import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
 import * as os from 'os';
 import process from 'process';
+import { autoPlayV1 } from './app/autoPlayWorkflow';
 import {
   cmdDoAtk,
   cmdDoFinish,
@@ -304,6 +305,22 @@ ${protentialTarget
 
       const args = match[1];
       await cmdDoFinish({ ctx, realm, bot, msg, args });
+    });
+  });
+
+  bot.onText(/\/auto_play (.+)/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      const args = match[1];
+      if (!ctx.walletAcc)
+        return bot.sendMessage(
+          msg.chat.id,
+          `please call /wallet_unlock <.enveloped_key..> frist`
+        );
+
+      autoPlayV1({ ctx, realm, timeOutHours: +args, playerAddress, bot, msg });
     });
   });
 
