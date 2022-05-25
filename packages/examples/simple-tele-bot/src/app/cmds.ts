@@ -83,7 +83,9 @@ export async function cmdDoMine({
     await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
-  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx, (r) => {
+    bot.sendMessage(msg.chat.id, `on Receipt: ${r.transactionHash}`);
+  });
   if (txHash)
     await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
   else await bot.sendMessage(msg.chat.id, `Ố ồ..`);
@@ -140,7 +142,9 @@ export async function cmdDoFinish({
     await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
-  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx, (r) => {
+    bot.sendMessage(msg.chat.id, `on Receipt: ${r.transactionHash}`);
+  });
   if (txHash)
     await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
   else await bot.sendMessage(msg.chat.id, `Ố ồ..`);
@@ -240,7 +244,9 @@ export async function cmdDoAtk({
     await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
-  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx, (r) => {
+    bot.sendMessage(msg.chat.id, `on Receipt: ${r.transactionHash}`);
+  });
   if (txHash)
     await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
   else await bot.sendMessage(msg.chat.id, `Ố ồ..`);
@@ -351,7 +357,8 @@ export async function cmdScheduleOpenMine({
     gasPrice: gasPriceInWei,
   };
 
-  await bot.sendMessage(msg.chat.id, `Sir! please sign tx in trust wallet`);
+  if (!ctx.walletAcc)
+    await bot.sendMessage(msg.chat.id, `Sir! please sign tx in trust wallet`);
 
   const signedTx = await sendSignRequestForWalletConnectTx({ ctx }, tx);
   if (!signedTx) return await bot.sendMessage(msg.chat.id, `Ó Ò`);
@@ -467,7 +474,9 @@ export async function cmdDoSupport({
     await bot.sendMessage(msg.chat.id, `Sir! please accept tx in trust wallet`);
 
   // Sign transaction
-  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx);
+  const txHash = await sendRequestForWalletConnectTx({ ctx }, tx, (r) => {
+    bot.sendMessage(msg.chat.id, `on Receipt: ${r.transactionHash}`);
+  });
   if (txHash)
     await bot.sendMessage(msg.chat.id, `https://polygonscan.com/tx/${txHash}`);
   else await bot.sendMessage(msg.chat.id, `Ố ồ..`);

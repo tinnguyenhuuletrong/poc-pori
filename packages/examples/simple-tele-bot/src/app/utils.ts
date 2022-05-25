@@ -1,30 +1,41 @@
 import TelegramBot from 'node-telegram-bot-api';
-import type { TransactionConfig } from 'web3-core';
+import type { TransactionConfig, TransactionReceipt } from 'web3-core';
 import type { ITxData } from '@walletconnect/types';
 import { Context } from '@pori-and-friends/pori-metadata';
 import { waitForMs } from '@pori-and-friends/utils';
 
 export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
-  tx: ITxData
+  tx: ITxData,
+  onTxReceipt?: (TransactionReceipt) => void
 ) {
-  if (ctx.walletAcc) return useAccountToSendTx(ctx, tx);
+  if (ctx.walletAcc) return useAccountToSendTx(ctx, tx, onTxReceipt);
   return useWalletConnectToSendTx(ctx, tx);
 }
 
-async function useAccountToSendTx(ctx: Context, tx: ITxData) {
+async function useAccountToSendTx(
+  ctx: Context,
+  tx: ITxData,
+  onTxReceipt?: (TransactionReceipt) => void
+) {
+  const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
+  const defaultNonce = await ctx.web3.eth.getTransactionCount(
+    ctx.walletAcc.address
+  );
+
   const web3Tx: TransactionConfig = {
     from: ctx.walletAcc.address,
     to: tx.to,
     data: tx.data, // Required
-    gasPrice: tx.gasPrice,
-    nonce: tx.nonce ? parseInt(tx.nonce.toString()) : undefined,
+    gas: tx.gas || '600000',
+    gasPrice: tx.gasPrice || defaultWeb3GasPrice,
+    nonce: tx.nonce ? parseInt(tx.nonce.toString()) : defaultNonce,
   };
   const signedTx = await ctx.walletAcc.signTransaction(web3Tx);
-  const txInfo = await ctx.web3.eth.sendSignedTransaction(
-    signedTx.rawTransaction
-  );
-  return txInfo.transactionHash;
+
+  const txInfo = ctx.web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+  txInfo.on('receipt', (r) => onTxReceipt && onTxReceipt(r));
+  return (await txInfo).transactionHash;
 }
 
 function useWalletConnectToSendTx(ctx: Context, tx: ITxData) {
@@ -52,14 +63,23 @@ export function sendSignRequestForWalletConnectTx(
 }
 
 async function useAccountToSignTx(ctx: Context, tx: ITxData) {
+  const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
+  const defaultNonce = await ctx.web3.eth.getTransactionCount(
+    ctx.walletAcc.address
+  );
+
   const web3Tx: TransactionConfig = {
     from: ctx.walletAcc.address,
     to: tx.to,
     data: tx.data, // Required
-    gasPrice: tx.gasPrice,
-    nonce: tx.nonce ? parseInt(tx.nonce.toString()) : undefined,
+    gas: tx.gas || '600000',
+    gasPrice: tx.gasPrice || defaultWeb3GasPrice,
+    nonce: tx.nonce ? parseInt(tx.nonce.toString()) : defaultNonce,
   };
   const signedTx = await ctx.walletAcc.signTransaction(web3Tx);
+  if (signedTx.rawTransaction) {
+    return signedTx.rawTransaction.split('0x')[1];
+  }
   return signedTx.rawTransaction;
 }
 
