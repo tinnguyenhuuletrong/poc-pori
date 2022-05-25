@@ -1,6 +1,7 @@
 import * as Input from './lib/input/pullData';
 import * as DataView from './lib/dataView';
 import * as Adventure from './lib/adventure';
+import * as Workflow from './lib/workflow/workflowV1';
 
 export * from './lib/basic';
 export * from './lib/nftBodyPart';
@@ -11,4 +12,4 @@ export * from './lib/wallet/walletConnect';
 export * from './lib/exchange/kyberPool';
 export * from './lib/exchange/binance';
 
-export { Input, DataView, Adventure };
+export { Input, DataView, Adventure, Workflow };
