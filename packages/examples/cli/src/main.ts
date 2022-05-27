@@ -254,45 +254,19 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const usePortal = false;
-      const poriants = ['1346', '5420', '1876'];
-      const index = Adventure.randAdventureSlot(3);
+      const message = 'my name is ttin';
+      console.log(ctx.walletConnectChannel.accounts);
 
-      const callData = ctx.contract.methods
-        .startAdventure(
-          // poriants
-          poriants,
+      const res = await ctx.walletConnectChannel.signMessage([
+        ctx.walletConnectChannel.accounts[0],
+        ctx.web3.utils.keccak256(
+          '\x19Ethereum Signed Message:\n' + message.length + message
+        ),
+      ]);
 
-          // index
-          index,
-
-          // notPortal
-          !usePortal
-        )
-        .encodeABI();
-
-      console.log({
-        poriants,
-        index,
-        usePortal,
-      });
-
-      const tx: TransactionConfig = {
-        from: ctx.walletConnectChannel.accounts[0],
-        to: getIdleGameAddressSC(env).address,
-        data: callData, // Required
-        gas: '600000',
-        nonce: 174,
-      };
-      const acc = ctx.web3.eth.accounts.privateKeyToAccount('<Key here>');
-
-      const res = await acc.signTransaction(tx);
-      // const res = await ctx.walletConnectChannel.signTransaction(tx);
       console.log(res);
 
-      const txReceipt = ctx.web3.eth.sendSignedTransaction(res.rawTransaction);
-      txReceipt.on('receipt', console.log);
-      console.log(await txReceipt);
+      return res;
     },
   });
 

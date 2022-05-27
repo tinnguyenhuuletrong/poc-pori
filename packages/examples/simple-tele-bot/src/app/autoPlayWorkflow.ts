@@ -2,10 +2,12 @@ import { Workflow } from '@pori-and-friends/pori-actions';
 import { Context } from '@pori-and-friends/pori-metadata';
 import { waitForMs } from '@pori-and-friends/utils';
 import { isEmpty } from 'lodash';
+import moment from 'moment';
 import type TelegramBot from 'node-telegram-bot-api';
 import { cmdDoFinish, cmdDoMine, cmdDoSupport } from './cmds';
 import { refreshAdventureStatsForAddress } from './computed';
 const MICRO_DELAY_MS = 2000;
+const SAFE_GWEITH = '80';
 
 export async function autoPlayV1({
   ctx,
@@ -35,6 +37,11 @@ export async function autoPlayV1({
       state.updateState(() => {
         state.data['step'] = 'start_mine';
       });
+
+      await state.promiseWithAbort(
+        waitForGasPrice({ ctx, end, bot, msg, state })
+      );
+
       // 1. start new mine with portal
       await state.promiseWithAbort(
         cmdDoMine({ ctx, realm, bot, msg, args: '1' })
@@ -50,7 +57,11 @@ export async function autoPlayV1({
       const nextSupportAt = activeMine.atkAt;
 
       state.updateState(() => {
-        state.data['step'] = 'waiting_for_support';
+        state.data[
+          'step'
+        ] = `waiting_for_support. Wakeup at ${nextSupportAt.toLocaleString()} - ${moment(
+          nextSupportAt
+        ).fromNow()}`;
       });
       await state.promiseWithAbort(
         waitForMs(nextSupportAt.valueOf() - Date.now() + MICRO_DELAY_MS)
@@ -71,11 +82,20 @@ export async function autoPlayV1({
       activeMine = addvStats.mines[Object.keys(addvStats.mines)[0]];
 
       state.updateState(() => {
-        state.data['step'] = 'waiting_for_finish';
+        state.data[
+          'step'
+        ] = `waiting_for_finish. Wakeup at ${activeMine.blockedTo.toLocaleString()} - ${moment(
+          activeMine.blockedTo
+        ).fromNow()}`;
       });
       await state.promiseWithAbort(
         waitForMs(activeMine.blockedTo.valueOf() - Date.now() + MICRO_DELAY_MS)
       );
+
+      await state.promiseWithAbort(
+        waitForGasPrice({ ctx, end, bot, msg, state })
+      );
+
       state.updateState(() => {
         state.data['step'] = 'begin_finish';
       });
@@ -132,4 +152,43 @@ async function refreshStatus(
 
 async function takeABreak(state: Workflow.WorkflowState) {
   await state.promiseWithAbort(waitForMs(MICRO_DELAY_MS));
+}
+
+async function waitForGasPrice({
+  ctx,
+  end,
+  bot,
+  msg,
+  state,
+}: {
+  ctx: Context;
+  end: number;
+  bot: TelegramBot;
+  msg: TelegramBot.Message;
+  state: Workflow.WorkflowState;
+}) {
+  const sleepInterval = 60000;
+  const checkMsg = await bot.sendMessage(msg.chat.id, `checking gas...`);
+  while (Date.now() < end) {
+    const web3GasPrice = await ctx.web3.eth.getGasPrice();
+    const valueInGweith = ctx.web3.utils.toWei(SAFE_GWEITH, 'gwei');
+
+    if (+web3GasPrice > +valueInGweith) {
+      await bot.editMessageText(
+        `gas price higher than expected ${web3GasPrice} > ${valueInGweith}. Check again after ${sleepInterval}ms`,
+        {
+          chat_id: checkMsg.chat.id,
+          message_id: checkMsg.message_id,
+        }
+      );
+      await state.promiseWithAbort(waitForMs(sleepInterval));
+      continue;
+    }
+
+    await bot.editMessageText(`gas price ${web3GasPrice} is safe to go`, {
+      chat_id: checkMsg.chat.id,
+      message_id: checkMsg.message_id,
+    });
+    break;
+  }
 }
