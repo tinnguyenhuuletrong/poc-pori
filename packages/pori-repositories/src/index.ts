@@ -25,6 +25,7 @@ export async function openRepo(opt: ConfigurationWithoutSync) {
     ...opt,
     schemaVersion: 3,
     schema: [...schemas, ...IdleGameSchemas, ...SchedulerServiceSchema],
+    shouldCompactOnLaunch: () => true,
   });
   return ins;
 }

@@ -4,6 +4,7 @@ import {
   IdleGameSCEventRepo,
   IdleGameSCEventDataModel,
 } from '@pori-and-friends/pori-repositories';
+import { waitForMs } from '@pori-and-friends/utils';
 import { scanEvents } from '../basic';
 import { queryNftInfo } from '../queryPoriApi';
 import { transformIdleGameEvent2Database } from '../transformer/transformIdleGameEvent2Database';
@@ -23,7 +24,7 @@ export async function updateEventDb(
       }
     );
 
-    let from = scData.updatedBlock;
+    let from = scData.updatedBlock + 1;
 
     const batchSize = 500;
     const headBlock = await ctx.web3.eth.getBlockNumber();
@@ -39,9 +40,9 @@ export async function updateEventDb(
         toBlock: to,
       });
 
-      from = to;
+      from = to + 1;
 
-      await IdleGameSCMetadataRepo.tx(realm, () => {
+      IdleGameSCMetadataRepo.txSync(realm, () => {
         scData.updatedBlock = to;
 
         const transformedEvents = events
@@ -73,23 +74,25 @@ async function updateKnowleageDb(realm: Realm, ctx: Context) {
 
   const events = await IdleGameSCEventRepo.findAll(realm);
 
-  const scanner = events.filtered(`_id >= oid(${knCursor})`);
+  const scanner = events.filtered(`_id > oid(${knCursor})`);
   console.log(`updateKnowleageDb need to update ${scanner.length} events`);
 
   const total = scanner.length;
+  if (total <= 0) return;
 
   const resolveNft = async (id: string | number) => {
     const data = await queryNftInfo(id, ctx);
+    // await waitForMs(1000);
     return data;
   };
 
   let count = 0;
   const saveInterval = 10;
 
-  const onIt = (id: Realm.BSON.ObjectId) => {
+  const onIt = (id: Realm.BSON.ObjectId, forceSave = false) => {
     count++;
-    if (count % saveInterval === 0) {
-      IdleGameSCMetadataRepo.tx(realm, () => {
+    if (forceSave || count % saveInterval === 0) {
+      IdleGameSCMetadataRepo.txSync(realm, () => {
         metadata.extras['knCursor'] = id.toHexString();
       });
     }
@@ -103,6 +106,6 @@ async function updateKnowleageDb(realm: Realm, ctx: Context) {
     onIt
   );
 
-  onIt(scanner[scanner.length - 1]._id);
+  onIt(scanner[scanner.length - 1]._id, true);
   console.log('updateKnowleageDb done');
 }

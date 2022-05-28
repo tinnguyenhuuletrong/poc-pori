@@ -208,7 +208,7 @@ export async function computePlayerAdventure(
     }
   }
 
-  DataViewRepo.tx(realm, () => {
+  DataViewRepo.txSync(realm, () => {
     lastViewIns.cursor = allEvents[allEvents.length - 1]._id.toHexString();
     lastViewIns.data = JSON.stringify(viewData);
   });

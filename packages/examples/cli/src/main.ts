@@ -6,6 +6,7 @@ import {
   DataView,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
+  getTokenBalance,
   init,
   Input,
   queryBinancePrice,
@@ -16,6 +17,8 @@ import {
   AdventureInfoEx,
   ENV,
   getIdleGameAddressSC,
+  getRIGYTokenInfo,
+  getRIKENTokenInfo,
   TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
@@ -353,6 +356,32 @@ async function main() {
         ctx,
         activeEnv.environment.walletConnectSessionStoragePath
       );
+    },
+  });
+
+  server.defineCommand('wallet.balance', {
+    help: 'get wallet balance',
+    action: async () => {
+      const rigyInfo = getRIGYTokenInfo(env);
+      const rikenInfo = getRIKENTokenInfo(env);
+
+      const [RIGY, RIKEN] = await Promise.all([
+        getTokenBalance({
+          ctx,
+          erc20Address: rigyInfo.tokenAddress,
+          walletAddress: playerAddress,
+        }),
+        getTokenBalance({
+          ctx,
+          erc20Address: rikenInfo.tokenAddress,
+          walletAddress: playerAddress,
+        }),
+      ]);
+
+      console.log({
+        RIGY,
+        RIKEN,
+      });
     },
   });
 

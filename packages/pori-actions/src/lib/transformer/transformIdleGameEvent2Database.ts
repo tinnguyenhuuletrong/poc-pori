@@ -23,7 +23,7 @@ export async function transformIdleGameEvent2Database(
           // resolve api query only for new nft
           if (!poriObj) nftInfo = await resolveNftInfo(poriId);
 
-          Repos.PlayerRepo.tx(realm, () => {
+          Repos.PlayerRepo.txSync(realm, () => {
             const playerObj = Repos.PlayerRepo.getOrCreate(
               realm,
               playerId,
@@ -56,7 +56,7 @@ export async function transformIdleGameEvent2Database(
 
           if (!playerObj) break;
 
-          Repos.PlayerRepo.tx(realm, () => {
+          Repos.PlayerRepo.txSync(realm, () => {
             // deactive + remove from player inventories
             if (poriObj) poriObj.isActive = false;
             const isExists =
@@ -80,7 +80,7 @@ export async function transformIdleGameEvent2Database(
 
           if (!metadata) break;
 
-          Repos.IdleGameSCMetadataRepo.tx(realm, () => {
+          Repos.IdleGameSCMetadataRepo.txSync(realm, () => {
             metadata.extras['turnDuration'] = data.turnDuration;
             metadata.extras['adventureDuration'] = data.adventureDuration;
           });

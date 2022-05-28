@@ -104,5 +104,11 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
         });
       });
     }
+
+    static txSync(realm: Realm, handler: () => void): void {
+      realm.write(() => {
+        handler();
+      });
+    }
   };
 }

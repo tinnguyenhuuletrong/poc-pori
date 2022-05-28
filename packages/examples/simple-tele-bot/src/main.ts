@@ -2,6 +2,7 @@ import {
   addWalletConnectToContext,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
+  getTokenBalance,
   init,
   queryBinancePrice,
   queryMarketInfo,
@@ -9,6 +10,8 @@ import {
 import {
   AdventureInfoEx,
   ENV,
+  getRIGYTokenInfo,
+  getRIKENTokenInfo,
   TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
@@ -85,7 +88,7 @@ async function main() {
     console.log(msg);
 
     const resp = `i am 🤖. 
-    <code>
+    <pre><code class="language-json">
       isMaster: ${msg.from.id.toString() === botMasterUid}
       masterUid: ${botMasterUid}
       uptime: ${process.uptime()}
@@ -93,8 +96,8 @@ async function main() {
       hostname: ${os.hostname()}
       playerAddress: ${playerAddress}
       walletUnlock: ${Boolean(ctx.walletAcc)}
-      _v: 6
-    </code>
+      _v: 7
+    </code></pre>
     Have fun!
     `;
     bot.sendMessage(msg.chat.id, resp, { parse_mode: 'HTML' });
@@ -129,10 +132,10 @@ async function main() {
     await bot.sendMessage(msg.chat.id, 'clear...', {
       reply_markup: {
         keyboard: [
-          [{ text: '/stats' }, { text: '/wallet_reset' }],
+          [{ text: '/stats' }, { text: '/wallet_balance' }],
           [{ text: '/sch_list' }, { text: '/whoami' }],
           [{ text: '/finish' }, { text: '/price' }],
-          [{ text: '/sch_mine' }, { text: '/market_list' }],
+          [{ text: '/auto_play <h>' }, { text: '/market_list' }],
         ],
         resize_keyboard: true,
       },
@@ -148,6 +151,41 @@ async function main() {
     await addWalletConnectToContext(
       ctx,
       activeEnv.environment.walletConnectSessionStoragePath
+    );
+  });
+
+  bot.onText(/\/wallet_balance/, async function (msg) {
+    if (!requireBotMaster(msg)) return;
+    captureChatId(msg.chat.id);
+
+    const rigyInfo = getRIGYTokenInfo(env);
+    const rikenInfo = getRIKENTokenInfo(env);
+
+    const [RIGY, RIKEN] = await Promise.all([
+      getTokenBalance({
+        ctx,
+        erc20Address: rigyInfo.tokenAddress,
+        walletAddress: playerAddress,
+      }),
+      getTokenBalance({
+        ctx,
+        erc20Address: rikenInfo.tokenAddress,
+        walletAddress: playerAddress,
+      }),
+    ]);
+
+    bot.sendMessage(
+      msg.chat.id,
+      `#balance
+      <pre><code class="language-json">${JSON.stringify(
+        {
+          RIGY,
+          RIKEN,
+        },
+        null,
+        2
+      )}</code></pre>`,
+      { parse_mode: 'HTML' }
     );
   });
 
@@ -320,6 +358,13 @@ ${protentialTarget
           `please call /wallet_unlock <.enveloped_key..> frist`
         );
 
+      if (Number.isNaN(+args)) {
+        return bot.sendMessage(
+          msg.chat.id,
+          `please call /auto_play <numberofHours>`
+        );
+      }
+
       autoPlayV1({ ctx, realm, timeOutHours: +args, playerAddress, bot, msg });
     });
   });
@@ -388,7 +433,7 @@ ${protentialTarget
       bot.sendMessage(
         msg.chat.id,
         `#price
-        <code>${JSON.stringify(
+        <pre><code class="language-json">${JSON.stringify(
           {
             ...rigyPoolInfo,
             ...rikenPoolInfo,
@@ -396,7 +441,7 @@ ${protentialTarget
           },
           null,
           2
-        )}</code>`,
+        )}</code></pre>`,
         { parse_mode: 'HTML' }
       );
     });

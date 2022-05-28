@@ -85,7 +85,7 @@ export class SchedulerService {
     const ins = await SchedulerRepo.findOne(realm, jobId);
     if (!ins) return;
 
-    SchedulerRepo.tx(realm, () => {
+    SchedulerRepo.txSync(realm, () => {
       const ticketId = ins._id;
       delete this.timerTickets[ticketId];
 
@@ -171,7 +171,7 @@ export class SchedulerService {
         );
       } finally {
         delete this.timerTickets[jobId];
-        SchedulerRepo.tx(realm, () => {
+        SchedulerRepo.txSync(realm, () => {
           ins.hasFinish = true;
           ins.result = result;
         });
