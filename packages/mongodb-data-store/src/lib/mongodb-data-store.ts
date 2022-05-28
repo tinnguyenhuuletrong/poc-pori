@@ -30,11 +30,18 @@ export async function addMongodbDataStore(
   return client;
 }
 
+function getBucket(mongoClient: MongoClient) {
+  const db = mongoClient.db('storage');
+  const bucket = new GridFSBucket(db, {
+    chunkSizeBytes: 10 * 1024 * 1024, // 5mb
+  });
+  return bucket;
+}
+
 export async function storeBlob(ctx: Context, key: string, dataStream: Stream) {
   if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
 
-  const db = ctx.mongoClient.db('storage');
-  const bucket = new GridFSBucket(db);
+  const bucket = getBucket(ctx.mongoClient);
 
   // TODO: check max revision to keep
   const oldFiles = await bucket.find({ filename: key }).toArray();
@@ -58,8 +65,7 @@ export async function downloadBlob(
 ): Promise<[GridFSFile, GridFSBucketReadStream]> {
   if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
 
-  const db = ctx.mongoClient.db('storage');
-  const bucket = new GridFSBucket(db);
+  const bucket = getBucket(ctx.mongoClient);
 
   const fileMeta = (
     await bucket.find({ filename: key }, { sort: { uploadDate: -1 } }).toArray()
