@@ -146,12 +146,13 @@ async function main() {
     if (!requireBotMaster(msg)) return;
     captureChatId(msg.chat.id);
 
-    await bot.sendMessage(msg.chat.id, 'trying to reset wallet channel...');
-    ctx.walletConnectChannel = null;
-    await addWalletConnectToContext(
-      ctx,
-      activeEnv.environment.walletConnectSessionStoragePath
-    );
+    // No longer need it
+    // await bot.sendMessage(msg.chat.id, 'trying to reset wallet channel...');
+    // ctx.walletConnectChannel = null;
+    // await addWalletConnectToContext(
+    //   ctx,
+    //   activeEnv.environment.walletConnectSessionStoragePath
+    // );
   });
 
   bot.onText(/\/wallet_balance/, async function (msg) {
@@ -604,10 +605,11 @@ async function boot() {
   const ctx = await init(ENV.Prod);
   console.log('connected');
 
-  await addWalletConnectToContext(
-    ctx,
-    activeEnv.environment.walletConnectSessionStoragePath
-  );
+  // No longer need it
+  // await addWalletConnectToContext(
+  //   ctx,
+  //   activeEnv.environment.walletConnectSessionStoragePath
+  // );
 
   const realm = await Repos.openRepo({
     path: activeEnv.environment.dbPath,
