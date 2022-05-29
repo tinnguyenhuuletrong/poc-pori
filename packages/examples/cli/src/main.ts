@@ -66,11 +66,13 @@ async function main() {
     activeEnv.environment.walletConnectSessionStoragePath
   );
 
-  MongoDataStore.addMongodbDataStore(
-    ctx,
-    activeEnv.environment.mongodbDataStoreUri,
-    activeEnv.environment.mongodbDataStoreSSLCer
-  );
+  if (activeEnv.environment.mongodbDataStoreUri) {
+    MongoDataStore.addMongodbDataStore(
+      ctx,
+      activeEnv.environment.mongodbDataStoreUri,
+      activeEnv.environment.mongodbDataStoreSSLCer
+    );
+  }
 
   const realm = await Repos.openRepo({
     path: activeEnv.environment.dbPath,
