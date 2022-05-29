@@ -95,3 +95,72 @@ node dist/packages/examples/scan-idle-game-events/main.js
   //data.farmer='0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA' || data.helper='0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA'
   //_id >= oid(6269fd6cdc7151e0d37d09df)
 ```
+
+## How to run CLI & Telegram bot
+
+1. update env from template
+
+```
+source ./.env -> load all env to terminal
+```
+
+2. extract snapshot data
+ It will restore block scan DB -> avoid scan all events again from blockchain each start 
+
+```txt
+ unzip archived/allEvents.prod.realm.zip -> archived/prod 
+ in the end we have something like 
+ ./archived/repo/prod
+  allEvents.prod.realm
+```
+
+2. run cli - generate wallet connect credential (optional), secret
+
+``` sh
+yarn nx run examples-cli:run
+```
+
+```txt
+>.help 
+.atk                send new mine request
+.bot.pull           Bot Update KnowleageDB
+.break              Sometimes you get stuck, this gets you out
+.clear              Alias for .break
+.decData            dec data
+.editor             Enter editor mode
+.encData            enc data
+.exit               Gracefull exit
+.gas                calculate gasPrice
+.genKey             gen new aes Keypair
+.help               Print this help message
+.load               Load JS from a file into the REPL session
+.market             marketplace
+.mine               send new mine request
+.price              Kyberswap token price
+.save               Save all evaluated commands in this REPL session to a file
+.schedule.create    create schedule
+.schedule.delete    delete schedule
+.schedule.list      List pending schedule
+.stats              Show my adv
+.storage.download   upload realm data to storage
+.storage.upload     upload realm data to storage
+.test               test
+.wallet.balance     get wallet balance
+.wallet.reset       Start walletconnect
+
+Press Ctrl+C to abort current expression, Ctrl+D to exit the REPL
+```
+
+``` sh
+Run .genKey to generate new secret key ( don't commit or share this )
+If success it will generate file 
+./archived/repo
+  .aesKey
+
+Next you can encrypt your wallet private key with 
+.encData <polygon wallet private key>
+```
+
+3. Run your telegram bot
+
+yarn nx run examples-simple-tele-bot:run
