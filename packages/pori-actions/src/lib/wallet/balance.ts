@@ -33,3 +33,14 @@ export async function getTokenBalance({
 
   return parseInt(res) / 10 ** 18;
 }
+
+export async function getMaticBalance({
+  ctx,
+  walletAddress,
+}: {
+  ctx: Context;
+  walletAddress: string;
+}) {
+  const balanceInWei = await ctx.web3.eth.getBalance(walletAddress);
+  return +ctx.web3.utils.fromWei(balanceInWei);
+}

@@ -6,6 +6,7 @@ import {
   DataView,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
+  getMaticBalance,
   getTokenBalance,
   init,
   Input,
@@ -367,7 +368,7 @@ async function main() {
       const rigyInfo = getRIGYTokenInfo(env);
       const rikenInfo = getRIKENTokenInfo(env);
 
-      const [RIGY, RIKEN] = await Promise.all([
+      const [RIGY, RIKEN, MATIC] = await Promise.all([
         getTokenBalance({
           ctx,
           erc20Address: rigyInfo.tokenAddress,
@@ -378,11 +379,13 @@ async function main() {
           erc20Address: rikenInfo.tokenAddress,
           walletAddress: playerAddress,
         }),
+        getMaticBalance({ ctx, walletAddress: playerAddress }),
       ]);
 
       console.log({
         RIGY,
         RIKEN,
+        MATIC,
       });
     },
   });

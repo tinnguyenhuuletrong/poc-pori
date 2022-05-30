@@ -2,6 +2,7 @@ import {
   addWalletConnectToContext,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
+  getMaticBalance,
   getTokenBalance,
   init,
   queryBinancePrice,
@@ -146,6 +147,8 @@ async function main() {
     if (!requireBotMaster(msg)) return;
     captureChatId(msg.chat.id);
 
+    ctx.walletAcc = null;
+
     // No longer need it
     // await bot.sendMessage(msg.chat.id, 'trying to reset wallet channel...');
     // ctx.walletConnectChannel = null;
@@ -162,7 +165,7 @@ async function main() {
     const rigyInfo = getRIGYTokenInfo(env);
     const rikenInfo = getRIKENTokenInfo(env);
 
-    const [RIGY, RIKEN] = await Promise.all([
+    const [RIGY, RIKEN, MATIC] = await Promise.all([
       getTokenBalance({
         ctx,
         erc20Address: rigyInfo.tokenAddress,
@@ -173,6 +176,7 @@ async function main() {
         erc20Address: rikenInfo.tokenAddress,
         walletAddress: playerAddress,
       }),
+      getMaticBalance({ ctx, walletAddress: playerAddress }),
     ]);
 
     bot.sendMessage(
@@ -180,8 +184,9 @@ async function main() {
       `#balance
       <pre><code class="language-json">${JSON.stringify(
         {
-          RIGY,
+          MATIC,
           RIKEN,
+          RIGY,
         },
         null,
         2

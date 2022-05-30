@@ -38,8 +38,8 @@ export async function cmdDoMine({
   bot: TelegramBot;
   msg: TelegramBot.Message;
 }) {
-  if (!ctx.walletConnectChannel?.connected) {
-    console.warn('wallet channel not ready. Please run .wallet.start first');
+  if (!ctx.walletAcc) {
+    console.warn('wallet channel not ready. Please run wallet_unlock first');
     return;
   }
 
@@ -74,7 +74,7 @@ export async function cmdDoMine({
   });
 
   const tx = {
-    from: ctx.walletConnectChannel.accounts[0],
+    from: ctx.walletAcc.address,
     to: getIdleGameAddressSC(env).address,
     data: callData, // Required
   };
@@ -108,8 +108,8 @@ export async function cmdDoFinish({
   bot: TelegramBot;
   msg: TelegramBot.Message;
 }) {
-  if (!ctx.walletConnectChannel?.connected) {
-    console.warn('wallet channel not ready. Please run .wallet.start first');
+  if (!ctx.walletAcc) {
+    console.warn('wallet channel not ready. Please run wallet_unlock first');
     return;
   }
 
@@ -133,7 +133,7 @@ export async function cmdDoFinish({
   });
 
   const tx = {
-    from: ctx.walletConnectChannel.accounts[0],
+    from: ctx.walletAcc.address,
     to: getIdleGameAddressSC(env).address,
     data: callData, // Required
   };
@@ -167,8 +167,8 @@ export async function cmdDoAtk({
   bot: TelegramBot;
   msg: TelegramBot.Message;
 }) {
-  if (!ctx.walletConnectChannel?.connected) {
-    console.warn('wallet channel not ready. Please run .wallet.start first');
+  if (!ctx.walletAcc) {
+    console.warn('wallet channel not ready. Please run wallet_unlock first');
     return;
   }
   const tmp = args.split(' ');
@@ -234,7 +234,7 @@ export async function cmdDoAtk({
   const factor = MINE_ATK_PRICE_FACTOR;
 
   const tx: ITxData = {
-    from: ctx.walletConnectChannel.accounts[0],
+    from: ctx.walletAcc.address,
     to: getIdleGameAddressSC(env).address,
     data: callData, // Required
     gasPrice: +web3GasPrice * factor,
@@ -271,8 +271,8 @@ export async function cmdScheduleOpenMine({
   bot: TelegramBot;
   msg: TelegramBot.Message;
 }) {
-  if (!ctx.walletConnectChannel?.connected) {
-    console.warn('wallet channel not ready. Please run .wallet.start first');
+  if (!ctx.walletAcc) {
+    console.warn('wallet channel not ready. Please run wallet_unlock first');
     return;
   }
   const currentGasWei = await currentGasPrice({ ctx });
@@ -315,9 +315,7 @@ export async function cmdScheduleOpenMine({
   const index = Adventure.randAdventureSlot(3);
   const scheduleId = schedulerNewMineId();
 
-  const nonce = await ctx.web3.eth.getTransactionCount(
-    ctx.walletConnectChannel.accounts[0]
-  );
+  const nonce = await ctx.web3.eth.getTransactionCount(ctx.walletAcc.address);
 
   await bot.sendMessage(
     msg.chat.id,
@@ -350,7 +348,7 @@ export async function cmdScheduleOpenMine({
   });
 
   const tx: ITxData = {
-    from: ctx.walletConnectChannel.accounts[0],
+    from: ctx.walletAcc.address,
     to: getIdleGameAddressSC(env).address,
     data: callData, // Required
     nonce: nonce,
@@ -401,8 +399,8 @@ export async function cmdDoSupport({
   bot: TelegramBot;
   msg: TelegramBot.Message;
 }) {
-  if (!ctx.walletConnectChannel?.connected) {
-    console.warn('wallet channel not ready. Please run .wallet.start first');
+  if (!ctx.walletAcc) {
+    console.warn('wallet channel not ready. Please run wallet_unlock first');
     return;
   }
 
@@ -465,7 +463,7 @@ export async function cmdDoSupport({
       .encodeABI();
 
   const tx = {
-    from: ctx.walletConnectChannel.accounts[0],
+    from: ctx.walletAcc.address,
     to: getIdleGameAddressSC(env).address,
     data: callDataAbi, // Required
   };
