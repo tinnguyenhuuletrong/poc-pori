@@ -124,7 +124,7 @@ export async function cmdDoFinish({
     playerAddress
   );
 
-  const mineInfo = addvStats.targets[mineId];
+  const mineInfo = addvStats.mines[mineId];
   if (!mineInfo) {
     console.log('opps. Mine status changed');
     await bot.sendMessage(

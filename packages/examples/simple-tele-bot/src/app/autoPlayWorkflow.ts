@@ -235,7 +235,7 @@ async function doFinishWithRetry(
   state: Workflow.WorkflowState
 ) {
   const doJob = async () => {
-    cmdDoFinish({ ctx, realm, bot, msg, args: `${mineId}` });
+    await cmdDoFinish({ ctx, realm, bot, msg, args: `${mineId}` });
   };
 
   await doTaskWithRetry(2, doJob, (err, retryNo) => {
