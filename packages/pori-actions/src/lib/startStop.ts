@@ -37,6 +37,10 @@ export async function init(env: ENV): Promise<Context> {
     provider,
     env,
     emiter: new EventEmitter(),
+
+    ui: {
+      writeMessage: async (msg) => console.log(msg),
+    },
   };
 
   return ctx;

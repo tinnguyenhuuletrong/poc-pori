@@ -10,7 +10,7 @@ export enum ENV {
   Staging = 'STAG',
   Prod = 'PROD',
 }
-
+export type SendMessageHandler = (msg: string) => Promise<void>;
 export type Context = {
   contract: Contract;
   web3: Web3;
@@ -20,6 +20,11 @@ export type Context = {
   env: ENV;
   emiter?: EventEmitter;
   mongoClient?: MongoClient;
+  playerAddress?: string;
+
+  ui: {
+    writeMessage: SendMessageHandler;
+  };
 };
 
 export type DnaBodyPartInfo = {

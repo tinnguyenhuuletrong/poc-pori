@@ -60,11 +60,13 @@ export function getIdleGameAddressSC(env: ENV) {
     return {
       abi: stagConfig.ABI_IDLE,
       address: stagConfig.gameInfo.m.app.contractAddress.idleGameAddress,
+      createdBlock: stagConfig.gameInfo.m.app.scCreatedBlock.idle,
     };
   }
   return {
     abi: prodConfig.ABI_IDLE,
     address: prodConfig.gameInfo.m.app.contractAddress.idleGameAddress,
+    createdBlock: prodConfig.gameInfo.m.app.scCreatedBlock.idle,
   };
 }
 

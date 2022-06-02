@@ -1,14 +1,13 @@
-import { Input, DataView } from '@pori-and-friends/pori-actions';
+import { Input, DataView, WalletActions } from '../../index';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import {
   AdventureInfoEx,
   AdventureInfo,
   Context,
+  getIdleGameAddressSC,
 } from '@pori-and-friends/pori-metadata';
 import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
-import { activeEnv, playerAddress } from './config';
-import { currentGasPrice } from './utils';
 
 export type ProtentialTarget = {
   link: string;
@@ -28,20 +27,27 @@ export type AdventureStatsComputed = {
   canDoNextAction: boolean;
   nextActionAt: string;
   nextAtkAt: string;
-  nextActionAtDate: Date;
-  nextAtkAtDate: Date;
+  nextActionAtDate?: Date;
+  nextAtkAtDate?: Date;
   gasPriceGWEI: string;
 };
 
 export async function refreshAdventureStatsForAddress(
-  { realm, ctx }: { realm: Realm; ctx: Context },
+  {
+    realm,
+    ctx,
+  }: {
+    realm: Realm;
+    ctx: Context;
+  },
   addr: string
 ): Promise<AdventureStatsComputed> {
+  const createdBlock = getIdleGameAddressSC(ctx.env).createdBlock;
   await Input.updateEventDb(realm, ctx, {
-    createdBlock: activeEnv.environment.createdBlock,
+    createdBlock,
   });
 
-  const activeAddr = addr || playerAddress;
+  const activeAddr = addr;
   const now = Date.now();
 
   const viewData = await DataView.computePlayerAdventure({
@@ -70,7 +76,7 @@ export async function refreshAdventureStatsForAddress(
   };
 
   for (const k of Object.keys(viewData.activeAdventures)) {
-    const value = viewData.activeAdventures[k] as AdventureInfo;
+    const value = viewData.activeAdventures[k as any] as AdventureInfo;
     if (
       value.farmerAddress === activeAddr ||
       value.supporterAddress === activeAddr
@@ -84,13 +90,13 @@ export async function refreshAdventureStatsForAddress(
   humanView.protentialTarget = Object.keys(humanView.targets)
     .map((key) => {
       const val = humanView.targets[key];
-      const sinceSec = (now - new Date(val.startTime).valueOf()) / 1000;
+      const sinceSec = (now - new Date(val.startTime ?? 0).valueOf()) / 1000;
       return {
         link: val.link,
         mineId: val.mineId,
         hasBigReward: val.hasBigReward,
-        startTimeLocalTime: new Date(val.startTime).toLocaleString(),
-        startTime: new Date(val.startTime),
+        startTimeLocalTime: new Date(val.startTime ?? 0).toLocaleString(),
+        startTime: new Date(val.startTime ?? 0),
         sinceSec,
       };
     })
@@ -103,7 +109,7 @@ export async function refreshAdventureStatsForAddress(
   // mine completed by farmer. But our poriant still lock
   if (humanView.note.readyToStart === false) humanView.activeMines++;
 
-  const web3GasPrice = await currentGasPrice({ ctx });
+  const web3GasPrice = await WalletActions.currentGasPrice({ ctx });
   humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
 
   // next action timeline
