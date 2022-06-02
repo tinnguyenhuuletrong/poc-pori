@@ -4,3 +4,22 @@ export * from './lib/cryptoHelper';
 export * from './lib/deferred';
 
 export const waitForMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export async function doTaskWithRetry(
+  times: number,
+  doTask: () => Promise<void>,
+  onRetry?: (error: Error, time: number) => void
+) {
+  let it = times;
+  while (it > 0) {
+    try {
+      await doTask();
+      return;
+    } catch (error) {
+      it--;
+      const canRetry = it > 0;
+      if (!canRetry) throw error;
+      onRetry && onRetry(error as Error, times - it);
+    }
+  }
+}

@@ -194,3 +194,5 @@ export type AdventureInfoEx = Omit<
   blockedTo: Date;
   atkAt: Date;
 };
+
+export type PromiseReturnType<T> = T extends Promise<infer Return> ? Return : T;

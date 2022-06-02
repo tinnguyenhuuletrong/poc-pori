@@ -119,6 +119,21 @@ export async function cmdDoFinish({
     return await bot.sendMessage(msg.chat.id, `Usage: /finish <mineId>`);
   }
 
+  const addvStats = await refreshAdventureStatsForAddress(
+    { realm, ctx },
+    playerAddress
+  );
+
+  const mineInfo = addvStats.targets[mineId];
+  if (!mineInfo) {
+    console.log('opps. Mine status changed');
+    await bot.sendMessage(
+      msg.chat.id,
+      `opps. Mine status changed. Already finished....`
+    );
+    return;
+  }
+
   await bot.sendMessage(msg.chat.id, `roger that!. Finish mine: ${mineId}`);
 
   const callData = ctx.contract.methods

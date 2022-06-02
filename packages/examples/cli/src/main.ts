@@ -260,19 +260,25 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const message = 'my name is ttin';
-      console.log(ctx.walletConnectChannel.accounts);
-
-      const res = await ctx.walletConnectChannel.signMessage([
-        ctx.walletConnectChannel.accounts[0],
-        ctx.web3.utils.keccak256(
-          '\x19Ethereum Signed Message:\n' + message.length + message
-        ),
-      ]);
-
-      console.log(res);
-
-      return res;
+      for (let i = 0; i < 30; i++) {
+        const latestBlockInfo = await ctx.web3.eth.getBlock('latest');
+        const res = await Adventure.queryMineinfoFromSc(ctx, 49264);
+        const offset =
+          (Date.now() - res.rewardMap.startTimeInDate.valueOf()) / 1000;
+        const nextRewardLevel = await Adventure.queryRandomRewardLevelFromSc(
+          ctx,
+          res
+        );
+        console.dir(
+          {
+            blockNum: latestBlockInfo.number,
+            txHash: latestBlockInfo.hash,
+            offset,
+            nextRewardLevel,
+          },
+          { depth: 5 }
+        );
+      }
     },
   });
 

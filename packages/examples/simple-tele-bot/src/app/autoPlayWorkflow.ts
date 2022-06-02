@@ -1,6 +1,6 @@
-import { Workflow } from '@pori-and-friends/pori-actions';
+import { Workflow, Adventure } from '@pori-and-friends/pori-actions';
 import { Context } from '@pori-and-friends/pori-metadata';
-import { waitForMs } from '@pori-and-friends/utils';
+import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type TelegramBot from 'node-telegram-bot-api';
@@ -71,7 +71,7 @@ export async function autoPlayV1({
         state.data['step'] = 'begin_support';
       });
       await state.promiseWithAbort(
-        cmdDoSupport({ ctx, realm, bot, msg, args: `${mineId}` })
+        doSupportWithGuess(ctx, bot, msg, mineId, realm)
       );
       state.updateState(() => {
         state.data['step'] = 'end_support';
@@ -100,7 +100,7 @@ export async function autoPlayV1({
         state.data['step'] = 'begin_finish';
       });
       await state.promiseWithAbort(
-        cmdDoFinish({ ctx, realm, bot, msg, args: `${mineId}` })
+        doFinishWithRetry(ctx, realm, bot, msg, mineId, state)
       );
       state.updateState(() => {
         state.data['step'] = 'end_finish';
@@ -191,4 +191,57 @@ async function waitForGasPrice({
     });
     break;
   }
+}
+
+async function guessRewardLevel({
+  ctx,
+  bot,
+  msg,
+  mineId,
+}: {
+  ctx: Context;
+  bot: TelegramBot;
+  msg: TelegramBot.Message;
+  mineId: number;
+}) {
+  const scMineInfo = await Adventure.queryMineinfoFromSc(ctx, mineId);
+  const nextSlotReward = await Adventure.queryRandomRewardLevelFromSc(
+    ctx,
+    scMineInfo
+  );
+  await bot.sendMessage(
+    msg.chat.id,
+    `#guessReward next rewardLevel is ${nextSlotReward}`
+  );
+}
+
+async function doSupportWithGuess(
+  ctx: Context,
+  bot: TelegramBot,
+  msg: TelegramBot.Message,
+  mineId: number,
+  realm: Realm
+) {
+  await guessRewardLevel({ ctx, bot, msg, mineId });
+  await cmdDoSupport({ ctx, realm, bot, msg, args: `${mineId}` });
+}
+
+async function doFinishWithRetry(
+  ctx: Context,
+  realm: Realm,
+  bot: TelegramBot,
+  msg: TelegramBot.Message,
+  mineId: number,
+  state: Workflow.WorkflowState
+) {
+  const doJob = async () => {
+    cmdDoFinish({ ctx, realm, bot, msg, args: `${mineId}` });
+  };
+
+  await doTaskWithRetry(2, doJob, (err, retryNo) => {
+    bot.sendMessage(
+      msg.chat.id,
+      `autoPlay #bot${state.id} retry no ${retryNo} cmdDoFinish after error ${err.message}`
+    );
+  });
 }
