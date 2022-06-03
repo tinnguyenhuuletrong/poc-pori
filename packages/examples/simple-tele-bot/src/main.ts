@@ -34,6 +34,7 @@ import {
   MINE_ATK_PRICE_FACTOR,
   playerAddress,
   SUPPORT_PORI,
+  VERSION,
 } from './app/config';
 import {
   addWorkerTaskForMineAtkNotify,
@@ -108,7 +109,7 @@ async function main() {
       hostname: ${os.hostname()}
       playerAddress: ${playerAddress}
       walletUnlock: ${Boolean(ctx.walletAcc)}
-      _v: 7
+      _v: ${VERSION}
     </code></pre>
     Have fun!
     `;
