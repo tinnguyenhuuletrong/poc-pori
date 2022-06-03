@@ -7,6 +7,8 @@ import {
   init,
   queryBinancePrice,
   queryMarketInfo,
+  Computed,
+  Cmds,
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfoEx,
@@ -24,20 +26,18 @@ import * as os from 'os';
 import process from 'process';
 import { autoPlayV1 } from './app/autoPlayWorkflow';
 import {
-  cmdDoAtk,
-  cmdDoFinish,
-  cmdDoMine,
-  cmdDoSupport,
-  cmdScheduleOpenMine,
-} from './app/cmds';
-import { refreshAdventureStatsForAddress } from './app/computed';
-import { activeEnv, botMasterUid, env, playerAddress } from './app/config';
-import { withErrorWrapper } from './app/utils';
+  activeEnv,
+  botMasterUid,
+  env,
+  FORMATION,
+  MINE_ATK_PRICE_FACTOR,
+  playerAddress,
+  SUPPORT_PORI,
+} from './app/config';
 import {
   addWorkerTaskForMineAtkNotify,
   addWorkerTaskForMineEndNotify,
   registerWorkerNotify,
-  registerWorkerStartNewMine,
 } from './app/worker';
 
 interface BotMemoryStructure {
@@ -76,7 +76,13 @@ async function main() {
 
   // worker register
   registerWorkerNotify({ ctx, realm, scheduler, bot });
-  registerWorkerStartNewMine({ ctx, realm, scheduler, bot });
+
+  // extend ctx UI
+  // register send msg
+  ctx.ui.writeMessage = async (msg) => {
+    const chatId = Memory.activeChats[0];
+    await bot.sendMessage(chatId, msg);
+  };
 
   // --------------------
   // cmds begin
@@ -242,10 +248,11 @@ async function main() {
 
       const addr = playerAddress;
       await bot.sendMessage(msg.chat.id, 'refreshing....');
-      const humanView = await refreshAdventureStatsForAddress(
-        { realm, ctx },
-        addr
-      );
+      const humanView =
+        await Computed.MyAdventure.refreshAdventureStatsForAddress(
+          { realm, ctx },
+          addr
+        );
 
       // targets:
       // ${humanView.protentialTarget.map(
@@ -319,7 +326,7 @@ ${protentialTarget
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
       const args = match[1];
-      await cmdDoMine({ ctx, realm, bot, msg, args });
+      await Cmds.cmdDoMine({ ctx, realm, args, FORMATION });
     });
   });
 
@@ -328,7 +335,7 @@ ${protentialTarget
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
       const args = match[1];
-      await cmdDoSupport({ ctx, realm, bot, msg, args });
+      await Cmds.cmdDoSupport({ ctx, realm, args, SUPPORT_PORI });
     });
   });
 
@@ -338,7 +345,13 @@ ${protentialTarget
       captureChatId(msg.chat.id);
 
       const args = match[1];
-      await cmdDoAtk({ ctx, realm, bot, msg, args });
+      await Cmds.cmdDoAtk({
+        ctx,
+        realm,
+        args,
+        FORMATION,
+        MINE_ATK_PRICE_FACTOR,
+      });
     });
   });
 
@@ -348,7 +361,7 @@ ${protentialTarget
       captureChatId(msg.chat.id);
 
       const args = match[1];
-      await cmdDoFinish({ ctx, realm, bot, msg, args });
+      await Cmds.cmdDoFinish({ ctx, realm, args });
     });
   });
 
@@ -372,15 +385,6 @@ ${protentialTarget
       }
 
       autoPlayV1({ ctx, realm, timeOutHours: +args, playerAddress, bot, msg });
-    });
-  });
-
-  bot.onText(/\/sch_mine (.*)/, async (msg, match) => {
-    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
-      if (!requireBotMaster(msg)) return;
-      captureChatId(msg.chat.id);
-      const args = match[1];
-      await cmdScheduleOpenMine({ ctx, realm, scheduler, bot, msg, args });
     });
   });
 
@@ -610,6 +614,8 @@ async function boot() {
   const ctx = await init(ENV.Prod);
   console.log('connected');
 
+  ctx.playerAddress = playerAddress;
+
   // No longer need it
   // await addWalletConnectToContext(
   //   ctx,
@@ -652,6 +658,18 @@ function saveBotMemory() {
     console.log(
       `🤖 - memory restore from ${activeEnv.environment.botMemoryPath}`
     );
+  }
+}
+
+export async function withErrorWrapper(
+  { chatId, bot }: { chatId: number; bot: TelegramBot },
+  handler: () => Promise<any>
+) {
+  try {
+    await handler();
+  } catch (error: any) {
+    console.error(error);
+    await bot.sendMessage(chatId, `Error: ${error.message}`);
   }
 }
 

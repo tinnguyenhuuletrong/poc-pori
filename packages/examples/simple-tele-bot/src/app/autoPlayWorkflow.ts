@@ -1,11 +1,15 @@
-import { Workflow, Adventure } from '@pori-and-friends/pori-actions';
+import {
+  Workflow,
+  Adventure,
+  Computed,
+  Cmds,
+} from '@pori-and-friends/pori-actions';
 import { Context } from '@pori-and-friends/pori-metadata';
 import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type TelegramBot from 'node-telegram-bot-api';
-import { cmdDoFinish, cmdDoMine, cmdDoSupport } from './cmds';
-import { refreshAdventureStatsForAddress } from './computed';
+import { FORMATION, SUPPORT_PORI } from './config';
 const MICRO_DELAY_MS = 2000;
 const SAFE_GWEITH = '80';
 
@@ -44,7 +48,7 @@ export async function autoPlayV1({
 
       // 1. start new mine with portal
       await state.promiseWithAbort(
-        cmdDoMine({ ctx, realm, bot, msg, args: '1' })
+        Cmds.cmdDoMine({ ctx, realm, args: '1', FORMATION })
       );
       state.updateState(() => {
         state.data['step'] = 'start_mine_finish';
@@ -147,7 +151,10 @@ async function refreshStatus(
   playerAddress: string
 ) {
   await takeABreak(state);
-  return await refreshAdventureStatsForAddress({ realm, ctx }, playerAddress);
+  return await Computed.MyAdventure.refreshAdventureStatsForAddress(
+    { realm, ctx },
+    playerAddress
+  );
 }
 
 async function takeABreak(state: Workflow.WorkflowState) {
@@ -223,7 +230,12 @@ async function doSupportWithGuess(
   realm: Realm
 ) {
   await guessRewardLevel({ ctx, bot, msg, mineId });
-  await cmdDoSupport({ ctx, realm, bot, msg, args: `${mineId}` });
+  await Cmds.cmdDoSupport({
+    ctx,
+    realm,
+    args: `${mineId}`,
+    SUPPORT_PORI,
+  });
 }
 
 async function doFinishWithRetry(
@@ -235,7 +247,7 @@ async function doFinishWithRetry(
   state: Workflow.WorkflowState
 ) {
   const doJob = async () => {
-    await cmdDoFinish({ ctx, realm, bot, msg, args: `${mineId}` });
+    await Cmds.cmdDoFinish({ ctx, realm, args: `${mineId}` });
   };
 
   await doTaskWithRetry(2, doJob, (err, retryNo) => {

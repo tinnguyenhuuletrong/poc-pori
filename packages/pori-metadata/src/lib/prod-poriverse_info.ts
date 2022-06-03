@@ -38,6 +38,9 @@ export const gameInfo = {
         fragmentAddress: '0xB640AdA89445ce74C6554bf27CD1aecE9CE998e4',
         fragmentDecimal: '0',
       },
+      scCreatedBlock: {
+        idle: 27503296,
+      },
       contractAddress: {
         PoriNFTBreedable: '0x81d5a77b1a070bec11280af89849ac5d74bb06cf',
         poriBreedingRule: '0x34041860276ebafe36067974acf52e232dc8452f',

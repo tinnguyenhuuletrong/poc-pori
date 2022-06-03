@@ -2,7 +2,6 @@ import { Context } from '@pori-and-friends/pori-metadata';
 import TelegramBot from 'node-telegram-bot-api';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import {
-  schedulerNewMineType,
   schedulerNotifyMineAtkId,
   schedulerNotifyMineFinishId,
   schedulerNotifyMineNotifyIdType,
@@ -111,49 +110,4 @@ export async function addWorkerTaskForMineAtkNotify({
     params: JSON.stringify({ chatId, msgData: pnMessage, extra }),
     _id: mineAtkSchedulerId,
   });
-}
-
-export function registerWorkerStartNewMine({
-  ctx,
-  realm,
-  scheduler,
-  bot,
-}: {
-  ctx: Context;
-  realm: Realm;
-  scheduler: Repos.SchedulerService;
-  bot: TelegramBot;
-}) {
-  const doSendNotify = async (job: Repos.ScheduleJobModel) => {
-    const { _id, params } = job;
-    const paramObj = JSON.parse(params);
-    const chatId = paramObj?.chatId;
-    const signedTx = paramObj?.signedTx;
-
-    if (!(chatId && signedTx)) return;
-    await bot.sendMessage(chatId, `${schedulerNewMineType} begin`);
-
-    try {
-      const txInfo = await ctx.web3.eth
-        .sendSignedTransaction(`0x${signedTx}`)
-        .on('receipt', (info) => {
-          bot.sendMessage(
-            chatId,
-            `${schedulerNewMineType} submited at. https://polygonscan.com/tx/${info.transactionHash}`
-          );
-        });
-
-      await bot.sendMessage(
-        chatId,
-        `${schedulerNewMineType} success. https://polygonscan.com/tx/${txInfo.transactionHash}`
-      );
-    } catch (error) {
-      await bot.sendMessage(
-        chatId,
-        `${schedulerNewMineType} error. ${error.message}`
-      );
-    }
-  };
-
-  scheduler.addHandler(schedulerNewMineType, doSendNotify);
 }

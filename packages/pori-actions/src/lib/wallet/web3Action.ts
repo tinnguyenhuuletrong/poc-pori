@@ -7,7 +7,7 @@ import { waitForMs } from '@pori-and-friends/utils';
 export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
   tx: ITxData,
-  onTxReceipt?: (TransactionReceipt) => void
+  onTxReceipt?: (r: TransactionReceipt) => void
 ) {
   if (ctx.walletAcc) return useAccountToSendTx(ctx, tx, onTxReceipt);
   return useWalletConnectToSendTx(ctx, tx);
@@ -16,8 +16,10 @@ export function sendRequestForWalletConnectTx(
 async function useAccountToSendTx(
   ctx: Context,
   tx: ITxData,
-  onTxReceipt?: (TransactionReceipt) => void
+  onTxReceipt?: (r: TransactionReceipt) => void
 ) {
+  if (!ctx.walletAcc) return;
+
   const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
   const defaultNonce = await ctx.web3.eth.getTransactionCount(
     ctx.walletAcc.address
@@ -33,12 +35,16 @@ async function useAccountToSendTx(
   };
   const signedTx = await ctx.walletAcc.signTransaction(web3Tx);
 
-  const txInfo = ctx.web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-  txInfo.on('receipt', (r) => onTxReceipt && onTxReceipt(r));
-  return (await txInfo).transactionHash;
+  if (signedTx.rawTransaction) {
+    const txInfo = ctx.web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    txInfo.on('receipt', (r) => onTxReceipt && onTxReceipt(r));
+    return (await txInfo).transactionHash;
+  }
+  return;
 }
 
 function useWalletConnectToSendTx(ctx: Context, tx: ITxData) {
+  if (!ctx.walletConnectChannel) return;
   return ctx.walletConnectChannel
     .sendTransaction(tx)
     .then((result) => {
@@ -63,6 +69,8 @@ export function sendSignRequestForWalletConnectTx(
 }
 
 async function useAccountToSignTx(ctx: Context, tx: ITxData) {
+  if (!ctx.walletAcc) return;
+
   const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
   const defaultNonce = await ctx.web3.eth.getTransactionCount(
     ctx.walletAcc.address
@@ -84,6 +92,7 @@ async function useAccountToSignTx(ctx: Context, tx: ITxData) {
 }
 
 function useWalletConnectToSignTx(ctx: Context, tx: ITxData) {
+  if (!ctx.walletConnectChannel) return;
   return ctx.walletConnectChannel
     .signTransaction(tx)
     .then((result) => {
@@ -98,23 +107,6 @@ function useWalletConnectToSignTx(ctx: Context, tx: ITxData) {
 
 export async function currentGasPrice({ ctx }: { ctx: Context }) {
   return await ctx.web3.eth.getGasPrice();
-}
-
-export async function withErrorWrapper(
-  { chatId, bot }: { chatId: number; bot: TelegramBot },
-  handler: () => Promise<any>
-) {
-  try {
-    await handler();
-  } catch (error) {
-    console.error(error);
-    await bot.sendMessage(chatId, `Error: ${error.message}`);
-  }
-}
-
-export function boolFromString(inp) {
-  if (inp === '1' || inp === 'true') return true;
-  return false;
 }
 
 const TIME_4_HOUR_MS = 4 * 60 * 60 * 1000;
@@ -147,4 +139,6 @@ export async function monitorTx({
     await waitForMs(sleepTimeoutMs);
     shouldRun = Date.now() > endAt;
   }
+
+  return false;
 }

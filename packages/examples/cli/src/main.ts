@@ -3,7 +3,6 @@ import {
   addWalletConnectToContext,
   Adventure,
   close,
-  DataView,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   getMaticBalance,
@@ -12,10 +11,9 @@ import {
   Input,
   queryBinancePrice,
   queryMarketInfo,
+  Computed,
 } from '@pori-and-friends/pori-actions';
 import {
-  AdventureInfo,
-  AdventureInfoEx,
   ENV,
   getIdleGameAddressSC,
   getRIGYTokenInfo,
@@ -37,10 +35,7 @@ import {
   readFileSync,
   writeFileSync,
 } from 'fs';
-import { maxBy, minBy } from 'lodash';
-import moment from 'moment';
 import repl from 'repl';
-import type { TransactionConfig } from 'web3-core';
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 
@@ -61,6 +56,11 @@ async function main() {
 
   const ctx = await init(ENV.Prod);
   console.log('connected');
+
+  ctx.playerAddress = playerAddress;
+  ctx.ui.writeMessage = async (msg) => {
+    console.log(msg);
+  };
 
   await addWalletConnectToContext(
     ctx,
@@ -343,12 +343,14 @@ async function main() {
     },
   });
 
-  queryMarketInfo;
-
   server.defineCommand('stats', {
     help: 'Show my adv',
     action: async (addr) => {
-      const humanView = await refreshAdventureStatsForAddress(addr);
+      const humanView =
+        await Computed.MyAdventure.refreshAdventureStatsForAddress(
+          { realm, ctx },
+          addr || playerAddress
+        );
       delete humanView.targets;
       delete humanView.note;
       console.dir(humanView, { depth: 5 });
@@ -459,7 +461,11 @@ async function main() {
         return;
       }
 
-      const addvStats = await refreshAdventureStatsForAddress(playerAddress);
+      const addvStats =
+        await Computed.MyAdventure.refreshAdventureStatsForAddress(
+          { realm, ctx },
+          playerAddress
+        );
 
       console.log('STATS');
       console.dir(
@@ -539,108 +545,6 @@ async function main() {
         // Error returned when rejected
         console.error(error);
       });
-  }
-
-  async function refreshAdventureStatsForAddress(addr: string) {
-    await Input.updateEventDb(realm, ctx, {
-      createdBlock: activeEnv.environment.createdBlock,
-    });
-
-    const activeAddr = addr || playerAddress;
-    const now = Date.now();
-
-    const viewData = await DataView.computePlayerAdventure({
-      realm,
-      playerAddress: activeAddr,
-      realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
-    });
-
-    // humanView
-    const humanView = {
-      note: DataView.humanrizeNote(viewData),
-
-      // my active adventures
-      mines: {} as Record<string, AdventureInfoEx>,
-
-      // protential target
-      targets: {},
-      protentialTarget: [],
-      activeMines: 0,
-      canDoNextAction: false,
-      nextActionAt: '',
-      nextActionAtDate: new Date(),
-      nextAtkAt: '',
-      nextAtkAtDate: new Date(),
-      gasPriceGWEI: '',
-    };
-
-    for (const k of Object.keys(viewData.activeAdventures)) {
-      const value = viewData.activeAdventures[k] as AdventureInfo;
-      if (
-        value.farmerAddress === activeAddr ||
-        value.supporterAddress === activeAddr
-      )
-        humanView.mines[k] = DataView.humanrizeAdventureInfo(value);
-      else if (value.state === 'AdventureStarted') {
-        humanView.targets[k] = DataView.humanrizeAdventureInfo(value);
-      }
-    }
-
-    humanView.protentialTarget = Object.keys(humanView.targets)
-      .map((key) => {
-        const val = humanView.targets[key];
-        const sinceSec = (now - new Date(val.startTime).valueOf()) / 1000;
-        return {
-          link: val.link,
-          mineId: val.mineId,
-          hasBigReward: val.hasBigReward,
-          startTimeLocalTime: new Date(val.startTime).toLocaleString(),
-          startTime: new Date(val.startTime),
-          sinceSec,
-        };
-      })
-      .sort((a, b) => {
-        return a.hasBigReward - b.hasBigReward;
-      });
-
-    humanView.activeMines = Object.keys(humanView.mines).length;
-
-    // mine completed by farmer. But our poriant still lock
-    if (humanView.note.readyToStart === false) humanView.activeMines++;
-
-    const web3GasPrice = await currentGasPrice();
-    humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
-
-    // next action timeline
-    const timeViewMine = Object.values(humanView.mines);
-    const noBlock = timeViewMine.every((itm) => {
-      return !!itm.canCollect;
-    });
-    const nextActionAt = maxBy(timeViewMine, (v) =>
-      v.blockedTo.valueOf()
-    )?.blockedTo;
-
-    const nextAtkAt = minBy(
-      timeViewMine.filter((itm) => itm.atkAt.valueOf() > now),
-      (v) => v.atkAt.valueOf()
-    )?.atkAt;
-
-    humanView.canDoNextAction = humanView.note.readyToStart && noBlock;
-    if (nextActionAt) {
-      humanView.nextActionAt = `${nextActionAt.toLocaleString()} - ${moment(
-        nextActionAt
-      ).fromNow()}`;
-    }
-    humanView.nextActionAtDate = nextActionAt;
-
-    if (nextAtkAt) {
-      humanView.nextAtkAt = `${nextAtkAt.toLocaleString()} - ${moment(
-        nextAtkAt
-      ).fromNow()}`;
-    }
-    humanView.nextAtkAtDate = nextAtkAt;
-
-    return humanView;
   }
 }
 
