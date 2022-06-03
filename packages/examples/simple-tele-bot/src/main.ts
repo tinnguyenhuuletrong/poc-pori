@@ -12,6 +12,7 @@ import {
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfoEx,
+  Context,
   ENV,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
@@ -52,6 +53,8 @@ function captureChatId(chatId) {
   }
 }
 
+let appCtx!: Context;
+
 async function main() {
   const token = process.env.TELEGRAM_TOKEN;
   if (!token) {
@@ -83,6 +86,8 @@ async function main() {
     const chatId = Memory.activeChats[0];
     await bot.sendMessage(chatId, msg);
   };
+
+  appCtx = ctx;
 
   // --------------------
   // cmds begin
@@ -597,6 +602,7 @@ ${formatedData
   }
   process.once('SIGTERM', async () => {
     await close();
+    appCtx.ui.writeMessage('recieved SIGTERM');
     process.exit(0);
   });
 }
@@ -675,12 +681,14 @@ export async function withErrorWrapper(
 
 process.on('uncaughtException', (err) => {
   console.log('got uncaughtException exit');
+  appCtx.ui.writeMessage(`🤖 uncaughtException: ${err.message}`);
   console.error(err);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (err) => {
   console.log('got unhandledRejection exit');
+  appCtx.ui.writeMessage(`🤖 unhandledRejection: ${(err as any).message}`);
   console.error(err);
   process.exit(1);
 });
