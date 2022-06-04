@@ -109,6 +109,7 @@ async function main() {
       hostname: ${os.hostname()}
       playerAddress: ${playerAddress}
       walletUnlock: ${Boolean(ctx.walletAcc)}
+      settingGasFactor: ${ctx.setting.gasFactor} 
       _v: ${VERSION}
     </code></pre>
     Have fun!
@@ -152,6 +153,18 @@ async function main() {
         ],
         resize_keyboard: true,
       },
+    });
+  });
+
+  bot.onText(/\/setting_set_gas_factor (.+)/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      const args = parseFloat(match[1]);
+      ctx.setting.gasFactor = args;
+
+      ctx.ui.writeMessage(`update setting.gasFactor to ${args}`);
     });
   });
 

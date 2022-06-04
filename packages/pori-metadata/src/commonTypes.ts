@@ -25,6 +25,9 @@ export type Context = {
   ui: {
     writeMessage: SendMessageHandler;
   };
+  setting: {
+    gasFactor: number;
+  };
 };
 
 export type DnaBodyPartInfo = {

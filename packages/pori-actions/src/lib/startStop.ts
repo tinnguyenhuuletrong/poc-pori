@@ -41,6 +41,9 @@ export async function init(env: ENV): Promise<Context> {
     ui: {
       writeMessage: async (msg) => console.log(msg),
     },
+    setting: {
+      gasFactor: 1,
+    },
   };
 
   return ctx;

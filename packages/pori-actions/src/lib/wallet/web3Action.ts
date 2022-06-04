@@ -20,17 +20,27 @@ async function useAccountToSendTx(
 ) {
   if (!ctx.walletAcc) return;
 
+  const gasFactor = ctx.setting.gasFactor ?? 1;
+
   const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
   const defaultNonce = await ctx.web3.eth.getTransactionCount(
     ctx.walletAcc.address
   );
+
+  const baseGas = Math.round(+defaultWeb3GasPrice * gasFactor);
+
+  if (!tx.gasPrice && gasFactor !== 1) {
+    await ctx.ui.writeMessage(
+      `warning: with gasFactor = ${gasFactor}. total gas price = ${baseGas}`
+    );
+  }
 
   const web3Tx: TransactionConfig = {
     from: ctx.walletAcc.address,
     to: tx.to,
     data: tx.data, // Required
     gas: tx.gas || '600000',
-    gasPrice: tx.gasPrice || defaultWeb3GasPrice,
+    gasPrice: tx.gasPrice || baseGas,
     nonce: tx.nonce ? parseInt(tx.nonce.toString()) : defaultNonce,
   };
   const signedTx = await ctx.walletAcc.signTransaction(web3Tx);
