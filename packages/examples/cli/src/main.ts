@@ -29,6 +29,7 @@ import {
 } from '@pori-and-friends/utils';
 import type { ITxData } from '@walletconnect/types';
 import {
+  copyFileSync,
   createReadStream,
   createWriteStream,
   existsSync,
@@ -75,9 +76,16 @@ async function main() {
     );
   }
 
-  const realm = await Repos.openRepo({
+  let realm = await Repos.openRepo({
     path: activeEnv.environment.dbPath,
   });
+
+  async function reloadRealm() {
+    realm = await Repos.openRepo({
+      path: activeEnv.environment.dbPath,
+    });
+    global.realm = realm;
+  }
 
   const scheduler = new Repos.Services.SchedulerService();
   await scheduler.start(realm);
@@ -120,8 +128,17 @@ async function main() {
     action: async () => {
       const stream = createReadStream(activeEnv.environment.dbPath);
       console.log('upload snapshot');
-      await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream);
-      console.log('uploaded');
+
+      const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
+        realm,
+        'default'
+      );
+      const metadata = {
+        revision: dbMetadata.updatedBlock,
+      };
+
+      await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream, metadata);
+      console.log(`uploaded - revision:${metadata.revision}`);
     },
   });
 
@@ -136,6 +153,7 @@ async function main() {
 
       const totalBytes = fileMeta.length;
       let downloaded = 0;
+      console.log(`metadata: revision:${fileMeta.metadata?.revision}`);
       console.log('totalBytes', totalBytes);
       dataStream.prependListener('data', (chunk) => {
         downloaded += chunk.length;
@@ -144,8 +162,17 @@ async function main() {
 
       dataStream
         .pipe(createWriteStream('./tmp/snapshot.realm'))
-        .on('finish', () => {
+        .on('finish', async () => {
           console.log('finish');
+          console.log('begin extract');
+
+          realm.close();
+          copyFileSync('./tmp/snapshot.realm', activeEnv.environment.dbPath);
+
+          console.log('extract success');
+          await reloadRealm();
+
+          console.log('reload realm success');
         });
     },
   });

@@ -38,7 +38,12 @@ function getBucket(mongoClient: MongoClient) {
   return bucket;
 }
 
-export async function storeBlob(ctx: Context, key: string, dataStream: Stream) {
+export async function storeBlob(
+  ctx: Context,
+  key: string,
+  dataStream: Stream,
+  metadata: Record<string, any> = {}
+) {
   if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
 
   const bucket = getBucket(ctx.mongoClient);
@@ -49,7 +54,9 @@ export async function storeBlob(ctx: Context, key: string, dataStream: Stream) {
     await bucket.delete(it._id);
   }
 
-  const writeStream = bucket.openUploadStream(key);
+  const writeStream = bucket.openUploadStream(key, {
+    metadata,
+  });
   dataStream.pipe(writeStream);
 
   return new Promise<void>((resolve, _) => {
