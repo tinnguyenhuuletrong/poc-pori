@@ -4,9 +4,9 @@ import {
   Computed,
   Cmds,
 } from '@pori-and-friends/pori-actions';
-import { Context } from '@pori-and-friends/pori-metadata';
+import { AdventureInfoEx, Context } from '@pori-and-friends/pori-metadata';
 import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 import moment from 'moment';
 import type TelegramBot from 'node-telegram-bot-api';
 import { FORMATION, SUPPORT_PORI } from './config';
@@ -74,9 +74,7 @@ export async function autoPlayV1({
       state.updateState(() => {
         state.data['step'] = 'begin_support';
       });
-      await state.promiseWithAbort(
-        doSupportWithGuess(ctx, bot, msg, mineId, realm)
-      );
+      await state.promiseWithAbort(doSupport(ctx, bot, msg, mineId, realm));
       state.updateState(() => {
         state.data['step'] = 'end_support';
       });
@@ -222,19 +220,19 @@ async function guessRewardLevel({
   );
 }
 
-async function doSupportWithGuess(
+async function doSupport(
   ctx: Context,
   bot: TelegramBot,
   msg: TelegramBot.Message,
   mineId: number,
   realm: Realm
 ) {
-  await guessRewardLevel({ ctx, bot, msg, mineId });
   await Cmds.cmdDoSupport({
     ctx,
     realm,
     args: `${mineId}`,
     SUPPORT_PORI,
+    customSlotPick: supportSlotPick,
   });
 }
 
@@ -256,4 +254,57 @@ async function doFinishWithRetry(
       `autoPlay #bot${state.id} retry no ${retryNo} cmdDoFinish after error ${err.message}`
     );
   });
+}
+
+/*
+  If has bigReward 
+    farmer found: send support to bigReward slot (protect it)
+    assit found: ignore -> open new slot
+  else 
+    open new slot
+*/
+async function supportSlotPick({
+  mineInfo,
+  isFarmer,
+  pori,
+  ctx,
+}: {
+  mineInfo: AdventureInfoEx;
+  isFarmer: boolean;
+  pori: string;
+  ctx: Context;
+}): Promise<number> {
+  const activeIndexs = [
+    ...(mineInfo?.farmerSlots || []),
+    ...(mineInfo?.supporterSlots || []),
+  ];
+  const activeRewardLevels = [
+    ...(mineInfo?.farmerRewardLevel || []),
+    ...(mineInfo?.supporterRewardLevel || []),
+  ];
+
+  let slotIndex!: number;
+  const bigRewardIndex = activeIndexs[activeRewardLevels.indexOf(4)];
+  const isFarmerFound = (mineInfo?.farmerRewardLevel || []).includes(4);
+
+  if (mineInfo.hasBigReward) {
+    if (isFarmerFound) slotIndex = bigRewardIndex;
+    else slotIndex = Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
+  } else {
+    slotIndex = Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
+  }
+
+  console.log({
+    isFarmer,
+    activeIndexs,
+    activeRewardLevels,
+    bigRewardIndex,
+    pori,
+    slotIndex,
+    isFarmerFound,
+  });
+  await ctx.ui.writeMessage(
+    `roger that!. send pori ${pori} to support mineId:${mineInfo.mineId} at ${slotIndex} (bigRewardIndex: ${bigRewardIndex}, isFarmerFound:${isFarmerFound})`
+  );
+  return slotIndex;
 }

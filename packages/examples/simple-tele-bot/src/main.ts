@@ -148,7 +148,7 @@ async function main() {
         keyboard: [
           [{ text: '/stats' }, { text: '/wallet_balance' }],
           [{ text: '/sch_list' }, { text: '/whoami' }],
-          [{ text: '/finish' }, { text: '/price' }],
+          [{ text: '/setting_set_gas_factor <mul>' }, { text: '/price' }],
           [{ text: '/auto_play <h>' }, { text: '/market_list' }],
         ],
         resize_keyboard: true,
@@ -457,7 +457,10 @@ ${protentialTarget
 
       const rigyPoolInfo = await getKyberPoolRIGYPrice({ ctx });
       const rikenPoolInfo = await getKyberPoolRIKENPrice({ ctx });
-      const lunaBusd = await queryBinancePrice({ ctx, pair: 'LUNABUSD' });
+      const [lunaBusd, maticBusd] = await Promise.all([
+        queryBinancePrice({ ctx, pair: 'LUNABUSD' }),
+        queryBinancePrice({ ctx, pair: 'MATICBUSD' }),
+      ]);
 
       bot.sendMessage(
         msg.chat.id,
@@ -467,6 +470,7 @@ ${protentialTarget
             ...rigyPoolInfo,
             ...rikenPoolInfo,
             'LUNA->BUSD': lunaBusd.price,
+            'MATIC->BUSD': maticBusd.price,
           },
           null,
           2

@@ -1,5 +1,9 @@
 import { Adventure, WalletActions } from '../../index';
-import { Context, getIdleGameAddressSC } from '@pori-and-friends/pori-metadata';
+import {
+  AdventureInfoEx,
+  Context,
+  getIdleGameAddressSC,
+} from '@pori-and-friends/pori-metadata';
 import { boolFromString } from '@pori-and-friends/utils';
 import type { ITxData } from '@walletconnect/types';
 import { uniq } from 'lodash';
@@ -251,26 +255,21 @@ export async function cmdDoAtk({
 
 // args: mineId
 // const args = match[1];
-// TODO:
 //      supporter: support2(mineId, porian, index)
 //      farmer: fortify(mineId, porian, index)
-
-// IF has bigReward (level = 4 at index i)
-//    Support this index
-// Else
-//    Random remaining slots
-
+export type SupportSlotCalculator = typeof defaultSupportSlotPick;
 export async function cmdDoSupport({
   ctx,
   realm,
   args,
   SUPPORT_PORI,
+  customSlotPick = defaultSupportSlotPick,
 }: {
   ctx: Context;
   realm: Realm;
   args: string;
-
   SUPPORT_PORI: string;
+  customSlotPick?: SupportSlotCalculator;
 }) {
   if (!ctx.walletAcc) {
     console.warn('wallet channel not ready. Please run wallet_unlock first');
@@ -296,33 +295,14 @@ export async function cmdDoSupport({
     return;
   }
   const isFarmer = mineInfo.isFarmer;
-  const activeIndexs = [
-    ...(mineInfo?.farmerSlots || []),
-    ...(mineInfo?.supporterSlots || []),
-  ];
-  const activeRewardLevels = [
-    ...(mineInfo?.farmerRewardLevel || []),
-    ...(mineInfo?.supporterRewardLevel || []),
-  ];
-
-  const bigRewardIndex = activeIndexs[activeRewardLevels.indexOf(4)];
-
   const pori = SUPPORT_PORI;
-  const slotIndex = bigRewardIndex
-    ? bigRewardIndex
-    : Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
 
-  console.log({
+  const slotIndex = await customSlotPick({
+    mineInfo,
     isFarmer,
-    activeIndexs,
-    activeRewardLevels,
-    bigRewardIndex,
     pori,
-    slotIndex,
+    ctx,
   });
-  await ctx.ui.writeMessage(
-    `roger that!. send pori ${pori} to support mineId:${mineId} at ${slotIndex} (bigRewardIndex: ${bigRewardIndex})`
-  );
 
   let callDataAbi = '';
   if (isFarmer) {
@@ -353,4 +333,48 @@ export async function cmdDoSupport({
   );
   if (txHash) await ctx.ui.writeMessage(`https://polygonscan.com/tx/${txHash}`);
   else await ctx.ui.writeMessage(`Ố ồ..`);
+}
+
+// IF has bigReward (level = 4 at index i)
+//    Support this index
+// Else
+//    Random remaining slots
+async function defaultSupportSlotPick({
+  mineInfo,
+  isFarmer,
+  pori,
+  ctx,
+}: {
+  mineInfo: AdventureInfoEx;
+  isFarmer: boolean;
+  pori: string;
+  ctx: Context;
+}): Promise<number> {
+  const activeIndexs = [
+    ...(mineInfo?.farmerSlots || []),
+    ...(mineInfo?.supporterSlots || []),
+  ];
+  const activeRewardLevels = [
+    ...(mineInfo?.farmerRewardLevel || []),
+    ...(mineInfo?.supporterRewardLevel || []),
+  ];
+
+  const bigRewardIndex = activeIndexs[activeRewardLevels.indexOf(4)];
+
+  const slotIndex = bigRewardIndex
+    ? bigRewardIndex
+    : Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
+
+  console.log({
+    isFarmer,
+    activeIndexs,
+    activeRewardLevels,
+    bigRewardIndex,
+    pori,
+    slotIndex,
+  });
+  await ctx.ui.writeMessage(
+    `roger that!. send pori ${pori} to support mineId:${mineInfo.mineId} at ${slotIndex} (bigRewardIndex: ${bigRewardIndex})`
+  );
+  return slotIndex;
 }

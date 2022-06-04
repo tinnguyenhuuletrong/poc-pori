@@ -307,11 +307,15 @@ async function main() {
     action: async () => {
       const rigyPoolInfo = await getKyberPoolRIGYPrice({ ctx });
       const rikenPoolInfo = await getKyberPoolRIKENPrice({ ctx });
-      const lunaBusd = await queryBinancePrice({ ctx, pair: 'LUNABUSD' });
+      const [lunaBusd, maticBusd] = await Promise.all([
+        queryBinancePrice({ ctx, pair: 'LUNABUSD' }),
+        queryBinancePrice({ ctx, pair: 'MATICBUSD' }),
+      ]);
       console.log({
         ...rigyPoolInfo,
         ...rikenPoolInfo,
         'LUNA->BUSD': lunaBusd.price,
+        'MATIC->BUSD': maticBusd.price,
       });
     },
   });
