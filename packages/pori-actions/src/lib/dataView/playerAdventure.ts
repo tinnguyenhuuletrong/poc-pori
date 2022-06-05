@@ -3,6 +3,7 @@ import {
   IdleGameSCEventDataModel,
   DataViewRepo,
   DataViewModel,
+  PoriRepo,
 } from '@pori-and-friends/pori-repositories';
 import {
   AdventureFinishedData,
@@ -44,7 +45,7 @@ export async function computePlayerAdventure(
 
   const allEvents = options.realmEventStore.filtered(
     `
-      _id >= oid(${cursor}) && (
+      _id > oid(${cursor}) && (
         type="AdventureStarted" ||
         type="AdventureSupported1" ||
         type="AdventureFortified" ||
@@ -249,7 +250,11 @@ function defaultViewData(
   };
 }
 
-export function humanrizeAdventureInfo(advIno: AdventureInfo): AdventureInfoEx {
+export function humanrizeAdventureInfo(
+  realm: Realm,
+  advIno: AdventureInfo,
+  withPoriePower = false
+): AdventureInfoEx {
   const startTime = advIno.startTime
     ? new Date(advIno.startTime).toLocaleString()
     : undefined;
@@ -287,6 +292,21 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo): AdventureInfoEx {
   turnTime.farmerAtkTime = farmerAtkStartAt.toLocaleString();
   turnTime.supporterAtkTime = supporterAtkStartAt.toLocaleString();
 
+  // calculate pories power
+  const powers: Record<string, number> = {};
+  if (withPoriePower) {
+    const farmerPories = advIno.farmerPories ?? [];
+    for (const id of farmerPories) {
+      const info = PoriRepo.findOneSync(realm, id);
+      if (info) powers[id] = info.minePower;
+    }
+    const supportPories = advIno.supporterPories ?? [];
+    for (const id of supportPories) {
+      const info = PoriRepo.findOneSync(realm, id);
+      if (info) powers[id] = info.helpPower;
+    }
+  }
+
   return {
     link,
     canCollect,
@@ -298,6 +318,7 @@ export function humanrizeAdventureInfo(advIno: AdventureInfo): AdventureInfoEx {
     ...turnTime,
     atkAt: advIno.isFarmer ? farmerAtkStartAt : supporterAtkStartAt,
     blockedTo,
+    powers,
   };
 }
 

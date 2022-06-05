@@ -201,6 +201,7 @@ export type AdventureInfoEx = Omit<
   supporterAtkTime?: string;
   blockedTo: Date;
   atkAt: Date;
+  powers: Record<string, number>;
 };
 
 export type PromiseReturnType<T> = T extends Promise<infer Return> ? Return : T;

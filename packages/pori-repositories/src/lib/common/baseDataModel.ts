@@ -7,6 +7,11 @@ export function CommonReamRepo<T extends Realm.Object>(MODEL_NAME: string) {
       return res;
     }
 
+    public static findOneSync(realm: Realm, id: any): T | undefined {
+      const res = realm.objectForPrimaryKey<T>(MODEL_NAME, id);
+      return res;
+    }
+
     public static async findAll(realm: Realm) {
       return realm.objects<T>(MODEL_NAME);
     }

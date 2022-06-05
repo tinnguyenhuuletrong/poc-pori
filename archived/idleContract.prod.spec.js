@@ -5,6 +5,9 @@ methods: {
   blockedTime: [Function: bound _createTxObject],
   '0x312f8b19': [Function: bound _createTxObject],
   'blockedTime(uint256)': [Function: bound _createTxObject],
+  decreasedTime: [Function: bound _createTxObject],
+  '0xc22a5a2b': [Function: bound _createTxObject],
+  'decreasedTime()': [Function: bound _createTxObject],
   env: [Function: bound _createTxObject],
   '0x9dca0032': [Function: bound _createTxObject],
   'env()': [Function: bound _createTxObject],
@@ -17,9 +20,15 @@ methods: {
   fragmentToken: [Function: bound _createTxObject],
   '0xa8126c66': [Function: bound _createTxObject],
   'fragmentToken()': [Function: bound _createTxObject],
+  mechaDiscount: [Function: bound _createTxObject],
+  '0x87a6918c': [Function: bound _createTxObject],
+  'mechaDiscount()': [Function: bound _createTxObject],
   mines: [Function: bound _createTxObject],
   '0x2a3a06a7': [Function: bound _createTxObject],
   'mines(uint256)': [Function: bound _createTxObject],
+  mission2Riken: [Function: bound _createTxObject],
+  '0x5f06c918': [Function: bound _createTxObject],
+  'mission2Riken(uint256)': [Function: bound _createTxObject],
   owner: [Function: bound _createTxObject],
   '0x8da5cb5b': [Function: bound _createTxObject],
   'owner()': [Function: bound _createTxObject],
@@ -29,6 +38,12 @@ methods: {
   porianPower: [Function: bound _createTxObject],
   '0x571119b5': [Function: bound _createTxObject],
   'porianPower()': [Function: bound _createTxObject],
+  portalFee: [Function: bound _createTxObject],
+  '0xb706c770': [Function: bound _createTxObject],
+  'portalFee(uint256,address)': [Function: bound _createTxObject],
+  portalInfos: [Function: bound _createTxObject],
+  '0xb6358916': [Function: bound _createTxObject],
+  'portalInfos(address)': [Function: bound _createTxObject],
   renounceOwnership: [Function: bound _createTxObject],
   '0x715018a6': [Function: bound _createTxObject],
   'renounceOwnership()': [Function: bound _createTxObject],
@@ -59,6 +74,9 @@ methods: {
   rikenToken: [Function: bound _createTxObject],
   '0x8584b423': [Function: bound _createTxObject],
   'rikenToken()': [Function: bound _createTxObject],
+  totalFragments: [Function: bound _createTxObject],
+  '0x97bde9b0': [Function: bound _createTxObject],
+  'totalFragments()': [Function: bound _createTxObject],
   transferOwnership: [Function: bound _createTxObject],
   '0xf2fde38b': [Function: bound _createTxObject],
   'transferOwnership(address)': [Function: bound _createTxObject],
@@ -89,6 +107,18 @@ methods: {
   setFragmentConfigs: [Function: bound _createTxObject],
   '0xafc99853': [Function: bound _createTxObject],
   'setFragmentConfigs(uint256,uint256,address)': [Function: bound _createTxObject],
+  depositRiken: [Function: bound _createTxObject],
+  '0xe3f8064d': [Function: bound _createTxObject],
+  'depositRiken(uint256)': [Function: bound _createTxObject],
+  withdrawRiken: [Function: bound _createTxObject],
+  '0xaae94882': [Function: bound _createTxObject],
+  'withdrawRiken(uint256)': [Function: bound _createTxObject],
+  getOwnerNowOf: [Function: bound _createTxObject],
+  '0x774f61d5': [Function: bound _createTxObject],
+  'getOwnerNowOf(uint256)': [Function: bound _createTxObject],
+  notExisted: [Function: bound _createTxObject],
+  '0xdcde5e60': [Function: bound _createTxObject],
+  'notExisted(uint256)': [Function: bound _createTxObject],
   onAuthorized: [Function: bound _createTxObject],
   '0x5a199e45': [Function: bound _createTxObject],
   'onAuthorized(address,address,uint256,uint256,bytes12,bytes)': [Function: bound _createTxObject],
@@ -98,6 +128,9 @@ methods: {
   getOwnerOf: [Function: bound _createTxObject],
   '0x99321e12': [Function: bound _createTxObject],
   'getOwnerOf(uint256,uint256)': [Function: bound _createTxObject],
+  isMecha: [Function: bound _createTxObject],
+  '0x92e5ccac': [Function: bound _createTxObject],
+  'isMecha(uint256[3])': [Function: bound _createTxObject],
   startAdventure: [Function: bound _createTxObject],
   '0x30057802': [Function: bound _createTxObject],
   'startAdventure(uint256[3],uint8[3],bool)': [Function: bound _createTxObject],
@@ -113,12 +146,15 @@ methods: {
   finish: [Function: bound _createTxObject],
   '0xd353a1cb': [Function: bound _createTxObject],
   'finish(uint256)': [Function: bound _createTxObject],
+  getPortalInfoOf: [Function: bound _createTxObject],
+  '0xe726f7dd': [Function: bound _createTxObject],
+  'getPortalInfoOf(address,uint256)': [Function: bound _createTxObject],
   _calculateNormalReward: [Function: bound _createTxObject],
   '0x8f30ec1c': [Function: bound _createTxObject],
   '_calculateNormalReward(bytes32,bytes12)': [Function: bound _createTxObject],
   _calculateBigReward: [Function: bound _createTxObject],
-  '0x450fe7c9': [Function: bound _createTxObject],
-  '_calculateBigReward(uint256,uint256,uint256,uint256,uint8)': [Function: bound _createTxObject],
+  '0xc28a2f82': [Function: bound _createTxObject],
+  '_calculateBigReward((uint8,(address,bytes12,uint128,uint128),(address,bytes12,uint128,uint128),bytes32),uint8,uint256,uint256,uint256,uint256)': [Function: bound _createTxObject],
   atkPowerOf: [Function: bound _createTxObject],
   '0x4a0fb891': [Function: bound _createTxObject],
   'atkPowerOf(uint256,uint8)': [Function: bound _createTxObject],
@@ -148,7 +184,22 @@ methods: {
   'getStartTimeOfRewardMap(bytes32)': [Function: bound _createTxObject],
   getRewardOf: [Function: bound _createTxObject],
   '0x57282550': [Function: bound _createTxObject],
-  'getRewardOf(uint256,uint256)': [Function: bound _createTxObject]
+  'getRewardOf(uint256,uint256)': [Function: bound _createTxObject],
+  getESB: [Function: bound _createTxObject],
+  '0x3e6d7747': [Function: bound _createTxObject],
+  'getESB(uint256,uint256)': [Function: bound _createTxObject],
+  setRikenPortalConfig: [Function: bound _createTxObject],
+  '0xccbf3042': [Function: bound _createTxObject],
+  'setRikenPortalConfig(uint256[],uint256,uint256,uint128,uint256)': [Function: bound _createTxObject],
+  portalInfoOf: [Function: bound _createTxObject],
+  '0x9b5579ae': [Function: bound _createTxObject],
+  'portalInfoOf(address)': [Function: bound _createTxObject],
+  getRikenAmount: [Function: bound _createTxObject],
+  '0xb95add0f': [Function: bound _createTxObject],
+  'getRikenAmount(uint256,bool)': [Function: bound _createTxObject],
+  sqrt: [Function: bound _createTxObject],
+  '0x677342ce': [Function: bound _createTxObject],
+  'sqrt(uint256)': [Function: bound _createTxObject]
 },
 events: {
   AdventureFinished: [Function: bound ],
@@ -727,6 +778,16 @@ _jsonInterface: [
   },
   {
     inputs: [],
+    name: 'decreasedTime',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0xc22a5a2b'
+  },
+  {
+    inputs: [],
     name: 'env',
     outputs: [ { internalType: 'uint8', name: '', type: 'uint8' } ],
     stateMutability: 'view',
@@ -766,6 +827,16 @@ _jsonInterface: [
     signature: '0xa8126c66'
   },
   {
+    inputs: [],
+    name: 'mechaDiscount',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x87a6918c'
+  },
+  {
     inputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
     name: 'mines',
     outputs: [
@@ -775,55 +846,13 @@ _jsonInterface: [
         type: 'uint8'
       },
       {
-        components: [
-          {
-            internalType: 'address',
-            name: 'player',
-            type: 'address'
-          },
-          {
-            internalType: 'bytes12',
-            name: 'selectedCells',
-            type: 'bytes12'
-          },
-          {
-            internalType: 'uint128',
-            name: 'porianId1',
-            type: 'uint128'
-          },
-          {
-            internalType: 'uint128',
-            name: 'porianId2',
-            type: 'uint128'
-          }
-        ],
+        components: [ [Object], [Object], [Object], [Object] ],
         internalType: 'struct IdleGame.PlayerInfo',
         name: 'farmer',
         type: 'tuple'
       },
       {
-        components: [
-          {
-            internalType: 'address',
-            name: 'player',
-            type: 'address'
-          },
-          {
-            internalType: 'bytes12',
-            name: 'selectedCells',
-            type: 'bytes12'
-          },
-          {
-            internalType: 'uint128',
-            name: 'porianId1',
-            type: 'uint128'
-          },
-          {
-            internalType: 'uint128',
-            name: 'porianId2',
-            type: 'uint128'
-          }
-        ],
+        components: [ [Object], [Object], [Object], [Object] ],
         internalType: 'struct IdleGame.PlayerInfo',
         name: 'helper',
         type: 'tuple'
@@ -835,6 +864,16 @@ _jsonInterface: [
     constant: true,
     payable: undefined,
     signature: '0x2a3a06a7'
+  },
+  {
+    inputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    name: 'mission2Riken',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x5f06c918'
   },
   {
     inputs: [],
@@ -865,6 +904,38 @@ _jsonInterface: [
     constant: true,
     payable: undefined,
     signature: '0x571119b5'
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'address', name: '', type: 'address' }
+    ],
+    name: 'portalFee',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0xb706c770'
+  },
+  {
+    inputs: [ { internalType: 'address', name: '', type: 'address' } ],
+    name: 'portalInfos',
+    outputs: [
+      { internalType: 'uint128', name: 'missions', type: 'uint128' },
+      {
+        internalType: 'uint128',
+        name: 'fastMissions',
+        type: 'uint128'
+      },
+      { internalType: 'uint256', name: 'supplied', type: 'uint256' },
+      { internalType: 'uint256', name: 'locked', type: 'uint256' }
+    ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0xb6358916'
   },
   {
     inputs: [],
@@ -980,6 +1051,16 @@ _jsonInterface: [
     constant: true,
     payable: undefined,
     signature: '0x8584b423'
+  },
+  {
+    inputs: [],
+    name: 'totalFragments',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x97bde9b0'
   },
   {
     inputs: [
@@ -1160,6 +1241,50 @@ _jsonInterface: [
     signature: '0xafc99853'
   },
   {
+    inputs: [ { internalType: 'uint256', name: 'amount', type: 'uint256' } ],
+    name: 'depositRiken',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+    constant: undefined,
+    payable: undefined,
+    signature: '0xe3f8064d'
+  },
+  {
+    inputs: [ { internalType: 'uint256', name: 'amount', type: 'uint256' } ],
+    name: 'withdrawRiken',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+    constant: undefined,
+    payable: undefined,
+    signature: '0xaae94882'
+  },
+  {
+    inputs: [ { internalType: 'uint256', name: 'porian', type: 'uint256' } ],
+    name: 'getOwnerNowOf',
+    outputs: [
+      { internalType: 'address', name: '', type: 'address' },
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'bool', name: '', type: 'bool' }
+    ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x774f61d5'
+  },
+  {
+    inputs: [ { internalType: 'uint256', name: 'porian', type: 'uint256' } ],
+    name: 'notExisted',
+    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0xdcde5e60'
+  },
+  {
     inputs: [
       { internalType: 'address', name: 'from', type: 'address' },
       { internalType: 'address', name: 'to', type: 'address' },
@@ -1204,6 +1329,22 @@ _jsonInterface: [
     constant: true,
     payable: undefined,
     signature: '0x99321e12'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256[3]',
+        name: 'porians',
+        type: 'uint256[3]'
+      }
+    ],
+    name: 'isMecha',
+    outputs: [ { internalType: 'bool', name: '', type: 'bool' } ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x92e5ccac'
   },
   {
     inputs: [
@@ -1282,6 +1423,22 @@ _jsonInterface: [
   },
   {
     inputs: [
+      { internalType: 'address', name: 'player', type: 'address' },
+      { internalType: 'uint256', name: 'mission', type: 'uint256' }
+    ],
+    name: 'getPortalInfoOf',
+    outputs: [
+      { internalType: 'bool', name: '', type: 'bool' },
+      { internalType: 'uint256', name: '', type: 'uint256' }
+    ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0xe726f7dd'
+  },
+  {
+    inputs: [
       { internalType: 'bytes32', name: 'rewardMap', type: 'bytes32' },
       {
         internalType: 'bytes12',
@@ -1302,22 +1459,64 @@ _jsonInterface: [
   },
   {
     inputs: [
-      { internalType: 'uint256', name: 'fPorian1', type: 'uint256' },
-      { internalType: 'uint256', name: 'fPorian2', type: 'uint256' },
-      { internalType: 'uint256', name: 'hPorian1', type: 'uint256' },
-      { internalType: 'uint256', name: 'hPorian2', type: 'uint256' },
-      { internalType: 'uint8', name: '_env', type: 'uint8' }
+      {
+        components: [ [Object], [Object], [Object], [Object] ],
+        internalType: 'struct IdleGame.MineInfo',
+        name: 'm',
+        type: 'tuple'
+      },
+      { internalType: 'uint8', name: '_env', type: 'uint8' },
+      {
+        internalType: 'uint256',
+        name: 'fRigyReward',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'fRikenReward',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'hRigyReward',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'hRikenReward',
+        type: 'uint256'
+      }
     ],
     name: '_calculateBigReward',
     outputs: [
-      { internalType: 'bool', name: 'isFarmer', type: 'bool' },
-      { internalType: 'uint256', name: 'fragments', type: 'uint256' }
+      { internalType: 'address', name: 'winner', type: 'address' },
+      { internalType: 'uint256', name: 'fragments', type: 'uint256' },
+      {
+        internalType: 'uint256',
+        name: 'fRigyRewardNew',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'fRikenRewardNew',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'hRigyRewardNew',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'hRikenRewardNew',
+        type: 'uint256'
+      }
     ],
     stateMutability: 'view',
     type: 'function',
     constant: true,
     payable: undefined,
-    signature: '0x450fe7c9'
+    signature: '0xc28a2f82'
   },
   {
     inputs: [
@@ -1465,6 +1664,126 @@ _jsonInterface: [
     constant: true,
     payable: undefined,
     signature: '0x57282550'
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'ep', type: 'uint256' },
+      { internalType: 'uint256', name: 'ap', type: 'uint256' }
+    ],
+    name: 'getESB',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'pure',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x3e6d7747'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256[]',
+        name: 'rikenAmounts',
+        type: 'uint256[]'
+      },
+      {
+        internalType: 'uint256',
+        name: '_mechaDiscount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'capacityRiken',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint128',
+        name: 'missionLimit',
+        type: 'uint128'
+      },
+      {
+        internalType: 'uint256',
+        name: '_decreasedTime',
+        type: 'uint256'
+      }
+    ],
+    name: 'setRikenPortalConfig',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+    constant: undefined,
+    payable: undefined,
+    signature: '0xccbf3042'
+  },
+  {
+    inputs: [ { internalType: 'address', name: 'player', type: 'address' } ],
+    name: 'portalInfoOf',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'suppliedRiken',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'lockedRiken',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'availableRiken',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'capacityRiken',
+        type: 'uint256'
+      },
+      { internalType: 'uint128', name: 'missions', type: 'uint128' },
+      {
+        internalType: 'uint128',
+        name: 'fastMissions',
+        type: 'uint128'
+      },
+      {
+        internalType: 'uint128',
+        name: 'capacityMissions',
+        type: 'uint128'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x9b5579ae'
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'missions', type: 'uint256' },
+      { internalType: 'bool', name: '_isMecha', type: 'bool' }
+    ],
+    name: 'getRikenAmount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'rikenAmount',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0xb95add0f'
+  },
+  {
+    inputs: [ { internalType: 'uint256', name: 'x', type: 'uint256' } ],
+    name: 'sqrt',
+    outputs: [ { internalType: 'uint256', name: '', type: 'uint256' } ],
+    stateMutability: 'pure',
+    type: 'function',
+    constant: true,
+    payable: undefined,
+    signature: '0x677342ce'
   }
 ]
 }
