@@ -1,5 +1,5 @@
+import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
 import {
-  addWalletConnectToContext,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   getMaticBalance,
@@ -20,7 +20,14 @@ import {
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import { decryptAes } from '@pori-and-friends/utils';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import {
+  copyFileSync,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'fs';
 import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
 import * as os from 'os';
@@ -29,6 +36,7 @@ import { autoPlayV1 } from './app/autoPlayWorkflow';
 import {
   activeEnv,
   botMasterUid,
+  DATASTORE_DB_KEY,
   env,
   FORMATION,
   MINE_ATK_PRICE_FACTOR,
@@ -69,7 +77,15 @@ async function main() {
   }
 
   console.log('🤖 booting step 1 done');
-  const { ctx, realm, scheduler } = await boot();
+  const bootInfo = await boot();
+  const { ctx, scheduler } = bootInfo;
+  let realm = bootInfo.realm;
+
+  async function reloadRealm() {
+    realm = await Repos.openRepo({
+      path: activeEnv.environment.dbPath,
+    });
+  }
 
   loadBotMemory();
 
@@ -77,6 +93,17 @@ async function main() {
 
   const bot = new TelegramBot(token, { polling: true });
   bot.on('polling_error', console.log);
+
+  // mongodb data store
+  if (activeEnv.environment.mongodbDataStoreUri) {
+    MongoDataStore.addMongodbDataStore(
+      ctx,
+      activeEnv.environment.mongodbDataStoreUri,
+      activeEnv.environment.mongodbDataStoreSSLCer
+    ).then((res) => {
+      ctx.ui.writeMessage('🤖 mongodb datastore connected!');
+    });
+  }
 
   // worker register
   registerWorkerNotify({ ctx, realm, scheduler, bot });
@@ -94,11 +121,12 @@ async function main() {
   // cmds begin
   // --------------------
 
-  bot.onText(/\/whoami/, function whoami(msg) {
+  bot.onText(/\/whoami/, async function whoami(msg) {
     if (!requireBotMaster(msg)) return;
     captureChatId(msg.chat.id);
 
-    console.log(msg);
+    // console.log(msg);
+    const localMetadata = await getLocalRealmRevision(realm);
 
     const resp = `i am 🤖. 
     <pre><code class="language-json">
@@ -110,6 +138,7 @@ async function main() {
       playerAddress: ${playerAddress}
       walletUnlock: ${Boolean(ctx.walletAcc)}
       settingGasFactor: ${ctx.setting.gasFactor} 
+      realmRevision: ${localMetadata.revision}
       _v: ${VERSION}
     </code></pre>
     Have fun!
@@ -146,10 +175,11 @@ async function main() {
     await bot.sendMessage(msg.chat.id, 'clear...', {
       reply_markup: {
         keyboard: [
-          [{ text: '/stats' }, { text: '/wallet_balance' }],
+          [{ text: '/db_fetch' }, { text: '/wallet_balance' }],
           [{ text: '/sch_list' }, { text: '/whoami' }],
-          [{ text: '/setting_set_gas_factor <mul>' }, { text: '/price' }],
-          [{ text: '/auto_play <h>' }, { text: '/market_list' }],
+          [{ text: '/setting_set_gas_factor 1.05' }, { text: '/price' }],
+          [{ text: '/auto_play 12' }, { text: '/market_list' }],
+          [{ text: '/stats' }],
         ],
         resize_keyboard: true,
       },
@@ -273,6 +303,8 @@ async function main() {
           addr
         );
 
+      const localMetadata = await getLocalRealmRevision(realm);
+
       // targets:
       // ${humanView.protentialTarget.map(
       //   (itm) => `\n\t \\- ${itm.mineId} ${itm.hasBigReward} ${itm.sinceSec}`
@@ -304,6 +336,7 @@ ${protentialTarget
   )
   .join('\n')}
 <b>Summary:</b>
+  - <i>revision: </i> <b>${localMetadata.revision}</b>
   - <i>canDoNextAction: </i> <b>${humanView.canDoNextAction}</b>
   - <i>activeMine: </i> ${humanView.activeMines}
   - <i>nextSupportAt: </i> ${humanView.nextAtkAt}
@@ -526,6 +559,96 @@ ${formatedData
     });
   });
 
+  bot.onText(/\/db_fetch/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+      const checkMsg = await bot.sendMessage(msg.chat.id, `🗄 checking...`);
+
+      await MongoDataStore.waitForConnected(ctx);
+
+      const metadata = await MongoDataStore.fetchBolb(ctx, DATASTORE_DB_KEY);
+
+      const localMetadata = await getLocalRealmRevision(realm);
+
+      const remoteRevision = metadata?.metadata?.revision;
+      const shouldPull = remoteRevision > localMetadata.revision;
+
+      await bot.editMessageText(
+        `🗄 remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}
+        - shouldPull: ${shouldPull}
+        `,
+        {
+          chat_id: checkMsg.chat.id,
+          message_id: checkMsg.message_id,
+          reply_markup: {
+            inline_keyboard: shouldPull
+              ? [
+                  [
+                    {
+                      text: `db_pull`,
+                      switch_inline_query_current_chat: `/db_pull`,
+                    },
+                  ],
+                ]
+              : undefined,
+          },
+        }
+      );
+    });
+  });
+
+  bot.onText(/\/db_pull/, async (msg) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+      const checkMsg = await bot.sendMessage(msg.chat.id, `🗄 checking...`);
+
+      const updateText = async (msg) => {
+        await bot.editMessageText(`🗄 ${msg}`, {
+          chat_id: checkMsg.chat.id,
+          message_id: checkMsg.message_id,
+        });
+      };
+
+      await MongoDataStore.waitForConnected(ctx);
+
+      const tmpDir = './tmp/';
+      if (!existsSync(tmpDir)) mkdirSync(tmpDir);
+
+      const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
+        ctx,
+        DATASTORE_DB_KEY
+      );
+
+      const totalBytes = fileMeta.length;
+      let downloaded = 0;
+      await updateText(`download begin. totalBytes ${totalBytes}`);
+      dataStream.prependListener('data', async (chunk) => {
+        downloaded += chunk.length;
+        await updateText(`progress ${downloaded / totalBytes}`);
+      });
+
+      dataStream
+        .pipe(createWriteStream('./tmp/snapshot.realm'))
+        .on('finish', async () => {
+          await updateText(`download finish. begin extract`);
+
+          realm.close();
+          copyFileSync('./tmp/snapshot.realm', activeEnv.environment.dbPath);
+
+          await updateText(`extract success. reload realm begin`);
+          await reloadRealm();
+
+          await updateText('reload realm success');
+
+          const localMetadata = await getLocalRealmRevision(realm);
+
+          await updateText(`#datastore_sync ${localMetadata.revision}`);
+        });
+    });
+  });
+
   // --------------------
   // cmd handler End
   // --------------------
@@ -623,6 +746,17 @@ ${formatedData
     appCtx.ui.writeMessage('recieved SIGTERM');
     process.exit(0);
   });
+}
+
+async function getLocalRealmRevision(realm: Realm) {
+  const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
+    realm,
+    'default'
+  );
+  const localMetadata = {
+    revision: dbMetadata.updatedBlock,
+  };
+  return localMetadata;
 }
 
 async function boot() {

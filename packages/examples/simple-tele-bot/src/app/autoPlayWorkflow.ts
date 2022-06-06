@@ -286,10 +286,28 @@ async function supportSlotPick({
   let slotIndex!: number;
   const bigRewardIndex = activeIndexs[activeRewardLevels.indexOf(4)];
   const isFarmerFound = (mineInfo?.farmerRewardLevel || []).includes(4);
+  let esbPercentage = NaN;
+  let bigRewardEP: number, bigRewardAP: number;
 
   if (mineInfo.hasBigReward) {
-    if (isFarmerFound) slotIndex = bigRewardIndex;
-    else slotIndex = Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
+    if (isFarmerFound) {
+      // calculate ESB
+      //  https://docs.poriverse.io/game-guide/chapter-1-the-lost-porian/esb-explorer-strike-back
+      const farmerPori =
+        mineInfo?.farmerPories[mineInfo.farmerRewardLevel.indexOf(4)];
+      bigRewardEP = mineInfo?.powers[farmerPori] ?? 0;
+      const supporterPori =
+        mineInfo?.supporterPories[mineInfo.supporterRewardLevel.indexOf(4)];
+      bigRewardAP = mineInfo?.powers[supporterPori] ?? 0;
+      const esbCal = await ctx.contract.methods.getESB(
+        bigRewardEP,
+        bigRewardAP
+      );
+      esbPercentage = Math.round(+esbCal / 100);
+      // calculate ESB - end
+
+      slotIndex = bigRewardIndex;
+    } else slotIndex = Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
   } else {
     slotIndex = Adventure.randAdventureSlot(1, uniq(activeIndexs))[0];
   }
@@ -304,7 +322,10 @@ async function supportSlotPick({
     isFarmerFound,
   });
   await ctx.ui.writeMessage(
-    `roger that!. send pori ${pori} to support mineId:${mineInfo.mineId} at ${slotIndex} (bigRewardIndex: ${bigRewardIndex}, isFarmerFound:${isFarmerFound})`
+    `roger that!. send pori ${pori} to support mineId:${mineInfo.mineId} at ${slotIndex} 
+
+    - (bigRewardIndex: ${bigRewardIndex}, isFarmerFound:${isFarmerFound}) 
+    - (bigRewardEP1: ${bigRewardEP}, bigRewardAP1: ${bigRewardAP}, esbPercentage: ${esbPercentage})`
   );
   return slotIndex;
 }

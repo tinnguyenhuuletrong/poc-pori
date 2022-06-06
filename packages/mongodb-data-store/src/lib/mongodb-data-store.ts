@@ -9,8 +9,17 @@ import {
 } from 'mongodb';
 import debug from 'debug';
 import { Stream } from 'stream';
+import { Deferred } from '@pori-and-friends/utils';
 
 const log = debug('pori:mongodb-data-store');
+const connectDefer = new Deferred();
+
+export async function waitForConnected(ctx: Context) {
+  if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
+
+  await connectDefer.promise;
+  return ctx.mongoClient;
+}
 
 export async function addMongodbDataStore(
   ctx: Context,
@@ -23,8 +32,12 @@ export async function addMongodbDataStore(
     serverApi: ServerApiVersion.v1,
   });
 
+  connectDefer.reset();
+
   await client.connect();
   ctx.mongoClient = client;
+
+  connectDefer.resolve(client);
 
   log('connected!');
   return client;
@@ -80,4 +93,19 @@ export async function downloadBlob(
 
   const readStream = bucket.openDownloadStreamByName(key);
   return [fileMeta, readStream];
+}
+
+export async function fetchBolb(
+  ctx: Context,
+  key: string
+): Promise<GridFSFile> {
+  if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
+
+  const bucket = getBucket(ctx.mongoClient);
+
+  const fileMeta = (
+    await bucket.find({ filename: key }, { sort: { uploadDate: -1 } }).toArray()
+  )[0];
+
+  return fileMeta;
 }
