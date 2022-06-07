@@ -299,10 +299,9 @@ async function supportSlotPick({
       const supporterPori =
         mineInfo?.supporterPories[mineInfo.supporterRewardLevel.indexOf(4)];
       bigRewardAP = mineInfo?.powers[supporterPori] ?? 0;
-      const esbCal = await ctx.contract.methods.getESB(
-        bigRewardEP,
-        bigRewardAP
-      );
+      const esbCal = await ctx.contract.methods
+        .getESB(bigRewardEP, bigRewardAP)
+        .call();
       esbPercentage = Math.round(+esbCal / 100);
       // calculate ESB - end
 
