@@ -3,10 +3,9 @@
   "projects": {
     "examples-cli": "packages/examples/cli",
     "examples-parse-nft": "packages/examples/parse-nft",
+    "examples-play": "packages/examples/play",
     "examples-query-mine-info": "packages/examples/query-mine-info",
-    "examples-scan-idle-game-events": "packages/examples/scan-idle-game-events",
     "examples-simple-tele-bot": "packages/examples/simple-tele-bot",
-    "examples-stream-idle-game-events": "packages/examples/stream-idle-game-events",
     "mongodb-data-store": "packages/mongodb-data-store",
     "pori-actions": "packages/pori-actions",
     "pori-metadata": "packages/pori-metadata",

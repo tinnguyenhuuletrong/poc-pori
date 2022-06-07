@@ -1,0 +1,50 @@
+{
+  "sourceRoot": "packages/examples/play/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/examples/play",
+        "main": "packages/examples/play/src/main.ts",
+        "tsConfig": "packages/examples/play/tsconfig.app.json",
+        "assets": ["packages/examples/play/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/examples/play/src/environments/environment.ts",
+              "with": "packages/examples/play/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-play:build"
+      }
+    },
+    "run": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "examples-play:build",
+        "runtimeArgs": ["--experimental-repl-await"]
+      }
+    },
+    "lint": {
+      "executor": "@angular-devkit/build-angular:tslint",
+      "options": {
+        "tsConfig": ["packages/examples/play/tsconfig.app.json"],
+        "exclude": ["**/node_modules/**", "!packages/examples/play/**/*"]
+      }
+    }
+  },
+  "tags": []
+}
