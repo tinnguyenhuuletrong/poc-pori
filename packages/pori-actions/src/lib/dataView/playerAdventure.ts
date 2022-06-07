@@ -11,11 +11,16 @@ import {
   AdventureInfo,
   AdventureInfoEx,
   AdventureStartedData,
+  AdventureStatsGroupByDay,
   AdventureSupported1Data,
   AdventureSupported2Data,
   calculateMineTurnTime,
   EIdleGameSCEventType,
 } from '@pori-and-friends/pori-metadata';
+import moment from 'moment';
+
+const TOKEN_DECIMAL = 18;
+const TOKEN_CONVERT_CONSTANT = 10 ** TOKEN_DECIMAL;
 
 const HEAD_VERSION = '1';
 export interface IComputePlayerAdventureProps {
@@ -31,7 +36,7 @@ export interface ActiveAdventureComputed {
     lastMineUnlockAt?: Date;
   };
   activeAdventures: Record<number, AdventureInfo>;
-  finishedAdventures: Record<number, AdventureInfo>;
+  finishedAdventures: Record<number, AdventureStatsGroupByDay>;
 }
 
 export async function computePlayerAdventure(
@@ -185,11 +190,38 @@ export async function computePlayerAdventure(
           }
 
           delete viewData.activeAdventures[evData.mineId];
-          viewData.finishedAdventures[evData.mineId] = {
-            ...mineInfo,
-            state: 'AdventureFinished',
+          const dateNo = moment(
+            mineInfo.isSupporter
+              ? mineInfo.supporterEndTime
+              : mineInfo.farmerEndTime
+          )
+            .startOf('D')
+            .unix();
 
-            // todo add reward
+          const previous = viewData.finishedAdventures[dateNo] || {
+            unixDay: dateNo,
+            timestamp: new Date(dateNo * 1000),
+            finishedMineIds: [],
+            totalRigy: 0,
+            totalRiken: 0,
+          };
+
+          const rigyReward = mineInfo.isSupporter
+            ? evData.helperReward1
+            : evData.farmerReward1;
+          const rikenReward = mineInfo.isSupporter
+            ? evData.helperReward2
+            : evData.farmerReward2;
+
+          viewData.finishedAdventures[dateNo] = {
+            ...previous,
+            finishedMineIds: [...previous.finishedMineIds, mineInfo.mineId],
+            totalRigy:
+              previous.totalRigy +
+              parseFloat(rigyReward.toString()) / TOKEN_CONVERT_CONSTANT,
+            totalRiken:
+              previous.totalRiken +
+              parseFloat(rikenReward.toString()) / TOKEN_CONVERT_CONSTANT,
           };
 
           // add note

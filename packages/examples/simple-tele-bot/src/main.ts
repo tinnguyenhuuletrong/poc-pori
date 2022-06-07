@@ -342,6 +342,15 @@ ${protentialTarget
   - <i>nextSupportAt: </i> ${humanView.nextAtkAt}
   - <i>nextActionAt: </i> ${humanView.nextActionAt}
   - <i>gasPriceGWEI: </i> ${humanView.gasPriceGWEI}
+
+<b>Today:</b>
+  - <i>day: </i> ${new Date(
+    humanView.todayStats?.timestamp
+  ).toLocaleDateString()}
+  - <i>mines: </i> ${humanView.todayStats?.finishedMineIds.length}
+  - <i>RIGY: </i> ${humanView.todayStats?.totalRigy}
+  - <i>RIKEN: </i> ${humanView.todayStats?.totalRiken}
+
       `;
 
       let keyboardActions: InlineKeyboardButton[] = [];

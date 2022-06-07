@@ -5,6 +5,7 @@ import {
   AdventureInfo,
   Context,
   getIdleGameAddressSC,
+  AdventureStatsGroupByDay,
 } from '@pori-and-friends/pori-metadata';
 import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
@@ -30,6 +31,7 @@ export type AdventureStatsComputed = {
   nextActionAtDate?: Date;
   nextAtkAtDate?: Date;
   gasPriceGWEI: string;
+  todayStats?: AdventureStatsGroupByDay;
 };
 
 export async function refreshAdventureStatsForAddress(
@@ -140,6 +142,10 @@ export async function refreshAdventureStatsForAddress(
     ).fromNow()}`;
   }
   humanView.nextAtkAtDate = nextAtkAt;
+
+  // stats
+  const toDayNo = moment().startOf('D').unix();
+  humanView.todayStats = viewData.finishedAdventures[toDayNo];
 
   return humanView;
 }

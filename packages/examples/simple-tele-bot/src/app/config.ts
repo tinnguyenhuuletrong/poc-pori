@@ -2,7 +2,7 @@ import { ENV } from '@pori-and-friends/pori-metadata';
 import * as AppEnv from '../environments/environment';
 import * as AppEnvProd from '../environments/environment.prod';
 
-export const VERSION = '9';
+export const VERSION = '10';
 export const env = ENV.Prod;
 export const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
 export const playerAddress = process.env.PLAYER_ADDRESS;

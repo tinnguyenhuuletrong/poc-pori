@@ -187,6 +187,14 @@ export type AdventureInfo = {
   supporterSlots?: number[];
 };
 
+export type AdventureStatsGroupByDay = {
+  unixDay: number;
+  timestamp: Date;
+  finishedMineIds: number[];
+  totalRigy: number;
+  totalRiken: number;
+};
+
 export type AdventureInfoEx = Omit<
   AdventureInfo,
   'startTime' | 'farmerEndTime' | 'supporterEndTime'
