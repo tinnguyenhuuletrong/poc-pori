@@ -1,10 +1,11 @@
 import { ENV } from '@pori-and-friends/pori-metadata';
 import * as AppEnv from '../environments/environment';
 import * as AppEnvProd from '../environments/environment.prod';
+import * as AppEnvProdPorichain from '../environments/environment.prod.porichain';
 
 export const VERSION = '10';
 export const env = ENV.Prod;
-export const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
+export const activeEnv = computeActiveEnv(env);
 export const playerAddress = process.env.PLAYER_ADDRESS;
 export const botMasterUid = process.env.TELEGRAM_MASTER_ID;
 export const MINE_ATK_PRICE_FACTOR = 1.2;
@@ -23,3 +24,19 @@ export const schedulerNotifyMineNotifyIdType =
 
 export const schedulerNotifyMineAtkId = (mineId) =>
   `schedule_mine_atk_${mineId}`;
+
+function computeActiveEnv(env: ENV) {
+  let activeEnv: typeof AppEnv;
+  switch (env) {
+    case ENV.Prod:
+      activeEnv = AppEnvProd;
+      break;
+    case ENV.ProdPorichain:
+      activeEnv = AppEnvProdPorichain;
+      break;
+    case ENV.Staging:
+      activeEnv = AppEnv;
+      break;
+  }
+  return activeEnv;
+}

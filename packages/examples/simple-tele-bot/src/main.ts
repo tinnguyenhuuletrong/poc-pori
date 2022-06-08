@@ -778,7 +778,7 @@ async function boot() {
   console.log('PlayerAddress:', playerAddress);
   console.log('Example: cli');
 
-  const ctx = await init(ENV.Prod);
+  const ctx = await init(env);
   console.log('connected');
 
   ctx.playerAddress = playerAddress;

@@ -39,11 +39,28 @@ import {
 import repl from 'repl';
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
+import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
 
 const env = ENV.Prod;
-const activeEnv = env === ENV.Prod ? AppEnvProd : AppEnv;
+const activeEnv = computeActiveEnv(env);
 const playerAddress = process.env.PLAYER_ADDRESS;
 const MINE_ATK_PRICE_FACTOR = 1.2;
+
+function computeActiveEnv(env: ENV) {
+  let activeEnv: typeof AppEnv;
+  switch (env) {
+    case ENV.Prod:
+      activeEnv = AppEnvProd;
+      break;
+    case ENV.ProdPorichain:
+      activeEnv = AppEnvProdPorichain;
+      break;
+    case ENV.Staging:
+      activeEnv = AppEnv;
+      break;
+  }
+  return activeEnv;
+}
 
 async function main() {
   console.log(env, activeEnv);
@@ -55,7 +72,7 @@ async function main() {
   console.log('PlayerAddress:', playerAddress);
   console.log('Example: cli');
 
-  const ctx = await init(ENV.Prod);
+  const ctx = await init(env);
   console.log('connected');
 
   ctx.playerAddress = playerAddress;

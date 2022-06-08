@@ -1,6 +1,7 @@
 import { ENV } from './commonTypes';
 import * as stagConfig from './lib/sta-poriverse_info';
 import * as prodConfig from './lib/prod-poriverse_info';
+import * as prodPoriChainConfig from './lib/prod-porichain-poriverse_info';
 
 export const TEN_POWER_10_BN = BigInt(10 ** 18);
 export const TURN_DURATION_SEC = 1800;
@@ -17,6 +18,8 @@ export function getWeb3NodeUriHttp(env: ENV) {
 
 export function getAPILink(env: ENV) {
   if (env === ENV.Staging) return stagConfig.gameInfo.m.app.apiUrl;
+  else if (env === ENV.ProdPorichain)
+    return prodPoriChainConfig.gameInfo.m.app.apiUrl;
   else return prodConfig.gameInfo.m.app.apiUrl;
 }
 
@@ -31,7 +34,8 @@ export function getRIGYTokenInfo(env: ENV) {
   let tokenConfig = prodConfig.gameInfo.m.app;
   if (env === ENV.Staging) {
     tokenConfig = stagConfig.gameInfo.m.app;
-  }
+  } else if (env === ENV.ProdPorichain)
+    tokenConfig = prodPoriChainConfig.gameInfo.m.app;
 
   return {
     symbol: tokenConfig.token.inGameSymbol,
@@ -45,7 +49,8 @@ export function getRIKENTokenInfo(env: ENV) {
   let tokenConfig = prodConfig.gameInfo.m.app;
   if (env === ENV.Staging) {
     tokenConfig = stagConfig.gameInfo.m.app;
-  }
+  } else if (env === ENV.ProdPorichain)
+    tokenConfig = prodPoriChainConfig.gameInfo.m.app;
 
   return {
     symbol: tokenConfig.token.nativeSymbol,
@@ -55,6 +60,13 @@ export function getRIKENTokenInfo(env: ENV) {
   };
 }
 
+export function getAdventureBaseLink(env: ENV) {
+  if (env === ENV.Staging) return stagConfig.gameInfo.m.app.urlAdventure;
+  else if (env === ENV.ProdPorichain)
+    return prodPoriChainConfig.gameInfo.m.app.urlAdventure;
+  return prodConfig.gameInfo.m.app.urlAdventure;
+}
+
 export function getIdleGameAddressSC(env: ENV) {
   if (env === ENV.Staging) {
     return {
@@ -62,7 +74,13 @@ export function getIdleGameAddressSC(env: ENV) {
       address: stagConfig.gameInfo.m.app.contractAddress.idleGameAddress,
       createdBlock: stagConfig.gameInfo.m.app.scCreatedBlock.idle,
     };
-  }
+  } else if (env === ENV.ProdPorichain)
+    return {
+      abi: prodPoriChainConfig.ABI_IDLE,
+      address:
+        prodPoriChainConfig.gameInfo.m.app.contractAddress.idleGameAddress,
+      createdBlock: prodPoriChainConfig.gameInfo.m.app.scCreatedBlock.idle,
+    };
   return {
     abi: prodConfig.ABI_IDLE,
     address: prodConfig.gameInfo.m.app.contractAddress.idleGameAddress,

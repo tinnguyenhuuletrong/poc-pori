@@ -15,7 +15,9 @@ import {
   AdventureSupported1Data,
   AdventureSupported2Data,
   calculateMineTurnTime,
+  Context,
   EIdleGameSCEventType,
+  getAdventureBaseLink,
 } from '@pori-and-friends/pori-metadata';
 import moment from 'moment';
 
@@ -283,6 +285,7 @@ function defaultViewData(
 }
 
 export function humanrizeAdventureInfo(
+  ctx: Context,
   realm: Realm,
   advIno: AdventureInfo,
   withPoriePower = false
@@ -310,7 +313,8 @@ export function humanrizeAdventureInfo(
     ? new Date(advIno.farmerEndTime)
     : new Date(advIno.supporterEndTime as any);
 
-  const link = `https://adventure.poriverse.io/missions/${advIno.mineId}`;
+  const baseAdvLink = getAdventureBaseLink(ctx.env);
+  const link = `${baseAdvLink}/missions/${advIno.mineId}`;
   const hasBigRewardFarmer =
     (advIno.farmerRewardLevel?.filter((itm) => itm >= 4).length ?? 0) > 0;
   const hasBigRewardSupporter =

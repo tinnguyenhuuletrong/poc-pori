@@ -9,6 +9,7 @@ import { MongoClient } from 'mongodb';
 export enum ENV {
   Staging = 'STAG',
   Prod = 'PROD',
+  ProdPorichain = 'PROD_PORICHAIN',
 }
 export type SendMessageHandler = (msg: string) => Promise<void>;
 export type Context = {
