@@ -31,9 +31,16 @@ export function stopBot(id: string) {
 
 function captureStartedBot(state: Workflow.WorkflowState, args: AutoPlayArgs) {
   const id = state.id;
-  state.finishDefered.promise.finally(() => {
-    delete AutoPlayDb[id];
-  });
+  state.finishDefered.promise
+    .then((res) => {
+      console.log('bot finish');
+    })
+    .catch((err) => {
+      console.log('bot error', err);
+    })
+    .finally(() => {
+      delete AutoPlayDb[id];
+    });
   AutoPlayDb[id] = { state, args };
 }
 
