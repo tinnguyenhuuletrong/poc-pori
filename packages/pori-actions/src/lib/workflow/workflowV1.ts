@@ -7,6 +7,7 @@ export type WorkflowState = {
   error?: Error;
   data: Record<string, any>;
   currentStep: string;
+  finishDefered: Deferred;
   abort: () => void;
   start: () => Promise<any>;
   onChange?: (flowState: WorkflowState) => void;
@@ -25,6 +26,7 @@ export function createWorkflow(exec: FlowExec): WorkflowState {
     startAt: new Date(),
     data: {},
     currentStep: '0',
+    finishDefered,
     abort: () =>
       cancelDefered.reject && cancelDefered.reject(new Error('aborted')),
     start: () => {

@@ -17,12 +17,12 @@ export async function cmdDoMine({
   ctx,
   realm,
   args,
-  FORMATION,
+  minePories,
 }: {
   ctx: Context;
   realm: Realm;
   args: string;
-  FORMATION: string[];
+  minePories: string[];
 }) {
   if (!ctx.walletAcc) {
     console.warn('wallet channel not ready. Please run wallet_unlock first');
@@ -32,7 +32,7 @@ export async function cmdDoMine({
   const tmp = args.split(' ');
   const usePortal = boolFromString(tmp[0]);
 
-  const poriants = FORMATION;
+  const poriants = minePories;
   const index = Adventure.randAdventureSlot(3);
 
   await ctx.ui.writeMessage(

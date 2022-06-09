@@ -32,7 +32,7 @@ import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
 import * as os from 'os';
 import process from 'process';
-import { autoPlayV1 } from './app/autoPlayWorkflow';
+import { AutoPlayDb, autoPlayV1, stopBot } from './app/autoPlayWorkflow';
 import {
   activeEnv,
   botMasterUid,
@@ -176,10 +176,10 @@ async function main() {
       reply_markup: {
         keyboard: [
           [{ text: '/db_fetch' }, { text: '/wallet_balance' }],
-          [{ text: '/sch_list' }, { text: '/whoami' }],
+          [{ text: '/sch_list' }, { text: '/auto_list' }],
           [{ text: '/setting_set_gas_factor 1.05' }, { text: '/price' }],
           [{ text: '/auto_play 12' }, { text: '/market_list' }],
-          [{ text: '/stats' }],
+          [{ text: '/stats' }, { text: '/whoami' }],
         ],
         resize_keyboard: true,
       },
@@ -387,7 +387,7 @@ ${protentialTarget
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
       const args = match[1];
-      await Cmds.cmdDoMine({ ctx, realm, args, FORMATION });
+      await Cmds.cmdDoMine({ ctx, realm, args, minePories: FORMATION });
     });
   });
 
@@ -445,7 +445,68 @@ ${protentialTarget
         );
       }
 
-      autoPlayV1({ ctx, realm, timeOutHours: +args, playerAddress, bot, msg });
+      await autoPlayV1({
+        ctx,
+        realm,
+        playerAddress,
+        bot,
+        msg,
+        args: {
+          minePories: FORMATION,
+          supportPori: SUPPORT_PORI,
+          timeOutHours: +args,
+        },
+      });
+    });
+  });
+
+  bot.onText(/\/auto_list/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      const allRunningBots = Object.entries(AutoPlayDb).map((itm) => itm[1]);
+      const resp = allRunningBots
+        .map((itm) => {
+          const endAt = new Date(
+            itm.state.startAt.valueOf() + itm.args.timeOutHours * 60 * 60 * 1000
+          );
+
+          return `  * ${itm.state.id} - ${itm.args.minePories.join(',')} - ${
+            itm.args.supportPori
+          }
+          startAt: ${itm.state.startAt.toLocaleString()}
+          endAt: ${endAt.toLocaleString()}
+          `;
+        })
+        .join('\n');
+
+      let keyboardActions: InlineKeyboardButton[] = [];
+      keyboardActions = allRunningBots.map((itm) => {
+        return {
+          text: `del - ${itm.state.id}`,
+          switch_inline_query_current_chat: `/auto_del ${itm.state.id}`,
+        };
+      });
+
+      await bot.sendMessage(msg.chat.id, resp || 'empty', {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [keyboardActions],
+        },
+      });
+    });
+  });
+
+  bot.onText(/\/auto_del (.+)/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      const botId = match[1];
+      await stopBot(botId);
+
+      bot.sendMessage(msg.chat.id, `jobId ${botId} deleted`);
     });
   });
 

@@ -9,25 +9,50 @@ import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
 import { isEmpty, uniq } from 'lodash';
 import moment from 'moment';
 import type TelegramBot from 'node-telegram-bot-api';
-import { FORMATION, SUPPORT_PORI } from './config';
 const MICRO_DELAY_MS = 2000;
 const SAFE_GWEITH = '80';
+
+type AutoPlayArgs = {
+  minePories: string[];
+  supportPori: string;
+  timeOutHours: number;
+};
+export const AutoPlayDb: Record<
+  string,
+  { args: AutoPlayArgs; state: Workflow.WorkflowState }
+> = {};
+
+export function stopBot(id: string) {
+  const botInfo = AutoPlayDb[id];
+  if (!botInfo) return;
+  botInfo.state.abort();
+  delete AutoPlayDb[id];
+}
+
+function captureStartedBot(state: Workflow.WorkflowState, args: AutoPlayArgs) {
+  const id = state.id;
+  state.finishDefered.promise.finally(() => {
+    delete AutoPlayDb[id];
+  });
+  AutoPlayDb[id] = { state, args };
+}
 
 export async function autoPlayV1({
   ctx,
   realm,
-  timeOutHours,
   playerAddress,
+  args,
   bot,
   msg,
 }: {
   ctx: Context;
   realm: Realm;
-  timeOutHours: number;
   playerAddress: string;
   bot: TelegramBot;
   msg: TelegramBot.Message;
+  args: AutoPlayArgs;
 }) {
+  const { minePories, supportPori, timeOutHours } = args;
   const start = Date.now();
   const end = start + timeOutHours * 60 * 60 * 1000;
 
@@ -35,78 +60,85 @@ export async function autoPlayV1({
     while (Date.now() < end) {
       let addvStats = await refreshStatus(state, realm, ctx, playerAddress);
       const isEmptyMine = isEmpty(addvStats.mines);
-      if (!isEmptyMine)
-        throw new Error('Please start autoplay when mine empty');
+      if (isEmptyMine) {
+        state.updateState(() => {
+          state.data['step'] = 'start_mine';
+        });
 
-      state.updateState(() => {
-        state.data['step'] = 'start_mine';
-      });
+        await state.promiseWithAbort(
+          waitForGasPrice({ ctx, end, bot, msg, state })
+        );
 
-      await state.promiseWithAbort(
-        waitForGasPrice({ ctx, end, bot, msg, state })
-      );
-
-      // 1. start new mine with portal
-      await state.promiseWithAbort(
-        Cmds.cmdDoMine({ ctx, realm, args: '1', FORMATION })
-      );
-      state.updateState(() => {
-        state.data['step'] = 'start_mine_finish';
-      });
+        // 1. start new mine with portal
+        await state.promiseWithAbort(
+          Cmds.cmdDoMine({ ctx, realm, args: '1', minePories })
+        );
+        state.updateState(() => {
+          state.data['step'] = 'start_mine_finish';
+        });
+      }
 
       // 2. do support
       addvStats = await refreshStatus(state, realm, ctx, playerAddress);
       let activeMine = addvStats.mines[Object.keys(addvStats.mines)[0]];
       const mineId = activeMine.mineId;
       const nextSupportAt = activeMine.atkAt;
+      const shouldSupport = moment(nextSupportAt || 0).isAfter();
+      if (shouldSupport) {
+        state.updateState(() => {
+          state.data[
+            'step'
+          ] = `waiting_for_support. Wakeup at ${nextSupportAt.toLocaleString()} - ${moment(
+            nextSupportAt
+          ).fromNow()}`;
+        });
+        await state.promiseWithAbort(
+          waitForMs(nextSupportAt.valueOf() - Date.now() + MICRO_DELAY_MS)
+        );
 
-      state.updateState(() => {
-        state.data[
-          'step'
-        ] = `waiting_for_support. Wakeup at ${nextSupportAt.toLocaleString()} - ${moment(
-          nextSupportAt
-        ).fromNow()}`;
-      });
-      await state.promiseWithAbort(
-        waitForMs(nextSupportAt.valueOf() - Date.now() + MICRO_DELAY_MS)
-      );
-
-      state.updateState(() => {
-        state.data['step'] = 'begin_support';
-      });
-      await state.promiseWithAbort(doSupport(ctx, bot, msg, mineId, realm));
-      state.updateState(() => {
-        state.data['step'] = 'end_support';
-      });
+        state.updateState(() => {
+          state.data['step'] = 'begin_support';
+        });
+        await state.promiseWithAbort(
+          doSupport(ctx, bot, msg, mineId, supportPori, realm)
+        );
+        state.updateState(() => {
+          state.data['step'] = 'end_support';
+        });
+      }
 
       // 3. do finish
       addvStats = await refreshStatus(state, realm, ctx, playerAddress);
       activeMine = addvStats.mines[Object.keys(addvStats.mines)[0]];
+      if (activeMine) {
+        state.updateState(() => {
+          state.data[
+            'step'
+          ] = `waiting_for_finish. Wakeup at ${activeMine.blockedTo.toLocaleString()} - ${moment(
+            activeMine.blockedTo
+          ).fromNow()}`;
+        });
+        await state.promiseWithAbort(
+          waitForMs(
+            activeMine.blockedTo.valueOf() - Date.now() + MICRO_DELAY_MS
+          )
+        );
 
-      state.updateState(() => {
-        state.data[
-          'step'
-        ] = `waiting_for_finish. Wakeup at ${activeMine.blockedTo.toLocaleString()} - ${moment(
-          activeMine.blockedTo
-        ).fromNow()}`;
-      });
-      await state.promiseWithAbort(
-        waitForMs(activeMine.blockedTo.valueOf() - Date.now() + MICRO_DELAY_MS)
-      );
+        await state.promiseWithAbort(
+          waitForGasPrice({ ctx, end, bot, msg, state })
+        );
 
-      await state.promiseWithAbort(
-        waitForGasPrice({ ctx, end, bot, msg, state })
-      );
+        state.updateState(() => {
+          state.data['step'] = 'begin_finish';
+        });
+        await state.promiseWithAbort(
+          doFinishWithRetry(ctx, realm, bot, msg, mineId, state)
+        );
+        state.updateState(() => {
+          state.data['step'] = 'end_finish';
+        });
+      }
 
-      state.updateState(() => {
-        state.data['step'] = 'begin_finish';
-      });
-      await state.promiseWithAbort(
-        doFinishWithRetry(ctx, realm, bot, msg, mineId, state)
-      );
-      state.updateState(() => {
-        state.data['step'] = 'end_finish';
-      });
       // done 1 loop
     }
   };
@@ -139,6 +171,8 @@ export async function autoPlayV1({
   - Duration: ${timeOutHours} hours
   `
   );
+
+  captureStartedBot(state, args);
   return state;
 }
 
@@ -198,33 +232,15 @@ async function waitForGasPrice({
   }
 }
 
-async function guessRewardLevel({
-  ctx,
-  bot,
-  msg,
-  mineId,
-}: {
-  ctx: Context;
-  bot: TelegramBot;
-  msg: TelegramBot.Message;
-  mineId: number;
-}) {
-  const scMineInfo = await Adventure.queryMineinfoFromSc(ctx, mineId);
-  const nextSlotReward = await Adventure.queryRandomRewardLevelFromSc(
-    ctx,
-    scMineInfo
-  );
-  await bot.sendMessage(
-    msg.chat.id,
-    `#guessReward next rewardLevel is ${nextSlotReward}`
-  );
-}
-
+//----------------------------------------------------------//
+// internal
+//----------------------------------------------------------//
 async function doSupport(
   ctx: Context,
   bot: TelegramBot,
   msg: TelegramBot.Message,
   mineId: number,
+  SUPPORT_PORI: string,
   realm: Realm
 ) {
   await Cmds.cmdDoSupport({

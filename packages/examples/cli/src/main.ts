@@ -41,8 +41,8 @@ import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
 
-const env = ENV.Prod;
-const activeEnv = computeActiveEnv(env);
+let env = ENV.Prod;
+let activeEnv = computeActiveEnv(env);
 const playerAddress = process.env.PLAYER_ADDRESS;
 const MINE_ATK_PRICE_FACTOR = 1.2;
 
@@ -63,6 +63,12 @@ function computeActiveEnv(env: ENV) {
 }
 
 async function main() {
+  for (let i = 0; i < process.argv.length; i++) {
+    const element = process.argv[i];
+    if (element === '--env') env = ENV[process.argv[i + 1]] as ENV;
+  }
+
+  activeEnv = computeActiveEnv(env);
   console.log(env, activeEnv);
 
   if (!playerAddress) {
