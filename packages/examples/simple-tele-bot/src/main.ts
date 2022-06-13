@@ -369,6 +369,10 @@ ${protentialTarget
         switch_inline_query_current_chat: hasPortal ? `/mine 1` : `/mine 0`,
       };
 
+      const keyboard = humanView.canDoNextAction
+        ? [keyboardActions, [newMineAction]]
+        : undefined;
+
       // capture and send end notification
       captureNotificationForMyMine(mines, msg);
 
@@ -376,7 +380,7 @@ ${protentialTarget
       await bot.sendMessage(msg.chat.id, resp, {
         parse_mode: 'HTML',
         reply_markup: {
-          inline_keyboard: [keyboardActions, [newMineAction]],
+          inline_keyboard: keyboard,
         },
       });
     });
