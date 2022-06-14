@@ -407,6 +407,9 @@ async function main() {
         );
       delete humanView.targets;
       delete humanView.note;
+      humanView.protentialTarget = humanView.protentialTarget
+        .slice(0, 5)
+        .filter((itm) => !!itm);
       console.dir(humanView, { depth: 5 });
     },
   });

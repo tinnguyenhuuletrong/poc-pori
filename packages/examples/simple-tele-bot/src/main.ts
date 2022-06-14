@@ -330,6 +330,8 @@ async function main() {
 ${mines.map((itm) => adventureRender(itm)).join('\n')}
 <b>Targets:</b>
 ${protentialTarget
+  .slice(0, 5)
+  .filter((itm) => !!itm)
   .map(
     (itm) =>
       `\t\t - ${itm.mineId} bigReward-${itm.hasBigReward} since-${itm.sinceSec} sec`
