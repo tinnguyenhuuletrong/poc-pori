@@ -32,7 +32,12 @@ import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
 import * as os from 'os';
 import process from 'process';
-import { AutoPlayDb, autoPlayV1, stopBot } from './app/autoPlayWorkflow';
+import {
+  AutoPlayDb,
+  autoPlayV1,
+  autoRefreshStatus,
+  stopBot,
+} from './app/autoPlayWorkflow';
 import {
   activeEnv,
   botMasterUid,
@@ -177,8 +182,9 @@ async function main() {
         keyboard: [
           [{ text: '/db_fetch' }, { text: '/wallet_balance' }],
           [{ text: '/sch_list' }, { text: '/auto_list' }],
-          [{ text: '/setting_set_gas_factor 1.05' }, { text: '/price' }],
-          [{ text: '/auto_play 12' }, { text: '/market_list' }],
+          [{ text: '/setting_set_gas_factor 1.05' }],
+          [{ text: '/auto_play 24' }, { text: '/auto_refresh' }],
+          [{ text: '/market_list' }, { text: '/price' }],
           [{ text: '/stats' }, { text: '/whoami' }],
         ],
         resize_keyboard: true,
@@ -458,9 +464,35 @@ ${protentialTarget
         bot,
         msg,
         args: {
+          type: 'bot',
           minePories: FORMATION,
           supportPori: SUPPORT_PORI,
           timeOutHours: +args,
+        },
+      });
+    });
+  });
+
+  bot.onText(/\/auto_refresh/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+
+      if (!ctx.walletAcc)
+        return bot.sendMessage(
+          msg.chat.id,
+          `please call /wallet_unlock <.enveloped_key..> frist`
+        );
+
+      await autoRefreshStatus({
+        ctx,
+        realm,
+        playerAddress,
+        bot,
+        msg,
+        args: {
+          type: 'background_refresh',
+          intervalMs: 2 * 60 * 1000,
         },
       });
     });
@@ -474,16 +506,30 @@ ${protentialTarget
       const allRunningBots = Object.entries(AutoPlayDb).map((itm) => itm[1]);
       const resp = allRunningBots
         .map((itm) => {
-          const endAt = new Date(
-            itm.state.startAt.valueOf() + itm.args.timeOutHours * 60 * 60 * 1000
-          );
+          const args = itm.args;
 
-          return `  * ${itm.state.id} - ${itm.args.minePories.join(',')} - ${
-            itm.args.supportPori
+          switch (args.type) {
+            case 'bot': {
+              const endAt = new Date(
+                itm.state.startAt.valueOf() + args.timeOutHours * 60 * 60 * 1000
+              );
+
+              return `  * bot : ${itm.state.id}
+                startAt: ${itm.state.startAt.toLocaleString()}
+                endAt: ${endAt.toLocaleString()}
+                `;
+            }
+            case 'background_refresh': {
+              return `  * background_refresh : ${itm.state.id} 
+                interval: - ${args.intervalMs} ms
+                it: - ${itm.state.data['_it']} times
+                nextAt: - ${moment(itm.state.data['_nextAt']).fromNow()} 
+                `;
+            }
+
+            default:
+              break;
           }
-          startAt: ${itm.state.startAt.toLocaleString()}
-          endAt: ${endAt.toLocaleString()}
-          `;
         })
         .join('\n');
 

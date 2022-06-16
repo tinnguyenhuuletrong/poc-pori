@@ -13,11 +13,18 @@ const MICRO_DELAY_MS = 2000;
 const SAFE_GWEITH = '80';
 const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
 
-type AutoPlayArgs = {
+export type AutoPlayOpenMineArgs = {
+  type: 'bot';
   minePories: string[];
   supportPori: string;
   timeOutHours: number;
 };
+export type AutoPlayRefreshStatusArg = {
+  type: 'background_refresh';
+  intervalMs: number;
+};
+
+export type AutoPlayArgs = AutoPlayOpenMineArgs | AutoPlayRefreshStatusArg;
 export const AutoPlayDb: Record<
   string,
   { args: AutoPlayArgs; state: Workflow.WorkflowState }
@@ -45,6 +52,68 @@ function captureStartedBot(state: Workflow.WorkflowState, args: AutoPlayArgs) {
   AutoPlayDb[id] = { state, args };
 }
 
+export async function autoRefreshStatus({
+  ctx,
+  realm,
+  playerAddress,
+  args,
+  bot,
+  msg,
+}: {
+  ctx: Context;
+  realm: Realm;
+  playerAddress: string;
+  bot: TelegramBot;
+  msg: TelegramBot.Message;
+  args: AutoPlayRefreshStatusArg;
+}) {
+  const intervalMs = args.intervalMs;
+  const workflowExec = async (state: Workflow.WorkflowState) => {
+    let count = 0;
+    state.updateState(() => {
+      state.data['_it'] = count;
+      state.data['_nextAt'] = new Date(Date.now() + intervalMs);
+    });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await takeABreak(state, intervalMs);
+      await state.promiseWithAbort(
+        refreshStatus(state, realm, ctx, playerAddress)
+      );
+
+      state.updateState(() => {
+        count++;
+        state.data['_it'] = count;
+        state.data['_nextAt'] = new Date(Date.now() + intervalMs);
+      });
+    }
+  };
+
+  const state = Workflow.createWorkflow(workflowExec, `auto_refresh`);
+  state
+    .start()
+    .catch((err) => {
+      bot.sendMessage(
+        msg.chat.id,
+        `autoRefresh #bot${state.id} error ${err.toString()}`
+      );
+    })
+    .finally(() => {
+      bot.sendMessage(msg.chat.id, `autoRefresh #bot${state.id} end!`);
+    });
+
+  bot.sendMessage(
+    msg.chat.id,
+    `autoRefresh #bot${state.id} started:
+  - Interval: ${intervalMs / (1 * 60 * 1000)} mins
+  `
+  );
+
+  captureStartedBot(state, args);
+  return state;
+}
+
 export async function autoPlayV1({
   ctx,
   realm,
@@ -58,7 +127,7 @@ export async function autoPlayV1({
   playerAddress: string;
   bot: TelegramBot;
   msg: TelegramBot.Message;
-  args: AutoPlayArgs;
+  args: AutoPlayOpenMineArgs;
 }) {
   const { minePories, supportPori, timeOutHours } = args;
   const start = Date.now();
@@ -151,7 +220,10 @@ export async function autoPlayV1({
     }
   };
 
-  const state = Workflow.createWorkflow(workflowExec);
+  const state = Workflow.createWorkflow(
+    workflowExec,
+    `bot_${[...args.minePories, args.supportPori].join('_')}`
+  );
   state.onChange = () => {
     bot.sendMessage(
       msg.chat.id,
@@ -197,8 +269,8 @@ async function refreshStatus(
   );
 }
 
-async function takeABreak(state: Workflow.WorkflowState) {
-  await state.promiseWithAbort(waitForMs(MICRO_DELAY_MS));
+async function takeABreak(state: Workflow.WorkflowState, sec = MICRO_DELAY_MS) {
+  await state.promiseWithAbort(waitForMs(sec));
 }
 
 async function waitForGasPrice({

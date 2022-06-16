@@ -17,12 +17,12 @@ export type WorkflowState = {
 
 export type FlowExec = (state: WorkflowState) => Promise<void>;
 
-export function createWorkflow(exec: FlowExec): WorkflowState {
+export function createWorkflow(exec: FlowExec, id?: string): WorkflowState {
   const cancelDefered = new Deferred();
   const finishDefered = new Deferred();
 
   const state: WorkflowState = {
-    id: `workflow_simple_${Date.now()}`,
+    id: id ?? `workflow_simple_${Date.now()}`,
     startAt: new Date(),
     data: {},
     currentStep: '0',
