@@ -18,3 +18,16 @@ execSync(`zipinfo archived/allEvents.prod.realm.zip`, {
   cwd,
   stdio: 'inherit',
 });
+
+execSync(
+  `zip -j ./archived/allEvents.prod.porichain.realm.zip ./archived/repo/prodPoriChain/allEvents.prod.realm`,
+  {
+    cwd,
+    stdio: 'inherit',
+  }
+);
+
+execSync(`zipinfo archived/allEvents.prod.porichain.realm.zip`, {
+  cwd,
+  stdio: 'inherit',
+});
