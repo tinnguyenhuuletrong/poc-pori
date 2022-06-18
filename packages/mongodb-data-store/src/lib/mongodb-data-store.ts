@@ -15,7 +15,7 @@ const log = debug('pori:mongodb-data-store');
 const connectDefer = new Deferred();
 
 export async function waitForConnected(ctx: Context) {
-  if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
+  // if (!ctx.mongoClient) throw new Error('ctx.mongoClient not found');
 
   await connectDefer.promise;
   return ctx.mongoClient;

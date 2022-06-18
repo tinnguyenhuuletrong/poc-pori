@@ -14,6 +14,7 @@ import {
   Computed,
 } from '@pori-and-friends/pori-actions';
 import {
+  Context,
   ENV,
   getIdleGameAddressSC,
   getRIGYTokenInfo,
@@ -36,7 +37,7 @@ import {
   readFileSync,
   writeFileSync,
 } from 'fs';
-import repl from 'repl';
+import repl, { REPLServer } from 'repl';
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
@@ -62,10 +63,14 @@ function computeActiveEnv(env: ENV) {
   return activeEnv;
 }
 
+let autoRunCommand = '';
+let server!: REPLServer;
+
 async function main() {
   for (let i = 0; i < process.argv.length; i++) {
     const element = process.argv[i];
     if (element === '--env') env = ENV[process.argv[i + 1]] as ENV;
+    else if (element === '--cmd') autoRunCommand = process.argv[i + 1];
   }
 
   activeEnv = computeActiveEnv(env);
@@ -120,7 +125,7 @@ async function main() {
     scheduler,
   };
 
-  const server = repl.start({
+  server = repl.start({
     prompt: '>',
     useColors: true,
     useGlobal: true,
@@ -146,22 +151,20 @@ async function main() {
     },
   });
 
+  server.defineCommand('ci.uploadSnapshot', {
+    help: 'ci script. updatedb + update snapshot',
+    action: async () => {
+      await doStats(realm, ctx);
+      await doUploadSnapshot(realm, ctx);
+
+      process.exit(0);
+    },
+  });
+
   server.defineCommand('storage.upload', {
     help: 'upload realm data to storage',
     action: async () => {
-      const stream = createReadStream(activeEnv.environment.dbPath);
-      console.log('upload snapshot');
-
-      const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
-        realm,
-        'default'
-      );
-      const metadata = {
-        revision: dbMetadata.updatedBlock,
-      };
-
-      await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream, metadata);
-      console.log(`uploaded - revision:${metadata.revision}`);
+      await doUploadSnapshot(realm, ctx);
     },
   });
 
@@ -400,17 +403,7 @@ async function main() {
   server.defineCommand('stats', {
     help: 'Show my adv',
     action: async (addr) => {
-      const humanView =
-        await Computed.MyAdventure.refreshAdventureStatsForAddress(
-          { realm, ctx },
-          addr || playerAddress
-        );
-      delete humanView.targets;
-      delete humanView.note;
-      humanView.protentialTarget = humanView.protentialTarget
-        .slice(0, 5)
-        .filter((itm) => !!itm);
-      console.dir(humanView, { depth: 5 });
+      doStats(realm, ctx, addr);
     },
   });
 
@@ -603,6 +596,45 @@ async function main() {
         console.error(error);
       });
   }
+
+  //----------------------------------------------------//
+  // Auto run ci support
+  //----------------------------------------------------//
+  if (autoRunCommand) {
+    console.info('[cmd mode] Run cmd', autoRunCommand);
+    server.write(`.${autoRunCommand}\n`);
+  }
 }
 
 main();
+
+async function doStats(realm: Realm, ctx: Context, addr?: string) {
+  const humanView = await Computed.MyAdventure.refreshAdventureStatsForAddress(
+    { realm, ctx },
+    addr || playerAddress
+  );
+  delete humanView.targets;
+  delete humanView.note;
+  humanView.protentialTarget = humanView.protentialTarget
+    .slice(0, 5)
+    .filter((itm) => !!itm);
+  console.dir(humanView, { depth: 5 });
+}
+
+async function doUploadSnapshot(realm: Realm, ctx: Context) {
+  const stream = createReadStream(activeEnv.environment.dbPath);
+  console.log('upload snapshot');
+
+  const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
+    realm,
+    'default'
+  );
+  const metadata = {
+    revision: dbMetadata.updatedBlock,
+  };
+
+  await MongoDataStore.waitForConnected(ctx);
+
+  await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream, metadata);
+  console.log(`uploaded - revision:${metadata.revision}`);
+}

@@ -7,7 +7,9 @@
     "nx-prod": "NODE_ENV=prod nx",
     "build:all:prod": "nx run-many --target=build --all --prod",
     "build:tele-bot": "node ci/build-bot-image.js",
-    "script:backup": "node ci/update-archive.js"
+    "script:snapshot_upload": "node ci/build-upload-snapshot.js",
+    "script:backup_only": "node ci/update-archive.js",
+    "script:backup": "yarn run script:snapshot_upload && yarn run script:backup_only"
   },
   "private": true,
   "dependencies": {
