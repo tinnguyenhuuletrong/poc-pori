@@ -34,6 +34,7 @@ export async function init(env: ENV): Promise<Context> {
   // getGas porichain return as 500. But avg fee on chain around 4100
   const gasFactor = env === ENV.ProdPorichain ? 8.2 : 1;
   const safeGweith = env === ENV.ProdPorichain ? 500 : 80;
+  const autoPlayMicroDlayMs = env === ENV.ProdPorichain ? 10000 : 3000;
 
   const ctx: Context = {
     contract,
@@ -44,10 +45,14 @@ export async function init(env: ENV): Promise<Context> {
 
     ui: {
       writeMessage: async (msg) => console.log(msg),
+      editMessage: async (lastMsginfo, msg) => {
+        /*nothing*/
+      },
     },
     setting: {
       gasFactor: gasFactor,
       safeGweith,
+      autoPlayMicroDelayMs: autoPlayMicroDlayMs,
     },
   };
 

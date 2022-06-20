@@ -4,6 +4,7 @@ import * as Adventure from './lib/adventure';
 import * as Workflow from './lib/workflow/workflowV1';
 import * as WalletActions from './lib/wallet/web3Action';
 import * as MyAdventure from './lib/computed/myAdventure';
+import * as Auto from './lib/auto/autoPlayWorkflow';
 import * as Cmds from './lib/cmds/cmds';
 
 export * from './lib/basic';
@@ -20,4 +21,13 @@ const Computed = {
   MyAdventure,
 };
 
-export { Input, DataView, Adventure, Workflow, WalletActions, Computed, Cmds };
+export {
+  Input,
+  DataView,
+  Adventure,
+  Workflow,
+  WalletActions,
+  Computed,
+  Cmds,
+  Auto,
+};

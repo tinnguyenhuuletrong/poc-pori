@@ -1,8 +1,10 @@
+import debug from 'debug';
 import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
 import {
   addWalletConnectToContext,
-  Adventure,
+  Auto,
   close,
+  Computed,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   getMaticBalance,
@@ -11,12 +13,10 @@ import {
   Input,
   queryBinancePrice,
   queryMarketInfo,
-  Computed,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
   ENV,
-  getIdleGameAddressSC,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
   TEN_POWER_10_BN,
@@ -29,7 +29,6 @@ import {
   generateAesKey,
   waitForMs,
 } from '@pori-and-friends/utils';
-import type { ITxData } from '@walletconnect/types';
 import {
   copyFileSync,
   createReadStream,
@@ -39,11 +38,6 @@ import {
   writeFileSync,
 } from 'fs';
 import repl, { REPLServer } from 'repl';
-import {
-  AutoPlayDb,
-  autoPlayV1,
-  autoRefreshStatus,
-} from './app/autoPlayWorkflow';
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
@@ -51,6 +45,8 @@ import * as AppEnvProdPorichain from './environments/environment.prod.porichain'
 let env = ENV.Prod;
 let activeEnv = computeActiveEnv(env);
 const playerAddress = process.env.PLAYER_ADDRESS;
+const logger = debug('pori:info');
+logger.enabled = true;
 
 function computeActiveEnv(env: ENV) {
   let activeEnv: typeof AppEnv;
@@ -93,7 +89,7 @@ async function main() {
 
   ctx.playerAddress = playerAddress;
   ctx.ui.writeMessage = async (msg) => {
-    console.log(msg);
+    logger(msg);
   };
 
   await addWalletConnectToContext(
@@ -318,14 +314,14 @@ async function main() {
   server.defineCommand('auto.list', {
     help: 'test',
     action: async () => {
-      console.log(AutoPlayDb);
+      console.log(Auto.AutoPlayDb);
     },
   });
 
   server.defineCommand('auto.background_refresh', {
     help: 'test',
     action: async () => {
-      await autoRefreshStatus({
+      await Auto.autoRefreshStatus({
         ctx,
         realm,
         playerAddress,
@@ -343,7 +339,7 @@ async function main() {
         );
 
       // update bot formations here
-      const timeOutHours = 3;
+      const timeOutHours = 48;
       const FORMATIONS = [
         {
           minePories: ['3923', '3018', '182'],
@@ -353,7 +349,7 @@ async function main() {
       ];
 
       for await (const iterator of FORMATIONS) {
-        await autoPlayV1({
+        await Auto.autoPlayV1({
           ctx,
           realm,
           playerAddress,
@@ -372,7 +368,7 @@ async function main() {
       await waitForMs(5000);
 
       // background update db
-      await autoRefreshStatus({
+      await Auto.autoRefreshStatus({
         ctx,
         realm,
         playerAddress,

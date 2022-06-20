@@ -1,5 +1,8 @@
 import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
 import {
+  Auto,
+  Cmds,
+  Computed,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   getMaticBalance,
@@ -7,13 +10,10 @@ import {
   init,
   queryBinancePrice,
   queryMarketInfo,
-  Computed,
-  Cmds,
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfoEx,
   Context,
-  ENV,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
   TEN_POWER_10_BN,
@@ -33,12 +33,6 @@ import moment from 'moment';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
 import * as os from 'os';
 import process from 'process';
-import {
-  AutoPlayDb,
-  autoPlayV1,
-  autoRefreshStatus,
-  stopBot,
-} from './app/autoPlayWorkflow';
 import {
   activeEnv,
   botMasterUid,
@@ -115,10 +109,20 @@ async function main() {
   registerWorkerNotify({ ctx, realm, scheduler, bot });
 
   // extend ctx UI
-  // register send msg
+  // register send msg, edit msg
   ctx.ui.writeMessage = async (msg) => {
     const chatId = Memory.activeChats[0];
-    await bot.sendMessage(chatId, msg);
+    return await bot.sendMessage(chatId, msg);
+  };
+
+  ctx.ui.editMessage = async (lastMsg, msg) => {
+    const msgInfo = lastMsg as TelegramBot.Message;
+    if (msgInfo) {
+      await bot.editMessageText(msg, {
+        chat_id: msgInfo.chat.id,
+        message_id: msgInfo.message_id,
+      });
+    }
   };
 
   appCtx = ctx;
@@ -461,17 +465,16 @@ ${protentialTarget
         );
       }
 
-      await autoPlayV1({
+      await Auto.autoPlayV1({
         ctx,
         realm,
         playerAddress,
-        bot,
-        msg,
         args: {
           type: 'bot',
           minePories: FORMATION,
           supportPori: SUPPORT_PORI,
           timeOutHours: +args,
+          usePortal: true,
         },
       });
     });
@@ -488,12 +491,10 @@ ${protentialTarget
           `please call /wallet_unlock <.enveloped_key..> frist`
         );
 
-      await autoRefreshStatus({
+      await Auto.autoRefreshStatus({
         ctx,
         realm,
         playerAddress,
-        bot,
-        msg,
         args: {
           type: 'background_refresh',
           intervalMs: 2 * 60 * 1000,
@@ -507,7 +508,9 @@ ${protentialTarget
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
 
-      const allRunningBots = Object.entries(AutoPlayDb).map((itm) => itm[1]);
+      const allRunningBots = Object.entries(Auto.AutoPlayDb).map(
+        (itm) => itm[1]
+      );
       const resp = allRunningBots
         .map((itm) => {
           const args = itm.args;
@@ -560,7 +563,7 @@ ${protentialTarget
       captureChatId(msg.chat.id);
 
       const botId = match[1];
-      await stopBot(botId);
+      await Auto.stopBot(botId);
 
       bot.sendMessage(msg.chat.id, `jobId ${botId} deleted`);
     });

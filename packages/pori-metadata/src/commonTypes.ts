@@ -11,7 +11,11 @@ export enum ENV {
   Prod = 'PROD',
   ProdPorichain = 'PROD_PORICHAIN',
 }
-export type SendMessageHandler = (msg: string) => Promise<void>;
+export type SendMessageHandler = (msg: string) => Promise<any>;
+export type EditMessageHandler = (
+  lastMsginfo: any,
+  msg: string
+) => Promise<any>;
 export type Context = {
   contract: Contract;
   web3: Web3;
@@ -25,10 +29,12 @@ export type Context = {
 
   ui: {
     writeMessage: SendMessageHandler;
+    editMessage: EditMessageHandler;
   };
   setting: {
     gasFactor: number;
     safeGweith: number;
+    autoPlayMicroDelayMs: number;
   };
 };
 
