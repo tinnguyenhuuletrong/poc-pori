@@ -16,6 +16,11 @@ export function getWeb3NodeUriHttp(env: ENV) {
   return process.env[key] as string;
 }
 
+export function getWeb3NodeUriPolygonHttp() {
+  const key = `NODE_URI_${ENV.Prod}_HTTP`.toUpperCase();
+  return process.env[key] as string;
+}
+
 export function getAPILink(env: ENV) {
   if (env === ENV.Staging) return stagConfig.gameInfo.m.app.apiUrl;
   else if (env === ENV.ProdPorichain)
@@ -30,6 +35,16 @@ export function getKyberSwapFactoryAddress(env: ENV) {
   return '0x5f1fe642060b5b9658c15721ea22e982643c095c';
 }
 
+export function getRIGYTokenInfoOnPolygon() {
+  const tokenConfig = prodConfig.gameInfo.m.app;
+  return {
+    symbol: tokenConfig.token.inGameSymbol,
+    tokenAddress: tokenConfig.token.inGameAddress,
+    decimal: tokenConfig.token.inGameDecimal,
+    chainId: tokenConfig.rpcMetamask.chainId,
+  };
+}
+
 export function getRIGYTokenInfo(env: ENV) {
   let tokenConfig = prodConfig.gameInfo.m.app;
   if (env === ENV.Staging) {
@@ -41,6 +56,16 @@ export function getRIGYTokenInfo(env: ENV) {
     symbol: tokenConfig.token.inGameSymbol,
     tokenAddress: tokenConfig.token.inGameAddress,
     decimal: tokenConfig.token.inGameDecimal,
+    chainId: tokenConfig.rpcMetamask.chainId,
+  };
+}
+
+export function getRIKENTokenInfoOnPolygon() {
+  const tokenConfig = prodConfig.gameInfo.m.app;
+  return {
+    symbol: tokenConfig.token.nativeSymbol,
+    tokenAddress: tokenConfig.token.nativeAddress,
+    decimal: tokenConfig.token.nativeDecimal,
     chainId: tokenConfig.rpcMetamask.chainId,
   };
 }

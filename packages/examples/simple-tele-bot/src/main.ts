@@ -22,6 +22,7 @@ import * as Repos from '@pori-and-friends/pori-repositories';
 import { decryptAes } from '@pori-and-friends/utils';
 import {
   copyFileSync,
+  createReadStream,
   createWriteStream,
   existsSync,
   mkdirSync,
@@ -180,9 +181,12 @@ async function main() {
     await bot.sendMessage(msg.chat.id, 'clear...', {
       reply_markup: {
         keyboard: [
-          [{ text: '/db_fetch' }, { text: '/wallet_balance' }],
+          [{ text: '/db_fetch' }, { text: '/db_upload' }],
           [{ text: '/sch_list' }, { text: '/auto_list' }],
-          [{ text: '/setting_set_gas_factor 1.05' }],
+          [
+            { text: '/setting_set_gas_factor 1.05' },
+            { text: '/wallet_balance' },
+          ],
           [{ text: '/auto_play 24' }, { text: '/auto_refresh' }],
           [{ text: '/market_list' }, { text: '/price' }],
           [{ text: '/stats' }, { text: '/whoami' }],
@@ -720,6 +724,25 @@ ${formatedData
     });
   });
 
+  bot.onText(/\/db_upload/, async (msg, match) => {
+    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
+      if (!requireBotMaster(msg)) return;
+      captureChatId(msg.chat.id);
+      const checkMsg = await bot.sendMessage(msg.chat.id, `🗄 uploading...`);
+
+      const remoteRevision = await doUploadSnapshot(realm, ctx);
+      const localMetadata = await getLocalRealmRevision(realm);
+
+      await bot.editMessageText(
+        `🗄 uploaded. remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}`,
+        {
+          chat_id: checkMsg.chat.id,
+          message_id: checkMsg.message_id,
+        }
+      );
+    });
+  });
+
   bot.onText(/\/db_pull/, async (msg) => {
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
@@ -851,6 +874,25 @@ ${formatedData
     gasPriceGWEI: string;
   }) {
     return humanView.activeMines <= 0;
+  }
+
+  async function doUploadSnapshot(realm: Realm, ctx: Context) {
+    const stream = createReadStream(activeEnv.environment.dbPath);
+    console.log('upload snapshot');
+
+    const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
+      realm,
+      'default'
+    );
+    const metadata = {
+      revision: dbMetadata.updatedBlock,
+    };
+
+    await MongoDataStore.waitForConnected(ctx);
+
+    await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream, metadata);
+    console.log(`uploaded - revision:${metadata.revision}`);
+    return metadata.revision;
   }
 
   // --------

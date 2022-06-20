@@ -1,5 +1,4 @@
 import {
-  ChainId,
   Token,
   WETH,
   Fetcher,
@@ -11,9 +10,9 @@ import {
 import {
   Context,
   getKyberSwapFactoryAddress,
-  getRIGYTokenInfo,
-  getRIKENTokenInfo,
-  getWeb3NodeUriHttp,
+  getRIGYTokenInfoOnPolygon,
+  getRIKENTokenInfoOnPolygon,
+  getWeb3NodeUriPolygonHttp,
 } from '@pori-and-friends/pori-metadata';
 
 let lazyProvider: any;
@@ -21,7 +20,7 @@ async function getProvider({ ctx }: { ctx: Context }) {
   if (lazyProvider) return lazyProvider;
 
   const etherJs = await import('@ethersproject/providers');
-  const url = getWeb3NodeUriHttp(ctx.env);
+  const url = getWeb3NodeUriPolygonHttp();
   lazyProvider = new etherJs.JsonRpcProvider(url);
   return lazyProvider;
 }
@@ -33,7 +32,7 @@ export async function getKyberPoolRIGYPrice({
   ctx: Context;
   amountInWei?: string;
 }) {
-  const tokenInfo = getRIGYTokenInfo(ctx.env);
+  const tokenInfo = getRIGYTokenInfoOnPolygon();
   const KyberFactoryAddress = getKyberSwapFactoryAddress(ctx.env);
   const provider = await getProvider({ ctx });
 
@@ -72,7 +71,7 @@ export async function getKyberPoolRIKENPrice({
   ctx: Context;
   amountInWei?: string;
 }) {
-  const tokenInfo = getRIKENTokenInfo(ctx.env);
+  const tokenInfo = getRIKENTokenInfoOnPolygon();
   const KyberFactoryAddress = getKyberSwapFactoryAddress(ctx.env);
 
   const RIGYToken = new Token(
