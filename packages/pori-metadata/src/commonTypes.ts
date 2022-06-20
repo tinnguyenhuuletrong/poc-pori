@@ -28,6 +28,7 @@ export type Context = {
   };
   setting: {
     gasFactor: number;
+    safeGweith: number;
   };
 };
 

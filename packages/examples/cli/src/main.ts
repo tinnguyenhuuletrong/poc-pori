@@ -27,6 +27,7 @@ import {
   encryptAes,
   generateAesIv,
   generateAesKey,
+  waitForMs,
 } from '@pori-and-friends/utils';
 import type { ITxData } from '@walletconnect/types';
 import {
@@ -38,6 +39,11 @@ import {
   writeFileSync,
 } from 'fs';
 import repl, { REPLServer } from 'repl';
+import {
+  AutoPlayDb,
+  autoPlayV1,
+  autoRefreshStatus,
+} from './app/autoPlayWorkflow';
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
@@ -45,7 +51,6 @@ import * as AppEnvProdPorichain from './environments/environment.prod.porichain'
 let env = ENV.Prod;
 let activeEnv = computeActiveEnv(env);
 const playerAddress = process.env.PLAYER_ADDRESS;
-const MINE_ATK_PRICE_FACTOR = 1.2;
 
 function computeActiveEnv(env: ENV) {
   let activeEnv: typeof AppEnv;
@@ -310,28 +315,69 @@ async function main() {
     },
   });
 
-  server.defineCommand('test', {
+  server.defineCommand('auto.list', {
     help: 'test',
     action: async () => {
-      for (let i = 0; i < 30; i++) {
-        const latestBlockInfo = await ctx.web3.eth.getBlock('latest');
-        const res = await Adventure.queryMineinfoFromSc(ctx, 49264);
-        const offset =
-          (Date.now() - res.rewardMap.startTimeInDate.valueOf()) / 1000;
-        const nextRewardLevel = await Adventure.queryRandomRewardLevelFromSc(
+      console.log(AutoPlayDb);
+    },
+  });
+
+  server.defineCommand('auto.background_refresh', {
+    help: 'test',
+    action: async () => {
+      await autoRefreshStatus({
+        ctx,
+        realm,
+        playerAddress,
+        args: { type: 'background_refresh', intervalMs: 2 * 60 * 1000 },
+      });
+    },
+  });
+
+  server.defineCommand('auto.all', {
+    help: 'test',
+    action: async () => {
+      if (!ctx.walletAcc)
+        return ctx.ui.writeMessage(
+          `please call .wallet.unlock <.enveloped_key..> frist`
+        );
+
+      // update bot formations here
+      const timeOutHours = 3;
+      const FORMATIONS = [
+        {
+          minePories: ['3923', '3018', '182'],
+          supportPori: '',
+          usePortal: true,
+        },
+      ];
+
+      for await (const iterator of FORMATIONS) {
+        await autoPlayV1({
           ctx,
-          res
-        );
-        console.dir(
-          {
-            blockNum: latestBlockInfo.number,
-            txHash: latestBlockInfo.hash,
-            offset,
-            nextRewardLevel,
+          realm,
+          playerAddress,
+          args: {
+            type: 'bot',
+            minePories: iterator.minePories,
+            supportPori: iterator.supportPori,
+            timeOutHours,
+            usePortal: iterator.usePortal,
           },
-          { depth: 5 }
-        );
+        });
+
+        await waitForMs(5000);
       }
+
+      await waitForMs(5000);
+
+      // background update db
+      await autoRefreshStatus({
+        ctx,
+        realm,
+        playerAddress,
+        args: { type: 'background_refresh', intervalMs: 2 * 60 * 1000 },
+      });
     },
   });
 
@@ -420,6 +466,44 @@ async function main() {
     },
   });
 
+  server.defineCommand('wallet.unlock', {
+    help: 'Start walletconnect',
+    action: async (args) => {
+      if (!existsSync(activeEnv.environment.aesKeyPath)) {
+        await ctx.ui.writeMessage(
+          'key not found. Please generate a new key + rebuild docker img...'
+        );
+        return;
+      }
+      const keyObj = JSON.parse(
+        readFileSync(activeEnv.environment.aesKeyPath).toString()
+      );
+      const key = Buffer.from(keyObj.key, 'hex');
+      const iv = Buffer.from(keyObj.iv, 'hex');
+      let privKey = '';
+      try {
+        const encrypted = args;
+        privKey = await decryptAes({ key, iv, encrypted });
+      } catch (error) {
+        await ctx.ui.writeMessage('decrypt error...');
+        return;
+      }
+
+      try {
+        const acc = ctx.web3.eth.accounts.privateKeyToAccount(privKey);
+        if (acc.address !== playerAddress)
+          throw new Error('not match playerAddress...');
+
+        ctx.walletAcc = acc;
+      } catch (error) {
+        await ctx.ui.writeMessage(error.message);
+        return;
+      }
+
+      await ctx.ui.writeMessage('wallet unlocked..');
+    },
+  });
+
   server.defineCommand('wallet.balance', {
     help: 'get wallet balance',
     action: async () => {
@@ -448,153 +532,8 @@ async function main() {
     },
   });
 
-  server.defineCommand('mine', {
-    help: 'send new mine request',
-    action: async (args) => {
-      if (!ctx.walletConnectChannel?.connected) {
-        console.warn(
-          'wallet channel not ready. Please run .wallet.start first'
-        );
-        return;
-      }
-
-      const tmp = args.split(' ');
-      const usePortal = !!tmp[0];
-
-      const poriants = ['1346', '5420', '1876'];
-      const index = Adventure.randAdventureSlot(3);
-
-      const callData = ctx.contract.methods
-        .startAdventure(
-          // poriants
-          poriants,
-
-          // index
-          index,
-
-          // notPortal
-          !usePortal
-        )
-        .encodeABI();
-
-      console.log({
-        poriants,
-        index,
-        usePortal,
-      });
-
-      const tx = {
-        from: ctx.walletConnectChannel.accounts[0],
-        to: getIdleGameAddressSC(env).address,
-        data: callData, // Required
-      };
-
-      // Sign transaction
-      await sendRequestForWalletConnectTx(tx);
-    },
-  });
-
-  server.defineCommand('atk', {
-    help: 'send new mine request',
-    action: async (args) => {
-      if (!ctx.walletConnectChannel?.connected) {
-        console.warn(
-          'wallet channel not ready. Please run .wallet.start first'
-        );
-        return;
-      }
-      const tmp = args.split(' ');
-      const mineId = tmp[0];
-      const usePortal = !!tmp[1];
-      if (!mineId) {
-        console.warn('\tUsage: .new.atk <mineId> [usePortal = false]');
-        return;
-      }
-
-      const addvStats =
-        await Computed.MyAdventure.refreshAdventureStatsForAddress(
-          { realm, ctx },
-          playerAddress
-        );
-
-      console.log('STATS');
-      console.dir(
-        {
-          protentialTarget: addvStats.protentialTarget,
-          activeMines: addvStats.activeMines,
-        },
-        { depth: 5 }
-      );
-
-      console.log('EXEC');
-      console.log({ mineId, usePortal });
-      const mineInfo = addvStats.targets[mineId];
-
-      if (!mineInfo) {
-        console.log('opps. Mine status changed');
-        return;
-      }
-
-      const poriants = ['1346', '5420', '1876'];
-      const index = Adventure.randAdventureSlot(3, mineInfo.farmerSlots);
-
-      const callData = ctx.contract.methods
-        .support1(
-          // mineId
-          mineId,
-          // poriants
-          poriants,
-
-          // index
-          index,
-
-          // notPortal
-          !usePortal
-        )
-        .encodeABI();
-
-      console.log({
-        method: 'support1',
-        mineId,
-        poriants,
-        index,
-        usePortal,
-        callData,
-      });
-
-      const web3GasPrice = await ctx.web3.eth.getGasPrice();
-      const factor = MINE_ATK_PRICE_FACTOR;
-
-      const tx: ITxData = {
-        from: ctx.walletConnectChannel.accounts[0],
-        to: getIdleGameAddressSC(env).address,
-        data: callData, // Required
-        gasPrice: +web3GasPrice * factor,
-      };
-
-      // Sign transaction
-      await sendRequestForWalletConnectTx(tx);
-    },
-  });
-
   async function currentGasPrice() {
     return await ctx.web3.eth.getGasPrice();
-  }
-
-  function sendRequestForWalletConnectTx(tx: ITxData) {
-    return ctx.walletConnectChannel
-      .sendTransaction(tx)
-      .then((result) => {
-        console.log(result);
-        return ctx.web3.eth.getTransactionReceipt(result);
-      })
-      .then((txInfo) => {
-        console.log(txInfo);
-      })
-      .catch((error) => {
-        // Error returned when rejected
-        console.error(error);
-      });
   }
 
   //----------------------------------------------------//
