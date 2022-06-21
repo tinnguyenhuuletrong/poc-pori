@@ -11,4 +11,6 @@ export const BOT_FORMATIONS = [
 
 export const playerAddress = process.env.PLAYER_ADDRESS;
 export const loggerInfo = debug('pori:info');
+
+export const noHistoryMode = !!process.env.NO_HISTORY;
 loggerInfo.enabled = true;

@@ -44,6 +44,7 @@ import {
   BOT_FORMATIONS,
   BOT_TIMEOUT_HOURS,
   loggerInfo,
+  noHistoryMode,
   playerAddress,
 } from './app/config';
 
@@ -129,9 +130,10 @@ async function main() {
     terminal: true,
   });
 
-  server.setupHistory(process.env.NODE_REPL_HISTORY, () => {
-    // noop;
-  });
+  if (!noHistoryMode)
+    server.setupHistory(process.env.NODE_REPL_HISTORY, () => {
+      loggerInfo(`history stored at ${process.env.NODE_REPL_HISTORY}`);
+    });
 
   //-----------------------------------------//
   // Cli Cmds

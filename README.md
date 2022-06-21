@@ -164,3 +164,82 @@ Next you can encrypt your wallet private key with
 3. Run your telegram bot
 
 yarn nx run examples-simple-tele-bot:run
+
+
+## How to run CLI bot - Little Rabbit - Porichain
+
+1. update env from template
+
+```sh
+export NODE_URI_PROD_HTTP=https://speedy-nodes-nyc.moralis.io/002c069a88c9e6b51c472995/polygon/mainnet
+export NODE_URI_PROD_PORICHAIN_HTTP=https://rpc1.porichain.io
+
+export PLAYER_ADDRESS=xxxxx
+
+export DEBUG=pori:*
+
+export NO_HISTORY=1
+```
+
+2. extract snapshot data
+ It will restore block scan DB -> avoid scan all events again from blockchain each start
+
+```txt
+ unzip archived/allEvents.prod.porichain.realm.zip -> archived/prodPoriChain 
+ in the end we have something like 
+ ./archived/repo/prodPoriChain
+  allEvents.prod.realm
+```
+
+2. modify src. update formation 
+packages/examples/cli/src/app/config.ts
+
+```ts
+export const BOT_TIMEOUT_HOURS = 48;
+export const BOT_FORMATIONS = [
+  {
+    minePories: ['3923', '3018', '182'],
+    supportPori: 'xxxx', // leave '' for ignore support pharse
+    usePortal: true,
+  },
+  // ...
+];
+```
+
+3. build
+
+```sh
+npm run build:all:prod
+```
+
+4. gen secret (one time)
+
+``` sh
+node dist/packages/examples/cli/main.js --args="--env,ProdPorichain"
+
+# -----
+Run .genKey to generate new secret key ( don't commit or share this )
+If success it will generate file 
+./archived/repo
+  .aesKey
+
+Next you can encrypt your wallet private key with 
+.encData <wallet private key>
+```
+
+4. run bots
+
+```sh
+node dist/packages/examples/cli/main.js --args="--env,ProdPorichain"
+
+.wallet.unlock <encodedData>
+
+.auto.all -> run all bot
+.auto.list -> list running bot
+```
+
+Note:
+
+- for distribution. it only need folders below
+  - dist/packages/examples/cli
+  - archived/repo
