@@ -126,6 +126,18 @@ export function calculateMineTurnTime(startTime: Date) {
   };
 }
 
+export function getContextSetting(env: ENV) {
+  // getGas porichain return as 500. But avg fee on chain around 4100
+  const gasFactor = env === ENV.ProdPorichain ? 8.2 : 1;
+  const safeGweith = env === ENV.ProdPorichain ? 500 : 80;
+  const autoPlayMicroDelayMs = env === ENV.ProdPorichain ? 10000 : 3000;
+  return {
+    gasFactor,
+    safeGweith,
+    autoPlayMicroDelayMs,
+  };
+}
+
 export * from './commonTypes';
 
 export * as IdleGameSc from './lib/idleGameSc';

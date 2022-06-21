@@ -1,4 +1,3 @@
-import debug from 'debug';
 import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
 import {
   addWalletConnectToContext,
@@ -41,12 +40,17 @@ import repl, { REPLServer } from 'repl';
 import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
+import {
+  BOT_FORMATIONS,
+  BOT_TIMEOUT_HOURS,
+  loggerInfo,
+  playerAddress,
+} from './app/config';
 
 let env = ENV.Prod;
 let activeEnv = computeActiveEnv(env);
-const playerAddress = process.env.PLAYER_ADDRESS;
-const logger = debug('pori:info');
-logger.enabled = true;
+let autoRunCommand = '';
+let server!: REPLServer;
 
 function computeActiveEnv(env: ENV) {
   let activeEnv: typeof AppEnv;
@@ -63,9 +67,6 @@ function computeActiveEnv(env: ENV) {
   }
   return activeEnv;
 }
-
-let autoRunCommand = '';
-let server!: REPLServer;
 
 async function main() {
   for (let i = 0; i < process.argv.length; i++) {
@@ -89,13 +90,8 @@ async function main() {
 
   ctx.playerAddress = playerAddress;
   ctx.ui.writeMessage = async (msg) => {
-    logger(msg);
+    loggerInfo(msg);
   };
-
-  await addWalletConnectToContext(
-    ctx,
-    activeEnv.environment.walletConnectSessionStoragePath
-  );
 
   if (activeEnv.environment.mongodbDataStoreUri) {
     MongoDataStore.addMongodbDataStore(
@@ -339,16 +335,7 @@ async function main() {
         );
 
       // update bot formations here
-      const timeOutHours = 48;
-      const FORMATIONS = [
-        {
-          minePories: ['3923', '3018', '182'],
-          supportPori: '',
-          usePortal: true,
-        },
-      ];
-
-      for await (const iterator of FORMATIONS) {
+      for await (const iterator of BOT_FORMATIONS) {
         await Auto.autoPlayV1({
           ctx,
           realm,
@@ -357,7 +344,7 @@ async function main() {
             type: 'bot',
             minePories: iterator.minePories,
             supportPori: iterator.supportPori,
-            timeOutHours,
+            timeOutHours: BOT_TIMEOUT_HOURS,
             usePortal: iterator.usePortal,
           },
         });
