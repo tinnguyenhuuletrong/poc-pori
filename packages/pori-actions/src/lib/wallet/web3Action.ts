@@ -3,6 +3,7 @@ import type { TransactionConfig, TransactionReceipt } from 'web3-core';
 import type { ITxData } from '@walletconnect/types';
 import { Context } from '@pori-and-friends/pori-metadata';
 import { waitForMs } from '@pori-and-friends/utils';
+import { isFunction } from 'lodash';
 
 export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
@@ -116,6 +117,9 @@ function useWalletConnectToSignTx(ctx: Context, tx: ITxData) {
 }
 
 export async function currentGasPrice({ ctx }: { ctx: Context }) {
+  if (isFunction(ctx.custom.estimageGas))
+    return await ctx.custom.estimageGas(ctx);
+
   return await ctx.web3.eth.getGasPrice();
 }
 

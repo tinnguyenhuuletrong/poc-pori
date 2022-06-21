@@ -16,6 +16,8 @@ export type EditMessageHandler = (
   lastMsginfo: any,
   msg: string
 ) => Promise<any>;
+export type CustomEstGasprice = (ctx: Context) => Promise<string>;
+
 export type Context = {
   contract: Contract;
   web3: Web3;
@@ -35,6 +37,9 @@ export type Context = {
     gasFactor: number;
     safeGweith: number;
     autoPlayMicroDelayMs: number;
+  };
+  custom: {
+    estimageGas?: CustomEstGasprice;
   };
 };
 

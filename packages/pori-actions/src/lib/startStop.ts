@@ -32,7 +32,7 @@ export async function init(env: ENV): Promise<Context> {
   const idleGameSc = getIdleGameAddressSC(env);
   const contract = new web3.eth.Contract(idleGameSc.abi, idleGameSc.address);
 
-  const setting = getContextSetting(env);
+  const { setting, custom } = getContextSetting(env);
 
   const ctx: Context = {
     contract,
@@ -48,6 +48,7 @@ export async function init(env: ENV): Promise<Context> {
       },
     },
     setting: setting,
+    custom: custom,
   };
 
   return ctx;

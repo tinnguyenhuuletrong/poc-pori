@@ -3,8 +3,8 @@ import debug from 'debug';
 export const BOT_TIMEOUT_HOURS = 48;
 export const BOT_FORMATIONS = [
   {
-    minePories: ['3923', '3018', '182'],
-    supportPori: '',
+    minePories: ['1346', '5420', '5387'],
+    supportPori: '1876',
     usePortal: true,
   },
 ];

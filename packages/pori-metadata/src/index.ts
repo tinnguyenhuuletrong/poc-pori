@@ -1,7 +1,8 @@
-import { ENV } from './commonTypes';
+import { Context, CustomEstGasprice, ENV } from './commonTypes';
 import * as stagConfig from './lib/sta-poriverse_info';
 import * as prodConfig from './lib/prod-poriverse_info';
 import * as prodPoriChainConfig from './lib/prod-porichain-poriverse_info';
+import { mean } from 'lodash';
 
 export const TEN_POWER_10_BN = BigInt(10 ** 18);
 export const TURN_DURATION_SEC = 1800;
@@ -128,13 +129,31 @@ export function calculateMineTurnTime(startTime: Date) {
 
 export function getContextSetting(env: ENV) {
   // getGas porichain return as 500. But avg fee on chain around 4100
-  const gasFactor = env === ENV.ProdPorichain ? 8.2 : 1;
-  const safeGweith = env === ENV.ProdPorichain ? 500 : 80;
+  const gasFactor = 1;
+  const safeGweith = env === ENV.ProdPorichain ? 5000 : 80;
   const autoPlayMicroDelayMs = env === ENV.ProdPorichain ? 10000 : 3000;
+
+  // custom estimage gas function base on pending tx for porichain
+  let estimageGas: CustomEstGasprice | undefined;
+  if (env === ENV.ProdPorichain) {
+    estimageGas = async (ctx: Context) => {
+      const pendingTx = await ctx.web3.eth.getPendingTransactions();
+      const avgGas = mean(
+        pendingTx
+          .filter((itm) => +itm.gasPrice > 0)
+          .map((itm) => {
+            return +itm.gasPrice;
+          })
+      );
+      return avgGas.toString();
+    };
+  }
+
   return {
-    gasFactor,
-    safeGweith,
-    autoPlayMicroDelayMs,
+    setting: { gasFactor, safeGweith, autoPlayMicroDelayMs },
+    custom: {
+      estimageGas,
+    },
   };
 }
 

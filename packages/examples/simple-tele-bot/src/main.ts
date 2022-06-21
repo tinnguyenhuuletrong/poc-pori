@@ -149,6 +149,7 @@ async function main() {
       walletUnlock: ${Boolean(ctx.walletAcc)}
       settingGasFactor: ${ctx.setting.gasFactor} 
       realmRevision: ${localMetadata.revision}
+      env: ${env}
       _v: ${VERSION}
     </code></pre>
     Have fun!

@@ -12,6 +12,7 @@ import {
   Input,
   queryBinancePrice,
   queryMarketInfo,
+  WalletActions,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
@@ -36,10 +37,8 @@ import {
   readFileSync,
   writeFileSync,
 } from 'fs';
+import os from 'os';
 import repl, { REPLServer } from 'repl';
-import * as AppEnv from './environments/environment';
-import * as AppEnvProd from './environments/environment.prod';
-import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
 import {
   BOT_FORMATIONS,
   BOT_TIMEOUT_HOURS,
@@ -47,6 +46,9 @@ import {
   noHistoryMode,
   playerAddress,
 } from './app/config';
+import * as AppEnv from './environments/environment';
+import * as AppEnvProd from './environments/environment.prod';
+import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
 
 let env = ENV.Prod;
 let activeEnv = computeActiveEnv(env);
@@ -380,8 +382,7 @@ async function main() {
   server.defineCommand('gas', {
     help: 'calculate gasPrice',
     action: async () => {
-      const web3GasPrice = await currentGasPrice();
-
+      const web3GasPrice = await WalletActions.currentGasPrice({ ctx });
       console.log(ctx.web3.utils.fromWei(web3GasPrice, 'gwei'), 'gwei');
     },
   });
@@ -517,9 +518,24 @@ async function main() {
     },
   });
 
-  async function currentGasPrice() {
-    return await ctx.web3.eth.getGasPrice();
-  }
+  server.defineCommand('whoami', {
+    help: 'whoami',
+    action: async () => {
+      const localMetadata = await getLocalRealmRevision(realm);
+
+      const resp = `i am 🤖. 
+  uptime: ${process.uptime()}
+  pid: ${process.pid}
+  hostname: ${os.hostname()}
+  playerAddress: ${playerAddress}
+  walletUnlock: ${Boolean(ctx.walletAcc)}
+  settingGasFactor: ${ctx.setting.gasFactor} 
+  realmRevision: ${localMetadata.revision}
+  env: ${env}
+    `;
+      console.log(resp);
+    },
+  });
 
   //----------------------------------------------------//
   // Auto run ci support
@@ -531,6 +547,17 @@ async function main() {
 }
 
 main();
+
+async function getLocalRealmRevision(realm: Realm) {
+  const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
+    realm,
+    'default'
+  );
+  const localMetadata = {
+    revision: dbMetadata.updatedBlock,
+  };
+  return localMetadata;
+}
 
 async function doStats(realm: Realm, ctx: Context, addr?: string) {
   const humanView = await Computed.MyAdventure.refreshAdventureStatsForAddress(
