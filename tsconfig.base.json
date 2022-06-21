@@ -28,8 +28,7 @@
       "@pori-and-friends/pori-repositories": [
         "packages/pori-repositories/src/index.ts"
       ],
-      "@pori-and-friends/utils": ["packages/utils/src/index.ts"],
-      "@pori-and-friends/utils/*": ["packages/utils/src/*"]
+      "@pori-and-friends/utils": ["packages/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
