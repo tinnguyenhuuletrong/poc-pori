@@ -37,7 +37,7 @@ export const gameInfo = {
       locale: 'en',
       fallbackLocale: 'en',
       urlAdventure: 'https://stag-adventure.poriverse.io',
-      urlMarketplace: 'https://stag-marketplace.poriverse.io/',
+      urlMarketplace: 'https://stag-marketplace.poriverse.io',
       linkPori2D: 'https://stag-porian-photo.vinaweb.app',
       linkPori3D: 'https://po-model.vinaweb.app/index.html',
       token: {

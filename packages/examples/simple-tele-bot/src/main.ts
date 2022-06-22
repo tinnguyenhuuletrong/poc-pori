@@ -3,6 +3,7 @@ import {
   Auto,
   Cmds,
   Computed,
+  expandEngadedMission,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   getMaticBalance,
@@ -14,6 +15,7 @@ import {
 import {
   AdventureInfoEx,
   Context,
+  getMarketplayBaseLink,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
   TEN_POWER_10_BN,
@@ -648,8 +650,13 @@ ${protentialTarget
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
       const sellingItems = await queryMarketInfo({ ctx });
+      const topItem = await expandEngadedMission({
+        ctx,
+        data: sellingItems.slice(0, 5),
+      });
+      const marketplaceBaseUrl = getMarketplayBaseLink(ctx.env);
 
-      const formatedData = sellingItems.slice(0, 5).map((itm) => {
+      const formatedData = topItem.map((itm) => {
         const {
           tokenId,
           price,
@@ -657,13 +664,15 @@ ${protentialTarget
           minePower,
           numOfBreeds,
           maxOfBreeds,
+          engagedMission,
         } = itm;
         return {
           tokenId,
-          link: `https://marketplace.poriverse.io/pori/${tokenId}`,
+          link: `${marketplaceBaseUrl}/pori/${tokenId}`,
           price: (BigInt(price) / TEN_POWER_10_BN).toString() + ' RIGY',
           minePower,
           helpPower,
+          engagedMission,
           breed: `${numOfBreeds} / ${maxOfBreeds}`,
         };
       });

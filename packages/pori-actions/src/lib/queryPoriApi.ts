@@ -29,6 +29,7 @@ export async function queryNftInfo(
 export type NftInfoForSale = NftInfo & {
   price: string;
   saleId: number;
+  engagedMission?: number;
 };
 
 export async function queryMarketInfo({
@@ -71,4 +72,24 @@ export async function queryMarketInfo({
 
   const data = (JSON.parse(res.data)?.items || []) as NftInfoForSale[];
   return data;
+}
+
+export async function expandEngadedMission({
+  ctx,
+  data,
+}: {
+  ctx: Context;
+  data: NftInfoForSale[];
+}) {
+  return Promise.all(
+    data.map(async (itm) => {
+      const engagedMission = await ctx.contract.methods
+        .missionOfPori(itm.tokenId)
+        .call();
+      return {
+        ...itm,
+        engagedMission: parseInt(engagedMission),
+      };
+    })
+  );
 }

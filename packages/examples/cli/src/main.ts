@@ -4,6 +4,7 @@ import {
   Auto,
   close,
   Computed,
+  expandEngadedMission,
   getKyberPoolRIGYPrice,
   getKyberPoolRIKENPrice,
   getMaticBalance,
@@ -17,6 +18,7 @@ import {
 import {
   Context,
   ENV,
+  getMarketplayBaseLink,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
   TEN_POWER_10_BN,
@@ -409,8 +411,13 @@ async function main() {
     help: 'marketplace',
     action: async () => {
       const sellingItems = await queryMarketInfo({ ctx });
+      const shortList = await expandEngadedMission({
+        ctx,
+        data: sellingItems.slice(0, 5),
+      });
+      const marketplaceBaseUrl = getMarketplayBaseLink(ctx.env);
 
-      const formatedData = sellingItems.slice(0, 5).map((itm) => {
+      const formatedData = shortList.map((itm) => {
         const {
           tokenId,
           price,
@@ -418,12 +425,14 @@ async function main() {
           minePower,
           numOfBreeds,
           maxOfBreeds,
+          engagedMission,
         } = itm;
         return {
-          link: `https://marketplace.poriverse.io/pori/${tokenId}`,
+          link: `${marketplaceBaseUrl}/pori/${tokenId}`,
           price: (BigInt(price) / TEN_POWER_10_BN).toString() + ' RIGY',
           minePower,
           helpPower,
+          engagedMission,
           breed: `${numOfBreeds} / ${maxOfBreeds}`,
         };
       });

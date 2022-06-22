@@ -93,6 +93,13 @@ export function getAdventureBaseLink(env: ENV) {
   return prodConfig.gameInfo.m.app.urlAdventure;
 }
 
+export function getMarketplayBaseLink(env: ENV) {
+  if (env === ENV.Staging) return stagConfig.gameInfo.m.app.urlMarketplace;
+  else if (env === ENV.ProdPorichain)
+    return prodPoriChainConfig.gameInfo.m.app.urlMarketplace;
+  return prodConfig.gameInfo.m.app.urlMarketplace;
+}
+
 export function getIdleGameAddressSC(env: ENV) {
   if (env === ENV.Staging) {
     return {
