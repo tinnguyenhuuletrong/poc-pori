@@ -152,7 +152,7 @@ export function getContextSetting(env: ENV) {
             return +itm.gasPrice;
           })
       );
-      return avgGas.toString();
+      return Math.round(avgGas).toString();
     };
   }
 
@@ -162,6 +162,11 @@ export function getContextSetting(env: ENV) {
       estimageGas,
     },
   };
+}
+
+export function getDatastoreBackupKey(env: ENV) {
+  if (env === ENV.ProdPorichain) return 'porichain-db-realm';
+  return 'pori-db-realm';
 }
 
 export * from './commonTypes';

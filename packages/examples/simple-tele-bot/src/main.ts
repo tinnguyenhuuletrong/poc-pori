@@ -15,6 +15,7 @@ import {
 import {
   AdventureInfoEx,
   Context,
+  getDatastoreBackupKey,
   getMarketplayBaseLink,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
@@ -38,7 +39,6 @@ import process from 'process';
 import {
   activeEnv,
   botMasterUid,
-  DATASTORE_DB_KEY,
   env,
   FORMATION,
   MINE_ATK_PRICE_FACTOR,
@@ -681,7 +681,15 @@ ${protentialTarget
 <b>Top 5:</b>
 ${formatedData
   .map((itm) => {
-    const { link, price, minePower, helpPower, breed, tokenId } = itm;
+    const {
+      link,
+      price,
+      minePower,
+      helpPower,
+      breed,
+      tokenId,
+      engagedMission,
+    } = itm;
 
     const appLink = `https://link.trustwallet.com/open_url?url=${link}&coin_id=966`;
     return `  link: <a href="${appLink}">${tokenId}</a>
@@ -689,6 +697,7 @@ ${formatedData
       - minePower: ${minePower}
       - helpPower: ${helpPower}
       - breed: ${breed}
+      - engagedMission: ${engagedMission}
     `;
   })
   .join('\n')}
@@ -702,11 +711,16 @@ ${formatedData
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
-      const checkMsg = await bot.sendMessage(msg.chat.id, `🗄 checking...`);
+      const backupKey = getDatastoreBackupKey(env);
+
+      const checkMsg = await bot.sendMessage(
+        msg.chat.id,
+        `🗄 ${backupKey} - checking...`
+      );
 
       await MongoDataStore.waitForConnected(ctx);
 
-      const metadata = await MongoDataStore.fetchBolb(ctx, DATASTORE_DB_KEY);
+      const metadata = await MongoDataStore.fetchBolb(ctx, backupKey);
 
       const localMetadata = await getLocalRealmRevision(realm);
 
@@ -760,7 +774,12 @@ ${formatedData
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
-      const checkMsg = await bot.sendMessage(msg.chat.id, `🗄 checking...`);
+      const backupKey = getDatastoreBackupKey(env);
+
+      const checkMsg = await bot.sendMessage(
+        msg.chat.id,
+        `🗄 ${backupKey} - checking...`
+      );
 
       const updateText = async (msg) => {
         await bot.editMessageText(`🗄 ${msg}`, {
@@ -776,7 +795,7 @@ ${formatedData
 
       const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
         ctx,
-        DATASTORE_DB_KEY
+        backupKey
       );
 
       const totalBytes = fileMeta.length;
@@ -891,7 +910,9 @@ ${formatedData
 
   async function doUploadSnapshot(realm: Realm, ctx: Context) {
     const stream = createReadStream(activeEnv.environment.dbPath);
-    console.log('upload snapshot');
+    const backupKey = getDatastoreBackupKey(env);
+
+    console.log(`upload snapshot - ${backupKey}`);
 
     const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
       realm,
@@ -903,7 +924,7 @@ ${formatedData
 
     await MongoDataStore.waitForConnected(ctx);
 
-    await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream, metadata);
+    await MongoDataStore.storeBlob(ctx, backupKey, stream, metadata);
     console.log(`uploaded - revision:${metadata.revision}`);
     return metadata.revision;
   }

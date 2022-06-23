@@ -18,6 +18,7 @@ import {
 import {
   Context,
   ENV,
+  getDatastoreBackupKey,
   getMarketplayBaseLink,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
@@ -174,10 +175,12 @@ async function main() {
   server.defineCommand('storage.download', {
     help: 'upload realm data to storage',
     action: async () => {
-      console.log('begin download');
+      const backupKey = getDatastoreBackupKey(env);
+
+      console.log(`begin download - ${backupKey}`);
       const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
         ctx,
-        'pori-db-realm'
+        backupKey
       );
 
       const totalBytes = fileMeta.length;
@@ -413,7 +416,7 @@ async function main() {
       const sellingItems = await queryMarketInfo({ ctx });
       const shortList = await expandEngadedMission({
         ctx,
-        data: sellingItems.slice(0, 5),
+        data: sellingItems.slice(0, 10),
       });
       const marketplaceBaseUrl = getMarketplayBaseLink(ctx.env);
 
@@ -583,8 +586,8 @@ async function doStats(realm: Realm, ctx: Context, addr?: string) {
 
 async function doUploadSnapshot(realm: Realm, ctx: Context) {
   const stream = createReadStream(activeEnv.environment.dbPath);
-  console.log('upload snapshot');
-
+  const backupKey = getDatastoreBackupKey(env);
+  console.log(`upload snapshot - ${backupKey}`);
   const dbMetadata = await Repos.IdleGameSCMetadataRepo.findOne(
     realm,
     'default'
@@ -595,6 +598,6 @@ async function doUploadSnapshot(realm: Realm, ctx: Context) {
 
   await MongoDataStore.waitForConnected(ctx);
 
-  await MongoDataStore.storeBlob(ctx, 'pori-db-realm', stream, metadata);
+  await MongoDataStore.storeBlob(ctx, backupKey, stream, metadata);
   console.log(`uploaded - revision:${metadata.revision}`);
 }

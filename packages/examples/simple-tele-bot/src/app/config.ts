@@ -11,7 +11,6 @@ export const botMasterUid = process.env.TELEGRAM_MASTER_ID;
 export const MINE_ATK_PRICE_FACTOR = 1.2;
 export const FORMATION = ['1346', '5420', '5387'];
 export const SUPPORT_PORI = '1876';
-export const DATASTORE_DB_KEY = 'pori-db-realm';
 
 export const schedulerNewMineId = () => 'schedule_new_mine';
 export const schedulerNewMineType = 'submit_new_mine_action';
