@@ -20,6 +20,7 @@ import {
   ENV,
   getDatastoreBackupKey,
   getMarketplayBaseLink,
+  getMobileWalletApplink,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
   TEN_POWER_10_BN,
@@ -127,6 +128,7 @@ async function main() {
   global.Services = {
     scheduler,
   };
+  global.test = getMobileWalletApplink;
 
   server = repl.start({
     prompt: '>',

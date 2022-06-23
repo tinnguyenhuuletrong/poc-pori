@@ -17,6 +17,7 @@ import {
   Context,
   getDatastoreBackupKey,
   getMarketplayBaseLink,
+  getMobileWalletApplink,
   getRIGYTokenInfo,
   getRIKENTokenInfo,
   TEN_POWER_10_BN,
@@ -330,7 +331,7 @@ async function main() {
       const protentialTarget = humanView.protentialTarget;
       const mines = Object.values(humanView.mines);
       const adventureRender = (inp: AdventureInfoEx) => {
-        const appLink = `https://link.trustwallet.com/open_url?url=${inp.link}&coin_id=966`;
+        const appLink = getMobileWalletApplink(env, inp.link);
         return `  * <a href="${appLink}">${inp.mineId}</a>
           - supporterAddr: ${inp.supporterAddress}
           - blockTo: ${inp.blockedTo.toLocaleString()}

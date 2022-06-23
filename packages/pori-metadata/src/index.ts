@@ -164,6 +164,14 @@ export function getContextSetting(env: ENV) {
   };
 }
 
+export function getMobileWalletApplink(env: ENV, link: string) {
+  if (env === ENV.ProdPorichain) {
+    const linkWithoutHttps = link.split('https://')[1];
+    return `https://metamask.app.link/dapp/${linkWithoutHttps}`;
+  }
+  return `https://link.trustwallet.com/open_url?url=${link}&coin_id=966`;
+}
+
 export function getDatastoreBackupKey(env: ENV) {
   if (env === ENV.ProdPorichain) return 'porichain-db-realm';
   return 'pori-db-realm';
