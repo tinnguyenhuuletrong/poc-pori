@@ -2,6 +2,7 @@ import { Adventure, WalletActions } from '../../index';
 import {
   AdventureInfoEx,
   Context,
+  getChainExplorerTxHashLink,
   getIdleGameAddressSC,
 } from '@pori-and-friends/pori-metadata';
 import { boolFromString } from '@pori-and-friends/utils';
@@ -75,7 +76,8 @@ export async function cmdDoMine({
       ctx.ui.writeMessage(`on Receipt: ${r.transactionHash}`);
     }
   );
-  if (txHash) await ctx.ui.writeMessage(`https://polygonscan.com/tx/${txHash}`);
+  if (txHash)
+    await ctx.ui.writeMessage(getChainExplorerTxHashLink(ctx.env, txHash));
   else await ctx.ui.writeMessage(`Ố ồ..`);
 }
 
@@ -147,7 +149,8 @@ export async function cmdDoFinish({
       ctx.ui.writeMessage(`on Receipt: ${r.transactionHash}`);
     }
   );
-  if (txHash) await ctx.ui.writeMessage(`https://polygonscan.com/tx/${txHash}`);
+  if (txHash)
+    await ctx.ui.writeMessage(getChainExplorerTxHashLink(ctx.env, txHash));
   else await ctx.ui.writeMessage(`Ố ồ..`);
 }
 
@@ -245,7 +248,8 @@ export async function cmdDoAtk({
       ctx.ui.writeMessage(`on Receipt: ${r.transactionHash}`);
     }
   );
-  if (txHash) await ctx.ui.writeMessage(`https://polygonscan.com/tx/${txHash}`);
+  if (txHash)
+    await ctx.ui.writeMessage(getChainExplorerTxHashLink(ctx.env, txHash));
   else await ctx.ui.writeMessage(`Ố ồ..`);
 }
 
@@ -331,7 +335,8 @@ export async function cmdDoSupport({
       ctx.ui.writeMessage(`on Receipt: ${r.transactionHash}`);
     }
   );
-  if (txHash) await ctx.ui.writeMessage(`https://polygonscan.com/tx/${txHash}`);
+  if (txHash)
+    await ctx.ui.writeMessage(getChainExplorerTxHashLink(ctx.env, txHash));
   else await ctx.ui.writeMessage(`Ố ồ..`);
 }
 

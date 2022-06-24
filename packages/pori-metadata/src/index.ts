@@ -172,6 +172,13 @@ export function getMobileWalletApplink(env: ENV, link: string) {
   return `https://link.trustwallet.com/open_url?url=${link}&coin_id=966`;
 }
 
+export function getChainExplorerTxHashLink(env: ENV, txHash: string) {
+  if (env === ENV.ProdPorichain) {
+    return `https://explorer.porichain.io/tx/${txHash}`;
+  }
+  return `https://polygonscan.com/tx/${txHash}`;
+}
+
 export function getDatastoreBackupKey(env: ENV) {
   if (env === ENV.ProdPorichain) return 'porichain-db-realm';
   return 'pori-db-realm';
