@@ -1,4 +1,10 @@
-import { Workflow, Adventure, Computed, Cmds } from '../../index';
+import {
+  Workflow,
+  Adventure,
+  Computed,
+  Cmds,
+  WalletActions,
+} from '../../index';
 import { AdventureInfoEx, Context } from '@pori-and-friends/pori-metadata';
 import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
 import { isEmpty, uniq } from 'lodash';
@@ -289,7 +295,7 @@ async function waitForGasPrice({
   const sleepInterval = 60000;
   const msgInfo = await ctx.ui.writeMessage(`checking gas...`);
   while (Date.now() < end) {
-    const web3GasPrice = await ctx.web3.eth.getGasPrice();
+    const web3GasPrice = await WalletActions.currentGasPrice({ ctx });
     const valueInGweith = ctx.web3.utils.toWei(
       ctx.setting.safeGweith.toString(),
       'gwei'

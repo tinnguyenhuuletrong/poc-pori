@@ -3,12 +3,11 @@ import * as AppEnv from '../environments/environment';
 import * as AppEnvProd from '../environments/environment.prod';
 import * as AppEnvProdPorichain from '../environments/environment.prod.porichain';
 
-export const VERSION = '10';
-export const env = ENV.Prod;
+export const VERSION = '11';
+export const env = ENV.ProdPorichain;
 export const activeEnv = computeActiveEnv(env);
 export const playerAddress = process.env.PLAYER_ADDRESS;
 export const botMasterUid = process.env.TELEGRAM_MASTER_ID;
-export const MINE_ATK_PRICE_FACTOR = 1.2;
 export const FORMATION = ['1346', '5420', '5387'];
 export const SUPPORT_PORI = '1876';
 

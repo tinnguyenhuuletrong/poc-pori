@@ -4,6 +4,7 @@ import type { ITxData } from '@walletconnect/types';
 import { Context } from '@pori-and-friends/pori-metadata';
 import { waitForMs } from '@pori-and-friends/utils';
 import { isFunction } from 'lodash';
+import { WalletActions } from '../../index';
 
 export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
@@ -23,7 +24,7 @@ async function useAccountToSendTx(
 
   const gasFactor = ctx.setting.gasFactor ?? 1;
 
-  const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
+  const defaultWeb3GasPrice = await currentGasPrice({ ctx });
   const defaultNonce = await ctx.web3.eth.getTransactionCount(
     ctx.walletAcc.address
   );
@@ -82,7 +83,7 @@ export function sendSignRequestForWalletConnectTx(
 async function useAccountToSignTx(ctx: Context, tx: ITxData) {
   if (!ctx.walletAcc) return;
 
-  const defaultWeb3GasPrice = await ctx.web3.eth.getGasPrice();
+  const defaultWeb3GasPrice = await WalletActions.currentGasPrice({ ctx });
   const defaultNonce = await ctx.web3.eth.getTransactionCount(
     ctx.walletAcc.address
   );

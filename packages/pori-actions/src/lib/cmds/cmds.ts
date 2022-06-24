@@ -224,7 +224,7 @@ export async function cmdDoAtk({
     callData,
   });
 
-  const web3GasPrice = await ctx.web3.eth.getGasPrice();
+  const web3GasPrice = await WalletActions.currentGasPrice({ ctx });
   const factor = MINE_ATK_PRICE_FACTOR;
 
   const tx: ITxData = {

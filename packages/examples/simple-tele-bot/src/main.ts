@@ -42,7 +42,6 @@ import {
   botMasterUid,
   env,
   FORMATION,
-  MINE_ATK_PRICE_FACTOR,
   playerAddress,
   SUPPORT_PORI,
   VERSION,
@@ -189,15 +188,24 @@ async function main() {
     await bot.sendMessage(msg.chat.id, 'clear...', {
       reply_markup: {
         keyboard: [
-          [{ text: '/db_fetch' }, { text: '/db_upload' }],
-          [{ text: '/sch_list' }, { text: '/auto_list' }],
           [
-            { text: '/setting_set_gas_factor 1.05' },
-            { text: '/wallet_balance' },
+            { text: '/db_fetch' },
+            { text: '/db_upload' },
+            { text: '/sch_list' },
+            { text: '/auto_list' },
           ],
-          [{ text: '/auto_play 24' }, { text: '/auto_refresh' }],
-          [{ text: '/market_list' }, { text: '/price' }],
-          [{ text: '/stats' }, { text: '/whoami' }],
+          [
+            { text: '/auto_play 24' },
+            { text: '/auto_refresh' },
+            { text: '/setting_set_gas_factor 1.05' },
+          ],
+          [
+            { text: '/market_list' },
+            { text: '/price' },
+            { text: '/wallet_balance' },
+            { text: '/whoami' },
+          ],
+          [{ text: '/stats' }],
         ],
         resize_keyboard: true,
       },
@@ -402,40 +410,6 @@ ${protentialTarget
         reply_markup: {
           inline_keyboard: keyboard,
         },
-      });
-    });
-  });
-
-  bot.onText(/\/mine (.*)/, async (msg, match) => {
-    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
-      if (!requireBotMaster(msg)) return;
-      captureChatId(msg.chat.id);
-      const args = match[1];
-      await Cmds.cmdDoMine({ ctx, realm, args, minePories: FORMATION });
-    });
-  });
-
-  bot.onText(/\/support (.+)/, async (msg, match) => {
-    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
-      if (!requireBotMaster(msg)) return;
-      captureChatId(msg.chat.id);
-      const args = match[1];
-      await Cmds.cmdDoSupport({ ctx, realm, args, SUPPORT_PORI });
-    });
-  });
-
-  bot.onText(/\/atk (.+)/, async (msg, match) => {
-    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
-      if (!requireBotMaster(msg)) return;
-      captureChatId(msg.chat.id);
-
-      const args = match[1];
-      await Cmds.cmdDoAtk({
-        ctx,
-        realm,
-        args,
-        FORMATION,
-        MINE_ATK_PRICE_FACTOR,
       });
     });
   });
@@ -692,7 +666,8 @@ ${formatedData
       engagedMission,
     } = itm;
 
-    const appLink = `https://link.trustwallet.com/open_url?url=${link}&coin_id=966`;
+    const baseAppLink = getMobileWalletApplink(env, link);
+    const appLink = baseAppLink;
     return `  link: <a href="${appLink}">${tokenId}</a>
       - price: ${price}
       - minePower: ${minePower}
@@ -729,7 +704,7 @@ ${formatedData
       const shouldPull = remoteRevision > localMetadata.revision;
 
       await bot.editMessageText(
-        `🗄 remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}
+        `🗄 ${backupKey} - remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}
         - shouldPull: ${shouldPull}
         `,
         {
@@ -756,13 +731,17 @@ ${formatedData
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
-      const checkMsg = await bot.sendMessage(msg.chat.id, `🗄 uploading...`);
+      const backupKey = getDatastoreBackupKey(env);
+      const checkMsg = await bot.sendMessage(
+        msg.chat.id,
+        `🗄 ${backupKey} uploading...`
+      );
 
       const remoteRevision = await doUploadSnapshot(realm, ctx);
       const localMetadata = await getLocalRealmRevision(realm);
 
       await bot.editMessageText(
-        `🗄 uploaded. remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}`,
+        `🗄 uploaded ${backupKey}. remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}`,
         {
           chat_id: checkMsg.chat.id,
           message_id: checkMsg.message_id,
