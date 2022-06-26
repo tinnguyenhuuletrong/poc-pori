@@ -215,7 +215,7 @@ npm run build:all:prod
 4. gen secret (one time)
 
 ``` sh
-node dist/packages/examples/cli/main.js --args="--env,ProdPorichain"
+node dist/packages/examples/cli/main.js --env ProdPorichain
 
 # -----
 Run .genKey to generate new secret key ( don't commit or share this )
