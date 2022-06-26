@@ -1,6 +1,7 @@
 import { Context, getAPILink } from '@pori-and-friends/pori-metadata';
 import { ENV, NftInfo } from '@pori-and-friends/pori-metadata';
 import { axiosIns } from '@pori-and-friends/utils';
+import { queryMissiontOfPoriSc } from './adventure';
 import { toChecksumAddress } from './util/web3utils';
 
 export async function queryNftInfo(
@@ -83,12 +84,10 @@ export async function expandEngadedMission({
 }) {
   return Promise.all(
     data.map(async (itm) => {
-      const engagedMission = await ctx.contract.methods
-        .missionOfPori(itm.tokenId)
-        .call();
+      const engagedMission = await queryMissiontOfPoriSc(ctx, itm.tokenId);
       return {
         ...itm,
-        engagedMission: parseInt(engagedMission),
+        engagedMission: engagedMission,
       };
     })
   );

@@ -81,3 +81,11 @@ export async function queryRandomRewardLevelFromSc(
     .randomRewardLevel(mineInfo.rewardMap.mineRawRewadMap)
     .call();
 }
+
+export async function queryMissiontOfPoriSc(
+  ctx: Context,
+  pori: string | number
+) {
+  const engagedMission = await ctx.contract.methods.missionOfPori(pori).call();
+  return parseInt(engagedMission);
+}

@@ -44,8 +44,7 @@ import {
 import os from 'os';
 import repl, { REPLServer } from 'repl';
 import {
-  BOT_FORMATIONS,
-  BOT_TIMEOUT_HOURS,
+  RuntimeConfig,
   loggerInfo,
   noHistoryMode,
   playerAddress,
@@ -346,7 +345,7 @@ async function main() {
         );
 
       // update bot formations here
-      for await (const iterator of BOT_FORMATIONS) {
+      for await (const iterator of RuntimeConfig.formations) {
         await Auto.autoPlayV1({
           ctx,
           realm,
@@ -355,7 +354,7 @@ async function main() {
             type: 'bot',
             minePories: iterator.minePories,
             supportPori: iterator.supportPori,
-            timeOutHours: BOT_TIMEOUT_HOURS,
+            timeOutHours: RuntimeConfig.settings.botTimeoutHours,
             usePortal: iterator.usePortal,
           },
         });

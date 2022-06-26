@@ -9,7 +9,9 @@ import { AdventureInfoEx, Context } from '@pori-and-friends/pori-metadata';
 import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
 import { isEmpty, uniq } from 'lodash';
 import moment from 'moment';
+import { queryMissiontOfPoriSc } from '../adventure';
 const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
+const MAX_PORI_ENGAGED_MISSION = 500;
 
 export type AutoPlayOpenMineArgs = {
   type: 'bot';
@@ -143,6 +145,10 @@ export async function autoPlayV1({
         });
 
         await state.promiseWithAbort(waitForGasPrice({ ctx, end, state }));
+
+        await state.promiseWithAbort(
+          checkPoriMissionCapping({ ctx, args, state })
+        );
 
         // 1. start new mine with portal
         await state.promiseWithAbort(
@@ -313,6 +319,31 @@ async function waitForGasPrice({
     ctx.ui.editMessage(msgInfo, `gas price ${web3GasPrice} is safe to go`);
     break;
   }
+}
+
+async function checkPoriMissionCapping({
+  ctx,
+  args,
+  state,
+}: {
+  ctx: Context;
+  args: AutoPlayOpenMineArgs;
+  state: Workflow.WorkflowState;
+}) {
+  const pories = [...args.minePories, args.supportPori];
+  const msgInfo = await ctx.ui.writeMessage(`checking pories capping...`);
+  let maxMission = -1;
+  for (const it of pories) {
+    const missionCount = await queryMissiontOfPoriSc(ctx, it);
+    if (missionCount > maxMission) maxMission = missionCount;
+    if (missionCount > MAX_PORI_ENGAGED_MISSION) {
+      throw new Error(`Pori mission capping reach ${it}: ${missionCount}`);
+    }
+  }
+  ctx.ui.editMessage(
+    msgInfo,
+    `capping is safe to go. Current cap ${maxMission}/${MAX_PORI_ENGAGED_MISSION}`
+  );
 }
 
 //----------------------------------------------------------//

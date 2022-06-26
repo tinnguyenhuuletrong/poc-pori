@@ -23,7 +23,7 @@ import {
   TEN_POWER_10_BN,
 } from '@pori-and-friends/pori-metadata';
 import * as Repos from '@pori-and-friends/pori-repositories';
-import { decryptAes } from '@pori-and-friends/utils';
+import { decryptAes, waitForMs } from '@pori-and-friends/utils';
 import {
   copyFileSync,
   createReadStream,
@@ -41,9 +41,8 @@ import {
   activeEnv,
   botMasterUid,
   env,
-  FORMATION,
+  RuntimeConfig,
   playerAddress,
-  SUPPORT_PORI,
   VERSION,
 } from './app/config';
 import {
@@ -194,11 +193,7 @@ async function main() {
             { text: '/sch_list' },
             { text: '/auto_list' },
           ],
-          [
-            { text: '/auto_play 24' },
-            { text: '/auto_refresh' },
-            { text: '/setting_set_gas_factor 1.05' },
-          ],
+          [{ text: '/auto_all' }, { text: '/setting_set_gas_factor 1.05' }],
           [
             { text: '/market_list' },
             { text: '/price' },
@@ -424,59 +419,43 @@ ${protentialTarget
     });
   });
 
-  bot.onText(/\/auto_play (.+)/, async (msg, match) => {
+  bot.onText(/\/auto_all/, async (msg, match) => {
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
 
-      const args = match[1];
       if (!ctx.walletAcc)
         return bot.sendMessage(
           msg.chat.id,
           `please call /wallet_unlock <.enveloped_key..> frist`
         );
 
-      if (Number.isNaN(+args)) {
-        return bot.sendMessage(
-          msg.chat.id,
-          `please call /auto_play <numberofHours>`
-        );
+      // update bot formations here
+      for await (const iterator of RuntimeConfig.formations) {
+        await Auto.autoPlayV1({
+          ctx,
+          realm,
+          playerAddress,
+          args: {
+            type: 'bot',
+            minePories: iterator.minePories,
+            supportPori: iterator.supportPori,
+            timeOutHours: RuntimeConfig.settings.botTimeoutHours,
+            usePortal: iterator.usePortal,
+          },
+        });
+
+        await waitForMs(5000);
       }
 
-      await Auto.autoPlayV1({
-        ctx,
-        realm,
-        playerAddress,
-        args: {
-          type: 'bot',
-          minePories: FORMATION,
-          supportPori: SUPPORT_PORI,
-          timeOutHours: +args,
-          usePortal: true,
-        },
-      });
-    });
-  });
+      await waitForMs(5000);
 
-  bot.onText(/\/auto_refresh/, async (msg, match) => {
-    withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
-      if (!requireBotMaster(msg)) return;
-      captureChatId(msg.chat.id);
-
-      if (!ctx.walletAcc)
-        return bot.sendMessage(
-          msg.chat.id,
-          `please call /wallet_unlock <.enveloped_key..> frist`
-        );
-
+      // background update db
       await Auto.autoRefreshStatus({
         ctx,
         realm,
         playerAddress,
-        args: {
-          type: 'background_refresh',
-          intervalMs: 2 * 60 * 1000,
-        },
+        args: { type: 'background_refresh', intervalMs: 2 * 60 * 1000 },
       });
     });
   });
