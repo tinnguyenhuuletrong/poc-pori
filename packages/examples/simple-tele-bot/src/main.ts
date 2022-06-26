@@ -445,10 +445,8 @@ ${protentialTarget
           },
         });
 
-        await waitForMs(5000);
+        await waitForMs(20000);
       }
-
-      await waitForMs(5000);
 
       // background update db
       await Auto.autoRefreshStatus({
