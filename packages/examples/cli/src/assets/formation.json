@@ -23,6 +23,11 @@
       "minePories": ["1435", "2596", "4794"],
       "supportPori": "706",
       "usePortal": true
+    },
+    {
+      "minePories": ["1529", "6060", "6266"],
+      "supportPori": "",
+      "usePortal": true
     }
   ]
 }

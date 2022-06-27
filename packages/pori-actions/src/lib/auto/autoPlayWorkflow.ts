@@ -6,10 +6,15 @@ import {
   WalletActions,
 } from '../../index';
 import { AdventureInfoEx, Context } from '@pori-and-friends/pori-metadata';
-import { doTaskWithRetry, waitForMs } from '@pori-and-friends/utils';
-import { isEmpty, uniq } from 'lodash';
+import {
+  doTaskWithRetry,
+  isArrayIncludeAll,
+  waitForMs,
+} from '@pori-and-friends/utils';
+import { uniq } from 'lodash';
 import moment from 'moment';
 import { queryMissiontOfPoriSc } from '../adventure';
+import { AdventureStatsComputed } from '../computed/myAdventure';
 const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
 const MAX_PORI_ENGAGED_MISSION = 500;
 
@@ -138,8 +143,8 @@ export async function autoPlayV1({
   const workflowExec = async (state: Workflow.WorkflowState) => {
     while (Date.now() < end) {
       let addvStats = await refreshStatus(state, realm, ctx, playerAddress);
-      const isEmptyMine = isEmpty(addvStats.mines);
-      if (isEmptyMine) {
+      let activeMine = findActiveMine({ ctx, addvStats, args });
+      if (!activeMine) {
         state.updateState(() => {
           state.data['step'] = 'start_mine';
         });
@@ -166,7 +171,7 @@ export async function autoPlayV1({
 
       // 2. do support
       addvStats = await refreshStatus(state, realm, ctx, playerAddress);
-      let activeMine = addvStats.mines[Object.keys(addvStats.mines)[0]];
+      activeMine = findActiveMine({ ctx, addvStats, args });
       if (!activeMine) {
         console.log(addvStats);
         throw 'OoO';
@@ -205,13 +210,13 @@ export async function autoPlayV1({
 
       // 3. do finish
       addvStats = await refreshStatus(state, realm, ctx, playerAddress);
-      activeMine = addvStats.mines[Object.keys(addvStats.mines)[0]];
+      activeMine = findActiveMine({ ctx, addvStats, args });
       if (activeMine) {
         state.updateState(() => {
           state.data[
             'step'
-          ] = `waiting_for_finish. Wakeup at ${activeMine.blockedTo.toLocaleString()} - ${moment(
-            activeMine.blockedTo
+          ] = `waiting_for_finish. Wakeup at ${activeMine?.blockedTo.toLocaleString()} - ${moment(
+            activeMine?.blockedTo
           ).fromNow()}`;
         });
         await state.promiseWithAbort(
@@ -330,7 +335,8 @@ async function checkPoriMissionCapping({
   args: AutoPlayOpenMineArgs;
   state: Workflow.WorkflowState;
 }) {
-  const pories = [...args.minePories, args.supportPori];
+  const pories = [...args.minePories];
+  if (args.supportPori) pories.push(args.supportPori);
   const msgInfo = await ctx.ui.writeMessage(`checking pories capping...`);
   let maxMission = -1;
   for (const it of pories) {
@@ -463,4 +469,26 @@ async function supportSlotPick({
     - (bigRewardEP1: ${bigRewardEP}, bigRewardAP1: ${bigRewardAP}, esbPercentage: ${esbPercentage})`
   );
   return slotIndex;
+}
+function findActiveMine({
+  ctx,
+  addvStats,
+  args,
+}: {
+  ctx: Context;
+  args: AutoPlayOpenMineArgs;
+  addvStats: AdventureStatsComputed;
+}): AdventureInfoEx | null {
+  const minePories = [...args.minePories].map((itm) => itm.toString()).sort();
+
+  for (const key in addvStats.mines) {
+    const mineInfo = addvStats.mines[key];
+    const farmerPories = (mineInfo.farmerPories || [])
+      .map((itm) => itm.toString())
+      .sort();
+
+    const isMatch = isArrayIncludeAll(farmerPories, minePories);
+    if (isMatch) return mineInfo;
+  }
+  return null;
 }

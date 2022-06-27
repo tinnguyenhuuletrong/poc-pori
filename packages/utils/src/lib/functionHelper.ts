@@ -23,3 +23,10 @@ export function boolFromString(inp: any) {
   if (inp === '1' || inp === 'true') return true;
   return false;
 }
+
+export function isArrayIncludeAll(array: any[], contain: any[]) {
+  for (const itm of contain) {
+    if (!array.includes(itm)) return false;
+  }
+  return true;
+}
