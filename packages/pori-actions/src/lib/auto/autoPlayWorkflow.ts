@@ -152,10 +152,6 @@ export async function autoPlayV1({
         await state.promiseWithAbort(waitForGasPrice({ ctx, end, state }));
 
         await state.promiseWithAbort(
-          checkPoriMissionCapping({ ctx, args, state })
-        );
-
-        await state.promiseWithAbort(
           checkPortal({ ctx, args, playerAddress, state, end })
         );
 
@@ -375,10 +371,10 @@ async function checkPortal({
 
   while (Date.now() < end) {
     const portalCap = await Adventure.queryPortalInfoSc(ctx, playerAddress);
-    if (portalCap.fastMissions >= portalCap.capacityMissions) {
-      await state.promiseWithAbort(waitForMs(sleepInterval));
-      continue;
-    }
+    // if (portalCap.fastMissions > 0) {
+    //   await state.promiseWithAbort(waitForMs(sleepInterval));
+    //   continue;
+    // }
     break;
   }
 
