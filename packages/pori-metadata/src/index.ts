@@ -121,6 +121,15 @@ export function getIdleGameAddressSC(env: ENV) {
   };
 }
 
+export function getPortalAddressSC(env: ENV) {
+  if (env === ENV.ProdPorichain)
+    return {
+      abi: prodPoriChainConfig.ABI_PORTAL,
+      address: prodPoriChainConfig.gameInfo.m.app.contractAddress.rainbowPortal,
+    };
+  return null;
+}
+
 export function calculateMineTurnTime(startTime: Date) {
   const farmerAtkStartAt = new Date(
     startTime.valueOf() + TURN_DURATION_SEC * 1000

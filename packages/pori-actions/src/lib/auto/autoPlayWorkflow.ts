@@ -152,7 +152,7 @@ export async function autoPlayV1({
         await state.promiseWithAbort(waitForGasPrice({ ctx, end, state }));
 
         await state.promiseWithAbort(
-          checkPoriMissionCapping({ ctx, args, state })
+          checkPortal({ ctx, args, playerAddress, state, end })
         );
 
         // 1. start new mine with portal
@@ -350,6 +350,35 @@ async function checkPoriMissionCapping({
     msgInfo,
     `capping is safe to go. Current cap ${maxMission}/${MAX_PORI_ENGAGED_MISSION}`
   );
+}
+
+async function checkPortal({
+  ctx,
+  args,
+  playerAddress,
+  end,
+  state,
+}: {
+  ctx: Context;
+  args: AutoPlayOpenMineArgs;
+  playerAddress: string;
+  end: number;
+  state: Workflow.WorkflowState;
+}) {
+  if (!args.usePortal) return;
+  const msgInfo = await ctx.ui.writeMessage(`checking portal capping...`);
+  const sleepInterval = 60000;
+
+  while (Date.now() < end) {
+    const portalCap = await Adventure.queryPortalInfoSc(ctx, playerAddress);
+    // if (portalCap.fastMissions > 0) {
+    //   await state.promiseWithAbort(waitForMs(sleepInterval));
+    //   continue;
+    // }
+    break;
+  }
+
+  ctx.ui.editMessage(msgInfo, `portal capping is safe to go`);
 }
 
 //----------------------------------------------------------//

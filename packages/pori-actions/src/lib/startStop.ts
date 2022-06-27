@@ -3,6 +3,7 @@ import {
   ENV,
   getContextSetting,
   getIdleGameAddressSC,
+  getPortalAddressSC,
   getWeb3NodeUri,
   getWeb3NodeUriHttp,
 } from '@pori-and-friends/pori-metadata';
@@ -30,12 +31,17 @@ export async function init(env: ENV): Promise<Context> {
   const web3 = new Web3(provider);
 
   const idleGameSc = getIdleGameAddressSC(env);
+  const portalSc = getPortalAddressSC(env);
+  if (!portalSc) throw new Error('missing portal sc config');
+
   const contract = new web3.eth.Contract(idleGameSc.abi, idleGameSc.address);
+  const contractPortal = new web3.eth.Contract(portalSc.abi, portalSc.address);
 
   const { setting, custom } = getContextSetting(env);
 
   const ctx: Context = {
     contract,
+    contractPortal,
     web3,
     provider,
     env,

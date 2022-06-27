@@ -572,7 +572,7 @@ async function getLocalRealmRevision(realm: Realm) {
 
 async function doStats(realm: Realm, ctx: Context, addr?: string) {
   const humanView = await Computed.MyAdventure.refreshAdventureStatsForAddress(
-    { realm, ctx },
+    { realm, ctx, options: { withGasPrice: true, withPortal: true } },
     addr || playerAddress
   );
   delete humanView.targets;

@@ -9,6 +9,7 @@ import {
 } from '@pori-and-friends/pori-metadata';
 import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
+import { queryPortalInfoSc, SCPortalInfo } from '../adventure';
 
 export type ProtentialTarget = {
   link: string;
@@ -32,15 +33,24 @@ export type AdventureStatsComputed = {
   nextAtkAtDate?: Date;
   gasPriceGWEI: string;
   todayStats?: AdventureStatsGroupByDay;
+  portalInfo?: SCPortalInfo;
 };
 
 export async function refreshAdventureStatsForAddress(
   {
     realm,
     ctx,
+    options = {
+      withGasPrice: false,
+      withPortal: false,
+    },
   }: {
     realm: Realm;
     ctx: Context;
+    options?: {
+      withGasPrice?: boolean;
+      withPortal?: boolean;
+    };
   },
   addr: string
 ): Promise<AdventureStatsComputed> {
@@ -116,8 +126,10 @@ export async function refreshAdventureStatsForAddress(
   // mine completed by farmer. But our poriant still lock
   if (humanView.note.readyToStart === false) humanView.activeMines++;
 
-  const web3GasPrice = await WalletActions.currentGasPrice({ ctx });
-  humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
+  if (options.withGasPrice) {
+    const web3GasPrice = await WalletActions.currentGasPrice({ ctx });
+    humanView.gasPriceGWEI = ctx.web3.utils.fromWei(web3GasPrice, 'gwei');
+  }
 
   // next action timeline
   const timeViewMine = Object.values(humanView.mines);
@@ -151,6 +163,11 @@ export async function refreshAdventureStatsForAddress(
   // stats
   const toDayNo = moment().startOf('D').unix();
   humanView.todayStats = viewData.finishedAdventures[toDayNo];
+
+  // portal
+  if (options.withPortal) {
+    humanView.portalInfo = await queryPortalInfoSc(ctx, addr);
+  }
 
   return humanView;
 }

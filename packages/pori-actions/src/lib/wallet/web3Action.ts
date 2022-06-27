@@ -1,18 +1,20 @@
-import TelegramBot from 'node-telegram-bot-api';
 import type { TransactionConfig, TransactionReceipt } from 'web3-core';
 import type { ITxData } from '@walletconnect/types';
 import { Context } from '@pori-and-friends/pori-metadata';
-import { waitForMs } from '@pori-and-friends/utils';
+import { JobQueue, waitForMs } from '@pori-and-friends/utils';
 import { isFunction } from 'lodash';
 import { WalletActions } from '../../index';
+
+const sendTxJobQueue = new JobQueue();
 
 export function sendRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
   tx: ITxData,
   onTxReceipt?: (r: TransactionReceipt) => void
 ) {
-  if (ctx.walletAcc) return useAccountToSendTx(ctx, tx, onTxReceipt);
-  return useWalletConnectToSendTx(ctx, tx);
+  return sendTxJobQueue.addJob(async () => {
+    return useAccountToSendTx(ctx, tx, onTxReceipt);
+  });
 }
 
 async function useAccountToSendTx(
@@ -55,29 +57,11 @@ async function useAccountToSendTx(
   return;
 }
 
-function useWalletConnectToSendTx(ctx: Context, tx: ITxData) {
-  if (!ctx.walletConnectChannel) return;
-  return ctx.walletConnectChannel
-    .sendTransaction(tx)
-    .then((result) => {
-      return result;
-    })
-    .then((txInfo) => {
-      console.log(txInfo);
-      return txInfo;
-    })
-    .catch((error) => {
-      // Error returned when rejected
-      console.error(error);
-    });
-}
-
 export function sendSignRequestForWalletConnectTx(
   { ctx }: { ctx: Context },
   tx: ITxData
 ) {
-  if (ctx.walletAcc) return useAccountToSignTx(ctx, tx);
-  return useWalletConnectToSignTx(ctx, tx);
+  return useAccountToSignTx(ctx, tx);
 }
 
 async function useAccountToSignTx(ctx: Context, tx: ITxData) {
@@ -101,20 +85,6 @@ async function useAccountToSignTx(ctx: Context, tx: ITxData) {
     return signedTx.rawTransaction.split('0x')[1];
   }
   return signedTx.rawTransaction;
-}
-
-function useWalletConnectToSignTx(ctx: Context, tx: ITxData) {
-  if (!ctx.walletConnectChannel) return;
-  return ctx.walletConnectChannel
-    .signTransaction(tx)
-    .then((result) => {
-      return result;
-    })
-    .catch((error) => {
-      // Error returned when rejected
-      console.error(error);
-      return null;
-    });
 }
 
 export async function currentGasPrice({ ctx }: { ctx: Context }) {

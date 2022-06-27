@@ -320,7 +320,7 @@ async function main() {
       await bot.sendMessage(msg.chat.id, 'refreshing....');
       const humanView =
         await Computed.MyAdventure.refreshAdventureStatsForAddress(
-          { realm, ctx },
+          { realm, ctx, options: { withGasPrice: true, withPortal: true } },
           addr
         );
 
@@ -365,6 +365,11 @@ ${protentialTarget
   - <i>nextSupportAt: </i> ${humanView.nextAtkAt}
   - <i>nextActionAt: </i> ${humanView.nextActionAt}
   - <i>gasPriceGWEI: </i> ${humanView.gasPriceGWEI}
+  - <i>portalInfo: </i> fastMission: ${
+    humanView.portalInfo?.fastMissions
+  }, missions: ${humanView.portalInfo?.missions}, cap: ${
+        humanView.portalInfo?.capacityMissions
+      }
 
 <b>Today:</b>
   - <i>day: </i> ${new Date(
