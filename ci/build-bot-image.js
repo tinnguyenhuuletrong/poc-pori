@@ -23,11 +23,11 @@ execSync('yarn run nx build examples-simple-tele-bot --prod', {
 // heroku container:release ${imgTag}
 // `);
 
-execSync(`heroku container:push worker -a pori-bot`, {
+execSync(`heroku container:push worker -a dante-pori-bot`, {
   cwd,
   stdio: 'inherit',
 });
 
 console.log(`To Deploy. Run 
-  heroku container:release worker -a pori-bot
+  heroku container:release worker -a dante-pori-bot
 `);
