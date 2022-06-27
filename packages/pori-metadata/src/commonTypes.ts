@@ -20,6 +20,7 @@ export type CustomEstGasprice = (ctx: Context) => Promise<string>;
 
 export type Context = {
   contract: Contract;
+  contractPortal: Contract;
   web3: Web3;
   walletAcc?: Account;
   provider: WebsocketProvider | HttpProvider;

@@ -89,3 +89,16 @@ export async function queryMissiontOfPoriSc(
   const engagedMission = await ctx.contract.methods.missionOfPori(pori).call();
   return parseInt(engagedMission);
 }
+
+export type SCPortalInfo = PromiseReturnType<
+  ReturnType<typeof queryPortalInfoSc>
+>;
+export async function queryPortalInfoSc(ctx: Context, addr: string) {
+  const info = await ctx.contractPortal.methods.portalInfoOf(addr).call();
+  const { missions, fastMissions, capacityMissions } = info;
+  return {
+    missions: parseInt(missions),
+    fastMissions: parseInt(fastMissions),
+    capacityMissions: parseInt(capacityMissions),
+  };
+}
