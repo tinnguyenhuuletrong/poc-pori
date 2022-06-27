@@ -10,8 +10,8 @@
       "usePortal": true
     },
     {
-      "minePories": ["1529", "6060", "6266"],
-      "supportPori": "",
+      "minePories": ["1529", "6060", "3923"],
+      "supportPori": "6266",
       "usePortal": true
     }
   ]
