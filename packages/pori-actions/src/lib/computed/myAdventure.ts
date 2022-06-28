@@ -1,4 +1,4 @@
-import { Input, DataView, WalletActions } from '../../index';
+import { Input, DataView, WalletActions, token2Usd } from '../../index';
 import * as Repos from '@pori-and-friends/pori-repositories';
 import {
   AdventureInfoEx,
@@ -34,6 +34,10 @@ export type AdventureStatsComputed = {
   gasPriceGWEI: string;
   todayStats?: AdventureStatsGroupByDay;
   portalInfo?: SCPortalInfo;
+  price?: {
+    rigy2Usd: number;
+    rken2Usd: number;
+  };
 };
 
 export async function refreshAdventureStatsForAddress(
@@ -43,6 +47,7 @@ export async function refreshAdventureStatsForAddress(
     options = {
       withGasPrice: false,
       withPortal: false,
+      withPrice: false,
     },
   }: {
     realm: Realm;
@@ -50,6 +55,7 @@ export async function refreshAdventureStatsForAddress(
     options?: {
       withGasPrice?: boolean;
       withPortal?: boolean;
+      withPrice?: boolean;
     };
   },
   addr: string
@@ -167,6 +173,17 @@ export async function refreshAdventureStatsForAddress(
   // portal
   if (options.withPortal) {
     humanView.portalInfo = await queryPortalInfoSc(ctx, addr);
+  }
+
+  // price
+  if (options.withPrice) {
+    humanView.price = await token2Usd(ctx);
+    if (humanView.todayStats) {
+      humanView.todayStats.rigyUsd =
+        humanView.todayStats.totalRigy * humanView.price.rigy2Usd;
+      humanView.todayStats.rikenUsd =
+        humanView.todayStats.totalRiken * humanView.price.rken2Usd;
+    }
   }
 
   return humanView;

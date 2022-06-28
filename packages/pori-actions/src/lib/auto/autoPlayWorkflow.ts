@@ -36,28 +36,6 @@ export const AutoPlayDb: Record<
   { args: AutoPlayArgs; state: Workflow.WorkflowState }
 > = {};
 
-export function stopBot(id: string) {
-  const botInfo = AutoPlayDb[id];
-  if (!botInfo) return;
-  botInfo.state.abort();
-  delete AutoPlayDb[id];
-}
-
-function captureStartedBot(state: Workflow.WorkflowState, args: AutoPlayArgs) {
-  const id = state.id;
-  state.finishDefered.promise
-    .then((res) => {
-      console.log('bot finish');
-    })
-    .catch((err) => {
-      console.log('bot error', err);
-    })
-    .finally(() => {
-      delete AutoPlayDb[id];
-    });
-  AutoPlayDb[id] = { state, args };
-}
-
 export async function autoRefreshStatus({
   ctx,
   realm,
@@ -149,10 +127,14 @@ export async function autoPlayV1({
           state.data['step'] = 'start_mine';
         });
 
-        await state.promiseWithAbort(waitForGasPrice({ ctx, end, state }));
+        await state.promiseWithAbort(checkGasPrice({ ctx, end, state }));
 
         await state.promiseWithAbort(
-          checkPortal({ ctx, args, playerAddress, state, end })
+          checkPoriMissionCapping({ ctx, args, state })
+        );
+
+        await state.promiseWithAbort(
+          checkPortal({ ctx, args, state, end, playerAddress })
         );
 
         // 1. start new mine with portal
@@ -227,7 +209,7 @@ export async function autoPlayV1({
           )
         );
 
-        await state.promiseWithAbort(waitForGasPrice({ ctx, end, state }));
+        await state.promiseWithAbort(checkGasPrice({ ctx, end, state }));
 
         state.updateState(() => {
           state.data['step'] = 'begin_finish';
@@ -271,6 +253,36 @@ export async function autoPlayV1({
   return state;
 }
 
+//----------------------------------------------------------//
+// bot manager
+//----------------------------------------------------------//
+
+export function stopBot(id: string) {
+  const botInfo = AutoPlayDb[id];
+  if (!botInfo) return;
+  botInfo.state.abort();
+  delete AutoPlayDb[id];
+}
+
+function captureStartedBot(state: Workflow.WorkflowState, args: AutoPlayArgs) {
+  const id = state.id;
+  state.finishDefered.promise
+    .then((res) => {
+      console.log('bot finish');
+    })
+    .catch((err) => {
+      console.log('bot error', err);
+    })
+    .finally(() => {
+      delete AutoPlayDb[id];
+    });
+  AutoPlayDb[id] = { state, args };
+}
+
+//----------------------------------------------------------//
+// internal
+//----------------------------------------------------------//
+
 async function refreshStatus(
   state: Workflow.WorkflowState,
   realm: Realm,
@@ -294,7 +306,7 @@ async function takeABreak(
   );
 }
 
-async function waitForGasPrice({
+async function checkGasPrice({
   ctx,
   end,
   state,
@@ -371,19 +383,24 @@ async function checkPortal({
 
   while (Date.now() < end) {
     const portalCap = await Adventure.queryPortalInfoSc(ctx, playerAddress);
-    // if (portalCap.fastMissions > 0) {
-    //   await state.promiseWithAbort(waitForMs(sleepInterval));
-    //   continue;
-    // }
+    if (portalCap.availableRiken < portalCap.nextMissionRequireRiken) {
+      ctx.ui.editMessage(
+        msgInfo,
+        `portal capping is not enough. ${
+          portalCap.availableRiken
+        } left. Require ${
+          portalCap.nextMissionRequireRiken
+        } ... try again after ${sleepInterval / 1000}s`
+      );
+      await state.promiseWithAbort(waitForMs(sleepInterval));
+      continue;
+    }
     break;
   }
 
   ctx.ui.editMessage(msgInfo, `portal capping is safe to go`);
 }
 
-//----------------------------------------------------------//
-// internal
-//----------------------------------------------------------//
 async function doSupport(
   ctx: Context,
   mineId: number,

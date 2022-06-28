@@ -1,4 +1,8 @@
-import { Context, PromiseReturnType } from '@pori-and-friends/pori-metadata';
+import {
+  Context,
+  PromiseReturnType,
+  TEN_POWER_10,
+} from '@pori-and-friends/pori-metadata';
 import { random } from 'lodash';
 
 const ALL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -95,10 +99,30 @@ export type SCPortalInfo = PromiseReturnType<
 >;
 export async function queryPortalInfoSc(ctx: Context, addr: string) {
   const info = await ctx.contractPortal.methods.portalInfoOf(addr).call();
-  const { missions, fastMissions, capacityMissions } = info;
+  const {
+    missions,
+    fastMissions,
+    capacityMissions,
+    suppliedRiken,
+    availableRiken,
+    lockedRiken,
+  } = info;
+
+  let nextMissionRequireRiken =
+    parseInt(
+      await ctx.contractPortal.methods.mission2Riken(+fastMissions + 1).call()
+    ) / TEN_POWER_10;
+
+  if (nextMissionRequireRiken <= 0)
+    nextMissionRequireRiken = Number.MAX_SAFE_INTEGER;
+
   return {
     missions: parseInt(missions),
     fastMissions: parseInt(fastMissions),
     capacityMissions: parseInt(capacityMissions),
+    suppliedRiken: parseInt(suppliedRiken) / TEN_POWER_10,
+    availableRiken: parseInt(availableRiken) / TEN_POWER_10,
+    lockedRiken: parseInt(lockedRiken) / TEN_POWER_10,
+    nextMissionRequireRiken: nextMissionRequireRiken,
   };
 }

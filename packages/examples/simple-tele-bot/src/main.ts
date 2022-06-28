@@ -11,10 +11,12 @@ import {
   init,
   queryBinancePrice,
   queryMarketInfo,
+  token2Usd,
 } from '@pori-and-friends/pori-actions';
 import {
   AdventureInfoEx,
   Context,
+  ENV,
   getDatastoreBackupKey,
   getMarketplayBaseLink,
   getMobileWalletApplink,
@@ -241,7 +243,8 @@ async function main() {
     const rigyInfo = getRIGYTokenInfo(env);
     const rikenInfo = getRIKENTokenInfo(env);
 
-    const [RIGY, RIKEN, MATIC] = await Promise.all([
+    // eslint-disable-next-line prefer-const
+    let [RIGY, RIKEN, MATIC, priceInfo] = await Promise.all([
       getTokenBalance({
         ctx,
         erc20Address: rigyInfo.tokenAddress,
@@ -253,7 +256,13 @@ async function main() {
         walletAddress: playerAddress,
       }),
       getMaticBalance({ ctx, walletAddress: playerAddress }),
+      token2Usd(ctx),
     ]);
+
+    if (ctx.env === ENV.ProdPorichain) {
+      RIGY = MATIC;
+      MATIC = 0;
+    }
 
     bot.sendMessage(
       msg.chat.id,
@@ -261,8 +270,10 @@ async function main() {
       <pre><code class="language-json">${JSON.stringify(
         {
           MATIC,
-          RIKEN,
           RIGY,
+          RIKEN,
+          RigyUsd: RIGY * priceInfo.rigy2Usd,
+          RikenUsd: RIKEN * priceInfo.rken2Usd,
         },
         null,
         2
@@ -320,7 +331,11 @@ async function main() {
       await bot.sendMessage(msg.chat.id, 'refreshing....');
       const humanView =
         await Computed.MyAdventure.refreshAdventureStatsForAddress(
-          { realm, ctx, options: { withGasPrice: true, withPortal: true } },
+          {
+            realm,
+            ctx,
+            options: { withGasPrice: true, withPortal: true, withPrice: true },
+          },
           addr
         );
 
@@ -365,10 +380,10 @@ ${protentialTarget
   - <i>nextSupportAt: </i> ${humanView.nextAtkAt}
   - <i>nextActionAt: </i> ${humanView.nextActionAt}
   - <i>gasPriceGWEI: </i> ${humanView.gasPriceGWEI}
-  - <i>portalInfo: </i> fastMission: ${
-    humanView.portalInfo?.fastMissions
-  }, missions: ${humanView.portalInfo?.missions}, cap: ${
-        humanView.portalInfo?.capacityMissions
+  - <i>portalInfo: </i> available/supplied: ${
+    humanView.portalInfo?.availableRiken
+  }/${humanView.portalInfo?.suppliedRiken}, nextMissionRequire: ${
+        humanView.portalInfo?.nextMissionRequireRiken
       }
 
 <b>Today:</b>
@@ -378,6 +393,8 @@ ${protentialTarget
   - <i>mines: </i> ${humanView.todayStats?.finishedMineIds.length}
   - <i>RIGY: </i> ${humanView.todayStats?.totalRigy}
   - <i>RIKEN: </i> ${humanView.todayStats?.totalRiken}
+  - <i>RIGY$: </i> ${humanView.todayStats?.rigyUsd}
+  - <i>RIKEN$: </i> ${humanView.todayStats?.rikenUsd}
 
       `;
 

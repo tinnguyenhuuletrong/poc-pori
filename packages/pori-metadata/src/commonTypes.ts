@@ -207,6 +207,8 @@ export type AdventureStatsGroupByDay = {
   finishedMineIds: number[];
   totalRigy: number;
   totalRiken: number;
+  rigyUsd?: number;
+  rikenUsd?: number;
 };
 
 export type AdventureInfoEx = Omit<
