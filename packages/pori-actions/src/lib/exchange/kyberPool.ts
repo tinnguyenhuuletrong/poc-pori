@@ -6,6 +6,7 @@ import {
   Route,
   TokenAmount,
   TradeType,
+  Pair,
 } from '@dynamic-amm/sdk';
 import {
   Context,
@@ -16,6 +17,8 @@ import {
 } from '@pori-and-friends/pori-metadata';
 
 let lazyProvider: any;
+const PairCacheDb: Record<string, Pair[]> = {};
+
 async function getProvider({ ctx }: { ctx: Context }) {
   if (lazyProvider) return lazyProvider;
 
@@ -23,6 +26,22 @@ async function getProvider({ ctx }: { ctx: Context }) {
   const url = getWeb3NodeUriPolygonHttp();
   lazyProvider = new etherJs.JsonRpcProvider(url);
   return lazyProvider;
+}
+
+async function getPairData(ctx: Context, tokenA: Token, tokenB: Token) {
+  const KyberFactoryAddress = getKyberSwapFactoryAddress(ctx.env);
+  const provider = await getProvider({ ctx });
+
+  const key = `${tokenA.address}_${tokenB.address}`;
+  if (PairCacheDb[key]) return PairCacheDb[key];
+
+  PairCacheDb[key] = await Fetcher.fetchPairData(
+    tokenA,
+    tokenB,
+    KyberFactoryAddress,
+    provider
+  );
+  return PairCacheDb[key];
 }
 
 export async function getKyberPoolRIGYPrice({
@@ -33,8 +52,6 @@ export async function getKyberPoolRIGYPrice({
   amountInWei?: string;
 }) {
   const tokenInfo = getRIGYTokenInfoOnPolygon();
-  const KyberFactoryAddress = getKyberSwapFactoryAddress(ctx.env);
-  const provider = await getProvider({ ctx });
 
   const RIGYToken = new Token(
     +tokenInfo.chainId,
@@ -43,12 +60,7 @@ export async function getKyberPoolRIGYPrice({
     tokenInfo.symbol
   );
 
-  const pools = await Fetcher.fetchPairData(
-    RIGYToken,
-    WETH[RIGYToken.chainId],
-    KyberFactoryAddress,
-    provider
-  );
+  const pools = await getPairData(ctx, RIGYToken, WETH[RIGYToken.chainId]);
 
   const route = new Route(pools, WETH[RIGYToken.chainId]);
 
@@ -72,27 +84,21 @@ export async function getKyberPoolRIKENPrice({
   amountInWei?: string;
 }) {
   const tokenInfo = getRIKENTokenInfoOnPolygon();
-  const KyberFactoryAddress = getKyberSwapFactoryAddress(ctx.env);
 
-  const RIGYToken = new Token(
+  const RIKENToken = new Token(
     +tokenInfo.chainId,
     tokenInfo.tokenAddress,
     +tokenInfo.decimal,
     tokenInfo.symbol
   );
 
-  const pools = await Fetcher.fetchPairData(
-    RIGYToken,
-    WETH[RIGYToken.chainId],
-    KyberFactoryAddress,
-    lazyProvider
-  );
+  const pools = await getPairData(ctx, RIKENToken, WETH[RIKENToken.chainId]);
 
-  const route = new Route(pools, WETH[RIGYToken.chainId]);
+  const route = new Route(pools, WETH[RIKENToken.chainId]);
 
   const trade = new Trade(
     route,
-    new TokenAmount(WETH[RIGYToken.chainId], amountInWei),
+    new TokenAmount(WETH[RIKENToken.chainId], amountInWei),
     TradeType.EXACT_INPUT
   );
 

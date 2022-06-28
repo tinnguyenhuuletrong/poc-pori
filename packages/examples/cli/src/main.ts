@@ -13,6 +13,7 @@ import {
   Input,
   queryBinancePrice,
   queryMarketInfo,
+  token2Usd,
   WalletActions,
 } from '@pori-and-friends/pori-actions';
 import {
@@ -317,15 +318,23 @@ async function main() {
     },
   });
 
-  server.defineCommand('auto.list', {
+  server.defineCommand('test', {
     help: 'test',
+    action: async () => {
+      const price = await token2Usd(ctx);
+      console.log(price);
+    },
+  });
+
+  server.defineCommand('auto.list', {
+    help: 'auto list',
     action: async () => {
       console.log(Auto.AutoPlayDb);
     },
   });
 
   server.defineCommand('auto.background_refresh', {
-    help: 'test',
+    help: 'auto background_refresh',
     action: async () => {
       await Auto.autoRefreshStatus({
         ctx,
@@ -337,7 +346,7 @@ async function main() {
   });
 
   server.defineCommand('auto.all', {
-    help: 'test',
+    help: 'auto all',
     action: async () => {
       if (!ctx.walletAcc)
         return ctx.ui.writeMessage(
@@ -507,7 +516,8 @@ async function main() {
       const rigyInfo = getRIGYTokenInfo(env);
       const rikenInfo = getRIKENTokenInfo(env);
 
-      const [RIGY, RIKEN, MATIC] = await Promise.all([
+      // eslint-disable-next-line prefer-const
+      let [RIGY, RIKEN, MATIC, priceInfo] = await Promise.all([
         getTokenBalance({
           ctx,
           erc20Address: rigyInfo.tokenAddress,
@@ -519,12 +529,17 @@ async function main() {
           walletAddress: playerAddress,
         }),
         getMaticBalance({ ctx, walletAddress: playerAddress }),
+        token2Usd(ctx),
       ]);
+
+      if (ctx.env === ENV.ProdPorichain) RIGY = MATIC;
 
       console.log({
         RIGY,
         RIKEN,
         MATIC,
+        RigyUsd: RIGY * priceInfo.rigy2Usd,
+        RikenUsd: RIKEN * priceInfo.rken2Usd,
       });
     },
   });
@@ -572,7 +587,11 @@ async function getLocalRealmRevision(realm: Realm) {
 
 async function doStats(realm: Realm, ctx: Context, addr?: string) {
   const humanView = await Computed.MyAdventure.refreshAdventureStatsForAddress(
-    { realm, ctx, options: { withGasPrice: true, withPortal: true } },
+    {
+      realm,
+      ctx,
+      options: { withGasPrice: true, withPortal: true, withPrice: true },
+    },
     addr || playerAddress
   );
   delete humanView.targets;
