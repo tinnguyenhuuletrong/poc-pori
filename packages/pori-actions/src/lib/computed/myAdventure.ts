@@ -10,6 +10,10 @@ import {
 import { maxBy, minBy } from 'lodash';
 import moment from 'moment';
 import { queryPortalInfoSc, SCPortalInfo } from '../adventure';
+import { URL } from 'url';
+
+const QUICK_CHART_URL =
+  'https://quickchart.io/chart/render/sm-ae828767-1b52-43d6-83af-a029e40e4ea3';
 
 export type ProtentialTarget = {
   link: string;
@@ -187,4 +191,45 @@ export async function refreshAdventureStatsForAddress(
   }
 
   return humanView;
+}
+
+export async function genLast7DaysGraphData({
+  ctx,
+  realm,
+  playerAddress,
+}: {
+  ctx: Context;
+  realm: Realm;
+  playerAddress: string;
+}) {
+  const viewData = await DataView.computePlayerAdventure({
+    realm,
+    playerAddress: playerAddress,
+    realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
+  });
+  const entries = Object.entries(viewData.finishedAdventures);
+
+  const last7Days = entries
+    .map((itm) => itm[1])
+    .sort((a, b) => b.unixDay - a.unixDay)
+    .slice(0, 7)
+    .reverse();
+
+  const graphData: { labels: string[]; data1: string[]; data2: string[] } = {
+    labels: [],
+    data1: [],
+    data2: [],
+  };
+  for (const it of last7Days) {
+    const tmp = moment(it.timestamp).format('MMM-DD');
+    graphData.labels.push(tmp);
+    graphData.data1.push(Math.round(it.totalRigy).toString());
+    graphData.data2.push(Math.round(it.totalRiken).toString());
+  }
+
+  const url = new URL(QUICK_CHART_URL);
+  url.searchParams.append('labels', graphData.labels.join(','));
+  url.searchParams.append('data1', graphData.data1.join(','));
+
+  return { graphData, url: url.toString() };
 }

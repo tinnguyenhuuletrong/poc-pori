@@ -600,6 +600,13 @@ async function doStats(realm: Realm, ctx: Context, addr?: string) {
     .slice(0, 5)
     .filter((itm) => !!itm);
   console.dir(humanView, { depth: 5 });
+
+  const graphInfo = await Computed.MyAdventure.genLast7DaysGraphData({
+    ctx,
+    realm,
+    playerAddress: addr || playerAddress,
+  });
+  console.log(graphInfo);
 }
 
 async function doUploadSnapshot(realm: Realm, ctx: Context) {
