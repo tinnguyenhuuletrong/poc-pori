@@ -339,6 +339,13 @@ async function main() {
           addr
         );
 
+      const chartIncomLast7Days =
+        await Computed.MyAdventure.genLast7DaysGraphData({
+          ctx,
+          realm,
+          playerAddress: addr,
+        });
+
       const localMetadata = await getLocalRealmRevision(realm);
 
       // targets:
@@ -395,6 +402,10 @@ ${protentialTarget
   - <i>RIKEN: </i> ${humanView.todayStats?.totalRiken}
   - <i>RIGY$: </i> ${humanView.todayStats?.rigyUsd}
   - <i>RIKEN$: </i> ${humanView.todayStats?.rikenUsd}
+
+
+<b>Charts:</b>
+  - <a href="${chartIncomLast7Days.url}">RIGYLast7Days</a>
 
       `;
 
