@@ -823,7 +823,9 @@ ${formatedData
   console.log('🤖 started');
 
   for (const id of Memory.activeChats) {
-    await bot.sendMessage(id, 'hi 👋!');
+    await bot.sendMessage(id, `hi [master](tg://user?id=${botMasterUid}) 👋`, {
+      parse_mode: 'MarkdownV2',
+    });
   }
 
   function captureNotificationForMyMine(
