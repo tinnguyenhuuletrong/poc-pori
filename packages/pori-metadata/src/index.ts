@@ -2,7 +2,7 @@ import { Context, CustomEstGasprice, ENV } from './commonTypes';
 import * as stagConfig from './lib/sta-poriverse_info';
 import * as prodConfig from './lib/prod-poriverse_info';
 import * as prodPoriChainConfig from './lib/prod-porichain-poriverse_info';
-import { mean } from 'lodash';
+import { isEmpty, mean } from 'lodash';
 
 export const TEN_POWER_10 = 10 ** 18;
 export const TEN_POWER_10_BN = BigInt(10 ** 18);
@@ -154,7 +154,12 @@ export function getContextSetting(env: ENV) {
   let estimageGas: CustomEstGasprice | undefined;
   if (env === ENV.ProdPorichain) {
     estimageGas = async (ctx: Context) => {
-      const pendingTx = await ctx.web3.eth.getPendingTransactions();
+      const blockInfo = await ctx.web3.eth.getBlock('latest');
+      const pendingTx = await Promise.all(
+        blockInfo.transactions.map((itm) => ctx.web3.eth.getTransaction(itm))
+      );
+      if (isEmpty(pendingTx)) return ctx.web3.utils.toWei('5000', 'gwei');
+
       const avgGas = mean(
         pendingTx
           .filter((itm) => +itm.gasPrice > 0)
