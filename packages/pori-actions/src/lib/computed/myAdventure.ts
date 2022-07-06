@@ -13,7 +13,7 @@ import { queryPortalInfoSc, SCPortalInfo } from '../adventure';
 import { URL } from 'url';
 
 const QUICK_CHART_URL =
-  'https://quickchart.io/chart/render/sm-ae828767-1b52-43d6-83af-a029e40e4ea3';
+  'https://quickchart.io/chart/render/sm-d5f8d67a-d271-4d30-9ae1-be744bd2627e';
 
 export type ProtentialTarget = {
   link: string;
