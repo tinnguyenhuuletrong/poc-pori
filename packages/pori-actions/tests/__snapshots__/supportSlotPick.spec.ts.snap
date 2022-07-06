@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`support_slot_pick assit found s 1`] = `
+Object {
+  "logs": Array [
+    "roger that!. send pori 99 to support mineId:36430 at 6 
+
+    - (bigRewardIndex: 5, isFarmerFound:false) 
+    - (bigRewardEP1: -1, bigRewardAP1: -1, esbPercentage: NaN)",
+  ],
+  "slotIndex": 6,
+}
+`;
+
+exports[`support_slot_pick giveup s 1`] = `
+Object {
+  "logs": Array [
+    "roger that!. send pori 99 to support mineId:36430 at 5 
+
+    - (bigRewardIndex: 9, isFarmerFound:true) 
+    - (bigRewardEP1: 289, bigRewardAP1: 314, esbPercentage: 8)",
+  ],
+  "slotIndex": 5,
+}
+`;
+
+exports[`support_slot_pick no s 1`] = `
+Object {
+  "logs": Array [
+    "roger that!. send pori 99 to support mineId:36430 at 6 
+
+    - (bigRewardIndex: undefined, isFarmerFound:false) 
+    - (bigRewardEP1: -1, bigRewardAP1: -1, esbPercentage: NaN)",
+  ],
+  "slotIndex": 6,
+}
+`;
+
+exports[`support_slot_pick protect s 1`] = `
+Object {
+  "logs": Array [
+    "roger that!. send pori 99 to support mineId:36430 at 9 
+
+    - (bigRewardIndex: 9, isFarmerFound:true) 
+    - (bigRewardEP1: 312, bigRewardAP1: 314, esbPercentage: 47)",
+  ],
+  "slotIndex": 9,
+}
+`;

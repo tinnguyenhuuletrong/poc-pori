@@ -9,6 +9,7 @@ module.exports = {
   transform: {
     '^.+\\.[tj]s$': 'ts-jest',
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
+  moduleFileExtensions: ['ts', 'js', 'html', 'json'],
   coverageDirectory: '../../coverage/packages/pori-actions',
+  setupFiles: ['<rootDir>/.jest/setEnvVars.ts'],
 };
