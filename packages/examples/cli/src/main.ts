@@ -54,7 +54,7 @@ import * as AppEnv from './environments/environment';
 import * as AppEnvProd from './environments/environment.prod';
 import * as AppEnvProdPorichain from './environments/environment.prod.porichain';
 
-let env = ENV.Prod;
+let env = ENV.ProdPorichain;
 let activeEnv = computeActiveEnv(env);
 let autoRunCommand = '';
 let server!: REPLServer;

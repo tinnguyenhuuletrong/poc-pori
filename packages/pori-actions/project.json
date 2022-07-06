@@ -23,7 +23,8 @@
       "outputs": ["coverage/packages/pori-actions"],
       "options": {
         "jestConfig": "packages/pori-actions/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "runInBand": true
       }
     }
   },
