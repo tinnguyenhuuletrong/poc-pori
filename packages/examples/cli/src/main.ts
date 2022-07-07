@@ -462,8 +462,11 @@ async function main() {
 
   server.defineCommand('inv.list', {
     help: 'list all inventories',
-    action: async () => {
-      const playerInfo = await Repos.PlayerRepo.findOne(realm, playerAddress);
+    action: async (addr) => {
+      const playerInfo = await Repos.PlayerRepo.findOne(
+        realm,
+        addr || playerAddress
+      );
       const pories = await Promise.all(
         playerInfo.pories.map(async (itm) => {
           const { _id, minePower, helpPower } = itm;
