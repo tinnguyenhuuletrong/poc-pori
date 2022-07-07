@@ -5,7 +5,7 @@
   },
   "formations": [
     {
-      "minePories": ["1346", "5420", "5387"],
+      "minePories": ["100312", "5374", "5387"],
       "supportPori": "1876",
       "usePortal": true
     },
@@ -14,5 +14,6 @@
       "supportPori": "6266",
       "usePortal": true
     }
-  ]
+  ],
+  "olds": ["1346", "5420"]
 }

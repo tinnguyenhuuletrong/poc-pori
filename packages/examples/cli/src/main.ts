@@ -15,6 +15,7 @@ import {
   queryMarketInfo,
   token2Usd,
   WalletActions,
+  Adventure,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
@@ -456,6 +457,46 @@ async function main() {
     help: 'Show my adv',
     action: async (addr) => {
       doStats(realm, ctx, addr);
+    },
+  });
+
+  server.defineCommand('inv.list', {
+    help: 'list all inventories',
+    action: async () => {
+      const playerInfo = await Repos.PlayerRepo.findOne(realm, playerAddress);
+      const pories = await Promise.all(
+        playerInfo.pories.map(async (itm) => {
+          const { _id, minePower, helpPower } = itm;
+          const engagedMission = await Adventure.queryMissiontOfPoriSc(
+            ctx,
+            _id
+          );
+          return {
+            id: _id,
+            minePower,
+            helpPower,
+            engagedMission,
+          };
+        })
+      );
+
+      const freeCheck = Object.fromEntries(pories.map((itm) => [itm.id, 1]));
+
+      const teams = RuntimeConfig.formations.map((itm) => {
+        const mine = itm.minePories.map((id) =>
+          pories.find((p) => p.id === +id)
+        );
+        const support = pories.find((p) => p.id === +itm.supportPori);
+
+        [...mine, support].forEach((p) => {
+          p && delete freeCheck[p.id];
+        });
+
+        const usePortal = itm.usePortal;
+        return { mine, support, usePortal };
+      });
+
+      console.dir({ pories, teams, freeCheck }, { depth: 5 });
     },
   });
 
