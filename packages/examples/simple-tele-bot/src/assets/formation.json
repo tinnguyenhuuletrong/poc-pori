@@ -5,28 +5,18 @@
   },
   "formations": [
     {
-      "minePories": ["1657", "4989", "1056"],
-      "supportPori": "3798",
+      "minePories": ["636", "2445", "1380"],
+      "supportPori": "2188",
       "usePortal": true
     },
     {
-      "minePories": ["3264", "3648", "2466"],
-      "supportPori": "3977",
+      "minePories": ["3719", "1263", "4214"],
+      "supportPori": "114",
       "usePortal": true
     },
     {
-      "minePories": ["1573", "2346", "4159"],
-      "supportPori": "4692",
-      "usePortal": true
-    },
-    {
-      "minePories": ["1435", "2596", "4794"],
-      "supportPori": "706",
-      "usePortal": true
-    },
-    {
-      "minePories": ["225", "3830", "3560"],
-      "supportPori": "2257",
+      "minePories": ["3602", "182", "1612"],
+      "supportPori": "2173",
       "usePortal": true
     }
   ]
