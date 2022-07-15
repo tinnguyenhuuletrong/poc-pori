@@ -1,4 +1,7 @@
+import Web3 from 'web3';
 import {
+  hexToBytes,
+  splitPackedHexBy32Bytes,
   toDecimal128,
   toNumber,
   transformArrayElementToNumber,
@@ -9,15 +12,24 @@ import {
   AllIdleGameSCEventData,
   EIdleGameSCEventType,
   IdleGameSCEvent,
+  IdleGameSCEventInvSignatureTable,
+  SBattleSwapData,
 } from './type.idleGame';
 
 export function parseIdleGameScEvent(
   eventInfo: EventData
 ): IdleGameSCEvent | null {
-  if (!AllIdleGameEvents.includes(eventInfo.event)) return null;
+  // if (!AllIdleGameEvents.includes(eventInfo.event)) return null;
 
-  const evType = eventInfo.event as EIdleGameSCEventType;
+  let evType!: EIdleGameSCEventType;
   let data: AllIdleGameSCEventData;
+  if (eventInfo.event) evType = eventInfo.event as EIdleGameSCEventType;
+  else {
+    const rawTopic = eventInfo.signature || eventInfo.raw.topics[0];
+    evType = IdleGameSCEventInvSignatureTable[rawTopic];
+  }
+
+  if (!evType) return null;
 
   switch (evType) {
     case EIdleGameSCEventType.AdventureStarted:
@@ -110,6 +122,9 @@ export function parseIdleGameScEvent(
         turnDuration: toNumber(eventInfo.returnValues['turnDuration']),
       };
       break;
+    case EIdleGameSCEventType.SBattleSwapped:
+      data = parseSBattleSwapRawData(eventInfo.raw.data);
+      break;
   }
 
   return {
@@ -117,5 +132,26 @@ export function parseIdleGameScEvent(
     txHash: eventInfo.transactionHash,
     blockNo: eventInfo.blockNumber,
     data,
+  };
+}
+
+function parseSBattleSwapRawData(rawData: string): SBattleSwapData {
+  const tmp = splitPackedHexBy32Bytes(rawData);
+  const mineId = parseInt(tmp[0], 16);
+  const address = Web3.utils.toChecksumAddress(
+    `0x${tmp[1].slice(24, tmp[1].length)}`
+  );
+  const porian = parseInt(tmp[2], 16);
+  const isAP = parseInt(tmp[3], 16) !== 0;
+  const fromIndex = parseInt(tmp[4], 16);
+  const toIndex = parseInt(tmp[5], 16);
+
+  return {
+    mineId,
+    farmer: isAP ? undefined : address,
+    helper: isAP ? address : undefined,
+    porian,
+    from: fromIndex.toString(),
+    to: toIndex.toString(),
   };
 }

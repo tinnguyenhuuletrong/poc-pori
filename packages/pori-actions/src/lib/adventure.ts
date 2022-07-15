@@ -3,6 +3,7 @@ import {
   PromiseReturnType,
   TEN_POWER_10,
 } from '@pori-and-friends/pori-metadata';
+import { byte2number } from '@pori-and-friends/utils';
 import { random } from 'lodash';
 
 const ALL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -71,10 +72,6 @@ function parseRewardMap(ctx: Context, rawRewardMap: string) {
     slots,
     mineRawRewadMap: rawRewardMap,
   };
-}
-
-function byte2number(bytes: number[]) {
-  return parseInt(Buffer.from(bytes).toString('hex'), 16);
 }
 
 export async function queryRandomRewardLevelFromSc(
