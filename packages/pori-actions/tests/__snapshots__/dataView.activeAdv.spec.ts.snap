@@ -90,3 +90,62 @@ Object {
   },
 }
 `;
+
+exports[`data_view active_adv_dataset_4 1`] = `
+Object {
+  "res": Object {
+    "activeAdventures": Object {
+      "52084": Object {
+        "farmerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+        "farmerEndTime": 2022-07-15T06:04:35.000Z,
+        "farmerPories": Array [
+          1529,
+          6060,
+          3923,
+          6266,
+        ],
+        "farmerRewardLevel": Array [
+          2,
+          4,
+          2,
+          4,
+        ],
+        "farmerSlots": Array [
+          7,
+          4,
+          9,
+          4,
+        ],
+        "isFarmer": true,
+        "isSupporter": false,
+        "mineId": 52084,
+        "startTime": 2022-07-15T03:04:35.000Z,
+        "state": "AdventureSupported2",
+        "supporterAddress": "0xA58FBB9328544B092020083E22994e9F8A4Ba4b9",
+        "supporterEndTime": 2022-07-15T06:04:35.000Z,
+        "supporterPories": Array [
+          100306,
+          4274,
+          100455,
+          100304,
+        ],
+        "supporterRewardLevel": Array [
+          3,
+          3,
+          4,
+          3,
+        ],
+        "supporterSlots": Array [
+          2,
+          3,
+          4,
+          1,
+        ],
+      },
+    },
+    "finishedAdventures": Object {},
+    "note": Object {},
+    "playerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+  },
+}
+`;

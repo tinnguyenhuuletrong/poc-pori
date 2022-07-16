@@ -3,7 +3,8 @@ export const waitForMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export async function doTaskWithRetry(
   times: number,
   doTask: () => Promise<void>,
-  onRetry?: (error: Error, time: number) => void
+  onRetry?: (error: Error, time: number) => void,
+  delayMs?: number
 ) {
   let it = times;
   while (it > 0) {
@@ -15,6 +16,7 @@ export async function doTaskWithRetry(
       const canRetry = it > 0;
       if (!canRetry) throw error;
       onRetry && onRetry(error as Error, times - it);
+      if (delayMs) await waitForMs(delayMs);
     }
   }
 }

@@ -323,8 +323,9 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const price = await token2Usd(ctx);
-      console.log(price);
+      const res = await Adventure.getPoriansAtSCellSc(ctx, '52332');
+      console.log(res);
+      return res;
     },
   });
 

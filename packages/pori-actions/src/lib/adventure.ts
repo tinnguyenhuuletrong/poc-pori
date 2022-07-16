@@ -123,3 +123,25 @@ export async function queryPortalInfoSc(ctx: Context, addr: string) {
     nextMissionRequireRiken: nextMissionRequireRiken,
   };
 }
+
+export type SCSCellInfo = PromiseReturnType<
+  ReturnType<typeof getPoriansAtSCellSc>
+>;
+export async function getPoriansAtSCellSc(ctx: Context, missionId: string) {
+  const [farmerSCellInfo, helperSCellInfo] = await Promise.all([
+    ctx.contract.methods.getPoriansAtSCell(missionId, false).call(),
+    ctx.contract.methods.getPoriansAtSCell(missionId, true).call(),
+  ]);
+
+  const farmer: string[] = [farmerSCellInfo['0'], farmerSCellInfo['1']]
+    .filter((itm) => itm !== '0')
+    .map((itm) => itm.toString());
+  const helper: string[] = [helperSCellInfo['0'], helperSCellInfo['1']]
+    .filter((itm) => itm !== '0')
+    .map((itm) => itm.toString());
+
+  return {
+    farmer,
+    helper,
+  };
+}

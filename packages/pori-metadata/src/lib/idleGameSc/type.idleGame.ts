@@ -77,10 +77,9 @@ export interface GameDurationChangedData {
 export interface SBattleSwapData {
   mineId: number;
   farmer?: string;
-  helper?: string;
   from: string;
   to: string;
-  porian: number;
+  porians: number[];
 }
 
 export type AllIdleGameSCEventData =

@@ -12,8 +12,6 @@ async function main() {
   const idleGameSc = getIdleGameAddressSC(env);
   const contract = new web3.eth.Contract(idleGameSc.abi, idleGameSc.address);
 
-  console.log(contract.events['AdventureSupported2']);
-
   global.web3 = web3;
 
   // const server = repl.start({

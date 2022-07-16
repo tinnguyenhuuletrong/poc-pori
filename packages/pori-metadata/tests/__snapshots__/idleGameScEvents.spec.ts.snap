@@ -138,9 +138,11 @@ Array [
     "data": Object {
       "farmer": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
       "from": "9",
-      "helper": undefined,
       "mineId": 51832,
-      "porian": 100508,
+      "porians": Array [
+        100508,
+        0,
+      ],
       "to": "7",
     },
     "txHash": "0x146f66a90cdea6225aa8b5d37a85cc44c48ab24117fae7cb948cf63140c472f0",

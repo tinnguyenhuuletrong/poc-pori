@@ -141,16 +141,15 @@ function parseSBattleSwapRawData(rawData: string): SBattleSwapData {
   const address = Web3.utils.toChecksumAddress(
     `0x${tmp[1].slice(24, tmp[1].length)}`
   );
-  const porian = parseInt(tmp[2], 16);
-  const isAP = parseInt(tmp[3], 16) !== 0;
+  const porianOutside = parseInt(tmp[2], 16);
+  const porianInside = parseInt(tmp[3], 16);
   const fromIndex = parseInt(tmp[4], 16);
   const toIndex = parseInt(tmp[5], 16);
 
   return {
     mineId,
-    farmer: isAP ? undefined : address,
-    helper: isAP ? address : undefined,
-    porian,
+    farmer: address,
+    porians: [porianOutside, porianInside],
     from: fromIndex.toString(),
     to: toIndex.toString(),
   };
