@@ -118,7 +118,12 @@ Array [
     "txHash": "0xd2162717f59565bbd9f6c3b3a385c861a96bac487a7e4eeca3d5ef899542defa",
     "type": "PorianWithdrawed",
   },
-  null,
+  Object {
+    "blockNo": 25777544,
+    "data": undefined,
+    "txHash": "0x541e5087cb1cd02e3991abcd1e43e0aeb0b158e4400292c58d059976412d32d2",
+    "type": "OwnershipTransferred",
+  },
   Object {
     "blockNo": 25777545,
     "data": Object {
@@ -127,6 +132,21 @@ Array [
     },
     "txHash": "0xf59a96c14408acef73996d4e76278bf5830a60fa0139188d66f15788a2270891",
     "type": "GameDurationChanged",
+  },
+  Object {
+    "blockNo": 696069,
+    "data": Object {
+      "farmer": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+      "from": "9",
+      "mineId": 51832,
+      "porians": Array [
+        100508,
+        0,
+      ],
+      "to": "7",
+    },
+    "txHash": "0x146f66a90cdea6225aa8b5d37a85cc44c48ab24117fae7cb948cf63140c472f0",
+    "type": "SBattleSwapped",
   },
 ]
 `;

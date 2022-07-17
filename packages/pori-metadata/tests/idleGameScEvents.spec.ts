@@ -1,3 +1,4 @@
+import type { EventData } from 'web3-eth-contract';
 import { IdleGameSc } from '../src';
 
 const SAMPLE_DATA = [
@@ -309,6 +310,28 @@ const SAMPLE_DATA = [
       ],
     },
   },
+  {
+    address: '0xd678f37434d06Fc3Eb43c11024998FAaFd411881',
+    blockHash:
+      '0x55d5f83157669d423cfce6d022c59e5b969c12252cf0e75d13e4f2fb478fb115',
+    blockNumber: 696069,
+    logIndex: 3,
+    removed: false,
+    transactionHash:
+      '0x146f66a90cdea6225aa8b5d37a85cc44c48ab24117fae7cb948cf63140c472f0',
+    transactionIndex: 1,
+    transactionLogIndex: '0x1',
+    id: 'log_efd5427d',
+    returnValues: {},
+    event: undefined,
+    signature: null,
+    raw: {
+      data: '0x000000000000000000000000000000000000000000000000000000000000ca78000000000000000000000000df218bd4414e0b1d581bddf64498abba8cce0eca000000000000000000000000000000000000000000000000000000000001889c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000090000000000000000000000000000000000000000000000000000000000000007',
+      topics: [
+        '0x6bdac8de130455f3dbd97b2916ff758c9cb534e9770af694954b63b76169d728',
+      ],
+    },
+  } as any,
 ];
 
 test('parse idleGameScEvent', () => {

@@ -1,6 +1,6 @@
-module.exports = {
+export default {
   displayName: 'examples-query-mine-info',
-  preset: '../../../jest.preset.ts',
+  preset: '../../../jest.preset.js',
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',

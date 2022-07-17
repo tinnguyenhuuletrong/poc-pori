@@ -4,5 +4,6 @@ packages
 node_modules
 ci
 _test
+tmp
 
 archived/repo/.history

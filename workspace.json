@@ -11,5 +11,6 @@
     "pori-metadata": "packages/pori-metadata",
     "pori-repositories": "packages/pori-repositories",
     "utils": "packages/utils"
-  }
+  },
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json"
 }

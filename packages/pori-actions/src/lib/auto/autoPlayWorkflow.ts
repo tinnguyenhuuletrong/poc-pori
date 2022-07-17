@@ -422,15 +422,25 @@ async function doFinishWithRetry(
   mineId: number,
   state: Workflow.WorkflowState
 ) {
+  // delay 3 sec
+  // Porichain time lag ??
+  //  0x175b05a99aca3f64fcfad12bc6c60c0392625a3eca08e3a070f17aa3c36b1f7e
+  await waitForMs(30 * 1000);
+
   const doJob = async () => {
     await Cmds.cmdDoFinish({ ctx, realm, args: `${mineId}` });
   };
 
-  await doTaskWithRetry(2, doJob, (err, retryNo) => {
-    ctx.ui.writeMessage(
-      `autoPlay #bot${state.id} retry no ${retryNo} cmdDoFinish after error ${err.message}`
-    );
-  });
+  await doTaskWithRetry(
+    4,
+    doJob,
+    (err, retryNo) => {
+      ctx.ui.writeMessage(
+        `autoPlay #bot${state.id} retry no ${retryNo} cmdDoFinish after error ${err.message}`
+      );
+    },
+    60 * 1000
+  );
 }
 
 function findActiveMine({

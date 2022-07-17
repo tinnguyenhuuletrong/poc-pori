@@ -16,5 +16,11 @@
       }
     }
   },
-  "defaultProject": "examples-query-mine-info"
+  "defaultProject": "examples-query-mine-info",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "pluginsConfig": {
+    "@nrwl/js": {
+      "analyzeSourceFiles": true
+    }
+  }
 }
