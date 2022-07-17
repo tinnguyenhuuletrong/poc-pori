@@ -16,6 +16,7 @@ import {
   token2Usd,
   WalletActions,
   Adventure,
+  queryMarketItems,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
@@ -322,8 +323,9 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const price = await token2Usd(ctx);
-      console.log(price);
+      const res = await Adventure.getPoriansAtSCellSc(ctx, '52332');
+      console.log(res);
+      return res;
     },
   });
 
@@ -419,8 +421,8 @@ async function main() {
     },
   });
 
-  server.defineCommand('market', {
-    help: 'marketplace',
+  server.defineCommand('market.pories', {
+    help: 'marketplace pories',
     action: async () => {
       const sellingItems = await queryMarketInfo({ ctx });
       const shortList = await expandEngadedMission({
@@ -446,6 +448,26 @@ async function main() {
           helpPower,
           engagedMission,
           breed: `${numOfBreeds} / ${maxOfBreeds}`,
+        };
+      });
+
+      console.log(formatedData);
+    },
+  });
+
+  server.defineCommand('market.items', {
+    help: 'marketplace items',
+    action: async () => {
+      const sellingItems = await queryMarketItems({ ctx, pageSize: 10 });
+
+      const marketplaceBaseUrl = getMarketplayBaseLink(ctx.env);
+
+      const formatedData = sellingItems.map((itm) => {
+        const { id, unitPrice, itemType, scOrderId } = itm;
+        return {
+          link: `${marketplaceBaseUrl}/item-orders/${scOrderId}`,
+          name: itemType.name,
+          price: (BigInt(unitPrice) / TEN_POWER_10_BN).toString() + ' RIGY',
         };
       });
 

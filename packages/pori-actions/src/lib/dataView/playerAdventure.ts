@@ -18,6 +18,7 @@ import {
   Context,
   EIdleGameSCEventType,
   getAdventureBaseLink,
+  SBattleSwapData,
 } from '@pori-and-friends/pori-metadata';
 import moment from 'moment';
 
@@ -57,6 +58,7 @@ export async function computePlayerAdventure(
         type="AdventureSupported1" ||
         type="AdventureFortified" ||
         type="AdventureSupported2" ||
+        type="SBattleSwapped" ||
         type="AdventureFinished"
       )
     `
@@ -176,6 +178,70 @@ export async function computePlayerAdventure(
             ],
             supporterSlots: [...(mineInfo.supporterSlots ?? []), evData.index],
           };
+        }
+        break;
+
+      case EIdleGameSCEventType.SBattleSwapped:
+        {
+          const evData = it.data as SBattleSwapData;
+          const mineInfo = viewData.activeAdventures[evData.mineId];
+
+          // not interesting
+          if (!mineInfo) break;
+          if (!(mineInfo.isSupporter || mineInfo.isFarmer)) {
+            delete viewData.activeAdventures[evData.mineId];
+            break;
+          }
+
+          const { farmer, from, to, porians } = evData;
+
+          let rewardLevel, slots, pories: number[];
+
+          if (mineInfo.isFarmer) {
+            pories = mineInfo.farmerPories || [];
+            rewardLevel = mineInfo.farmerRewardLevel || [];
+            slots = mineInfo.farmerSlots || [];
+          } else {
+            pories = mineInfo.supporterPories || [];
+            rewardLevel = mineInfo.supporterRewardLevel || [];
+            slots = mineInfo.supporterSlots || [];
+          }
+
+          // do swap
+          const poriIdOutside = +porians[0];
+          const poriIdInside = +porians[1];
+          const outsideIndex = pories.findIndex((itm) => itm === poriIdOutside);
+          const insideIndex = pories.findIndex((itm) => itm === poriIdInside);
+
+          const outsideRewardLevel = rewardLevel[outsideIndex];
+          const outsideSlot = slots[outsideIndex];
+
+          const insideRewardLevel = rewardLevel[insideIndex] || 4;
+          const insideSlot = slots[insideIndex] || +to;
+
+          if (poriIdInside) {
+            rewardLevel[insideIndex] = outsideRewardLevel;
+            slots[insideIndex] = outsideSlot;
+          }
+
+          rewardLevel[outsideIndex] = insideRewardLevel;
+          slots[outsideIndex] = insideSlot;
+
+          if (mineInfo.isFarmer) {
+            viewData.activeAdventures[evData.mineId] = {
+              ...mineInfo,
+              farmerPories: pories,
+              farmerRewardLevel: rewardLevel,
+              farmerSlots: slots,
+            };
+          } else {
+            viewData.activeAdventures[evData.mineId] = {
+              ...mineInfo,
+              supporterPories: pories,
+              supporterRewardLevel: rewardLevel,
+              supporterSlots: slots,
+            };
+          }
         }
         break;
 

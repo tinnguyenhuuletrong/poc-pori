@@ -33,6 +33,23 @@ export type NftInfoForSale = NftInfo & {
   engagedMission?: number;
 };
 
+export type NftInfoForItem = {
+  id: number;
+  sellerAddress: string;
+  itemType: {
+    id: number;
+    name: string;
+    description: string;
+    usage: string;
+    logoUrl: string;
+  };
+  unitPrice: string;
+  amount: string;
+  scOrderId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export async function queryMarketInfo({
   ctx,
 }: {
@@ -91,4 +108,35 @@ export async function expandEngadedMission({
       };
     })
   );
+}
+
+// ------------
+export async function queryMarketItems({
+  ctx,
+  pageSize = 10,
+}: {
+  ctx: Context;
+  pageSize: number;
+}) {
+  const baseURL = getAPILink(ctx.env);
+
+  const res = await axiosIns.request({
+    method: 'get',
+    baseURL,
+    url: `/api/v1/item-orders`,
+    params: {
+      pageIndex: 0,
+      pageSize,
+      sortBy: 'unitPrice',
+      sortOrder: 'asc',
+      minPrice: 0,
+      maxPrice: 99000000,
+    },
+  });
+
+  if (res.status !== 200)
+    throw new Error(`Request failed status ${res.status} - ${res.data}`);
+
+  const data = (JSON.parse(res.data)?.items || []) as NftInfoForItem[];
+  return data;
 }

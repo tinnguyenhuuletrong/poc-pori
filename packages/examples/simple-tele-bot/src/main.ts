@@ -105,6 +105,8 @@ async function main() {
       activeEnv.environment.mongodbDataStoreSSLCer
     ).then((res) => {
       ctx.ui.writeMessage('🤖 mongodb datastore connected!');
+      const chatId = Memory.activeChats[0];
+      if (chatId) doFetchSnapshotDb(bot, parseInt(chatId), ctx, realm);
     });
   }
 
@@ -115,7 +117,7 @@ async function main() {
   // register send msg, edit msg
   ctx.ui.writeMessage = async (msg) => {
     const chatId = Memory.activeChats[0];
-    return await bot.sendMessage(chatId, msg);
+    if (chatId) return await bot.sendMessage(chatId, msg);
   };
 
   ctx.ui.editMessage = async (lastMsg, msg) => {
@@ -697,43 +699,7 @@ ${formatedData
     withErrorWrapper({ chatId: msg.chat.id, bot }, async () => {
       if (!requireBotMaster(msg)) return;
       captureChatId(msg.chat.id);
-      const backupKey = getDatastoreBackupKey(env);
-
-      const checkMsg = await bot.sendMessage(
-        msg.chat.id,
-        `🗄 ${backupKey} - checking...`
-      );
-
-      await MongoDataStore.waitForConnected(ctx);
-
-      const metadata = await MongoDataStore.fetchBolb(ctx, backupKey);
-
-      const localMetadata = await getLocalRealmRevision(realm);
-
-      const remoteRevision = metadata?.metadata?.revision;
-      const shouldPull = remoteRevision > localMetadata.revision;
-
-      await bot.editMessageText(
-        `🗄 ${backupKey} - remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}
-        - shouldPull: ${shouldPull}
-        `,
-        {
-          chat_id: checkMsg.chat.id,
-          message_id: checkMsg.message_id,
-          reply_markup: {
-            inline_keyboard: shouldPull
-              ? [
-                  [
-                    {
-                      text: `db_pull`,
-                      switch_inline_query_current_chat: `/db_pull`,
-                    },
-                  ],
-                ]
-              : undefined,
-          },
-        }
-      );
+      await doFetchSnapshotDb(bot, msg.chat.id, ctx, realm);
     });
   });
 
@@ -936,6 +902,51 @@ ${formatedData
     appCtx.ui.writeMessage('recieved SIGTERM');
     process.exit(0);
   });
+}
+
+async function doFetchSnapshotDb(
+  bot: TelegramBot,
+  chatId: number,
+  ctx: Context,
+  realm: Realm
+) {
+  const backupKey = getDatastoreBackupKey(env);
+
+  const checkMsg = await bot.sendMessage(
+    chatId,
+    `🗄 ${backupKey} - checking...`
+  );
+
+  await MongoDataStore.waitForConnected(ctx);
+
+  const metadata = await MongoDataStore.fetchBolb(ctx, backupKey);
+
+  const localMetadata = await getLocalRealmRevision(realm);
+
+  const remoteRevision = metadata?.metadata?.revision;
+  const shouldPull = remoteRevision > localMetadata.revision;
+
+  await bot.editMessageText(
+    `🗄 ${backupKey} - remoteRevision:${remoteRevision}, localRevision:${localMetadata.revision}
+        - shouldPull: ${shouldPull}
+        `,
+    {
+      chat_id: checkMsg.chat.id,
+      message_id: checkMsg.message_id,
+      reply_markup: {
+        inline_keyboard: shouldPull
+          ? [
+              [
+                {
+                  text: `db_pull`,
+                  switch_inline_query_current_chat: `/db_pull`,
+                },
+              ],
+            ]
+          : undefined,
+      },
+    }
+  );
 }
 
 async function getLocalRealmRevision(realm: Realm) {

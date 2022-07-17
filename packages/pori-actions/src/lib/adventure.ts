@@ -3,6 +3,7 @@ import {
   PromiseReturnType,
   TEN_POWER_10,
 } from '@pori-and-friends/pori-metadata';
+import { byte2number } from '@pori-and-friends/utils';
 import { random } from 'lodash';
 
 const ALL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -73,10 +74,6 @@ function parseRewardMap(ctx: Context, rawRewardMap: string) {
   };
 }
 
-function byte2number(bytes: number[]) {
-  return parseInt(Buffer.from(bytes).toString('hex'), 16);
-}
-
 export async function queryRandomRewardLevelFromSc(
   ctx: Context,
   mineInfo: SCMineInfo
@@ -124,5 +121,27 @@ export async function queryPortalInfoSc(ctx: Context, addr: string) {
     availableRiken: parseInt(availableRiken) / TEN_POWER_10,
     lockedRiken: parseInt(lockedRiken) / TEN_POWER_10,
     nextMissionRequireRiken: nextMissionRequireRiken,
+  };
+}
+
+export type SCSCellInfo = PromiseReturnType<
+  ReturnType<typeof getPoriansAtSCellSc>
+>;
+export async function getPoriansAtSCellSc(ctx: Context, missionId: string) {
+  const [farmerSCellInfo, helperSCellInfo] = await Promise.all([
+    ctx.contract.methods.getPoriansAtSCell(missionId, false).call(),
+    ctx.contract.methods.getPoriansAtSCell(missionId, true).call(),
+  ]);
+
+  const farmer: string[] = [farmerSCellInfo['0'], farmerSCellInfo['1']]
+    .filter((itm) => itm !== '0')
+    .map((itm) => itm.toString());
+  const helper: string[] = [helperSCellInfo['0'], helperSCellInfo['1']]
+    .filter((itm) => itm !== '0')
+    .map((itm) => itm.toString());
+
+  return {
+    farmer,
+    helper,
   };
 }

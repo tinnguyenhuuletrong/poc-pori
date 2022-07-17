@@ -10,6 +10,7 @@ export enum EIdleGameSCEventType {
   PorianDeposited = 'PorianDeposited',
   PorianWithdrawed = 'PorianWithdrawed',
   GameDurationChanged = 'GameDurationChanged',
+  SBattleSwapped = 'SBattleSwapped',
 }
 
 export interface AdventureStartedData {
@@ -73,6 +74,14 @@ export interface GameDurationChangedData {
   turnDuration: number;
 }
 
+export interface SBattleSwapData {
+  mineId: number;
+  farmer?: string;
+  from: string;
+  to: string;
+  porians: number[];
+}
+
 export type AllIdleGameSCEventData =
   | AdventureStartedData
   | AdventureFinishedData
@@ -81,7 +90,8 @@ export type AllIdleGameSCEventData =
   | AdventureSupported2Data
   | PorianDepositedData
   | PorianWithdrawedData
-  | GameDurationChangedData;
+  | GameDurationChangedData
+  | SBattleSwapData;
 
 export interface IdleGameSCEvent {
   type: EIdleGameSCEventType;
@@ -110,6 +120,16 @@ export const IdleGameSCEventSignatureTable: Record<
     '0x44402a61584354899786311a4f0c7bf924b31db70b5ebef891d88cee08156ed5',
   [EIdleGameSCEventType.GameDurationChanged]:
     '0xc62be04bfb76e5e364578771d33bb80ebbea7219b67ba068fb4bbdaf83e4a3c0',
+  [EIdleGameSCEventType.SBattleSwapped]:
+    '0x6bdac8de130455f3dbd97b2916ff758c9cb534e9770af694954b63b76169d728',
+};
+
+export const IdleGameSCEventInvSignatureTable: Record<
+  string,
+  EIdleGameSCEventType
+> = {
+  '0x6bdac8de130455f3dbd97b2916ff758c9cb534e9770af694954b63b76169d728':
+    EIdleGameSCEventType.SBattleSwapped,
 };
 
 export const AllIdleGameEvents = Object.keys(IdleGameSCEventSignatureTable);

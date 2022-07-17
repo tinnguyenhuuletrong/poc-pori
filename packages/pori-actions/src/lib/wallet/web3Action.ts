@@ -43,7 +43,7 @@ async function useAccountToSendTx(
     from: ctx.walletAcc.address,
     to: tx.to,
     data: tx.data, // Required
-    gas: tx.gas || '600000',
+    gas: tx.gas || '2000000',
     gasPrice: tx.gasPrice || baseGas,
     nonce: tx.nonce ? parseInt(tx.nonce.toString()) : defaultNonce,
   };
