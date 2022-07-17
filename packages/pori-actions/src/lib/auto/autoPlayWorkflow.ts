@@ -439,7 +439,7 @@ async function doFinishWithRetry(
         `autoPlay #bot${state.id} retry no ${retryNo} cmdDoFinish after error ${err.message}`
       );
     },
-    ctx.setting.autoPlayMicroDelayMs
+    60 * 1000
   );
 }
 
