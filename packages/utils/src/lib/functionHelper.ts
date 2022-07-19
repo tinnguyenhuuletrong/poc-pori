@@ -1,3 +1,5 @@
+import { minBy } from 'lodash';
+
 export const waitForMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function doTaskWithRetry(
@@ -69,4 +71,23 @@ export function splitPackedHexBy32Bytes(hex: string) {
     res.push(chunk);
   }
   return res;
+}
+
+export function minIndex<T>(arr: T[]) {
+  const res = minBy<[T, number]>(Object.entries(arr) as any, (itm) => itm[1]);
+  if (!res) return null;
+  return {
+    minVal: res[1],
+    minIndex: res[0],
+  };
+}
+export function minIndexBy<T>(arr: T[], byFunc: (arg: [T, number]) => number) {
+  const res = minBy<[T, number]>(Object.entries(arr) as any, (itm) =>
+    byFunc(itm)
+  );
+  if (!res) return null;
+  return {
+    minVal: res[1],
+    minIndex: res[0],
+  };
 }

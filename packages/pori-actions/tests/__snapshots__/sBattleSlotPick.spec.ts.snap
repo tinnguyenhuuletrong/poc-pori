@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`s_battle_slot_pick assit has 3p - has s. explorer power higher 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: explorer power higher 312 vs 300 and assit can not play s. nothing to do",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 0 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: explorer power higher 312 vs 0 and assit can not play s. nothing to do",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 1(higher) - don't have  1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: don't have pori atk > 320. nothing to do",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 1(higher) 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: move min rewardLevel -> S. 3560 - R:1 - Pw:330",
+  ],
+  "sCmd": Object {
+    "desIds": Array [
+      0,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 9,
+    "srcIds": Array [
+      3560,
+    ],
+  },
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - not s 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: s not found",
+  ],
+  "sCmd": null,
+}
+`;
