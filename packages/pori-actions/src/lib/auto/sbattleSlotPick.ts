@@ -1,6 +1,6 @@
 import { Adventure } from '../../index';
 import { AdventureInfoEx, Context } from '@pori-and-friends/pori-metadata';
-import { minBy, sortBy, sum, toString, uniq } from 'lodash';
+import { isEmpty, minBy, sortBy, sum, toString, uniq } from 'lodash';
 import { ESB_P_THRESHOLD_KEEP_BIG_REWARD } from './autoPlayWorkflow';
 import { minIndex, minIndexBy } from '@pori-and-friends/utils';
 import { SCSCellInfo } from '../adventure';
@@ -79,8 +79,10 @@ export async function sbattleSlotPick({
     supporterPories,
     hasS,
     mineId,
+    sIndex,
     farmerMaxPowerOf2,
     supporterMaxPowerOf2,
+    farmerPories,
     supporterPoriesSortedByDecPower,
     farmerPoriesSortedByDecPower,
     powerOf,
@@ -102,8 +104,55 @@ export async function sbattleSlotPick({
     return null;
   }
 
-  // TODO: 4 pories case
-  return null;
+  await ctx.ui.writeMessage(
+    `sbattle ${mineId}: max2Power of supporter ${supporterMaxPowerOf2}, farmer ${farmerMaxPowerOf2}. sFarmer: ${sCellInfo.farmer.join(
+      ','
+    )}, sSupport: ${sCellInfo.helper.join(',')}`
+  );
+
+  // TODO: optimize
+  //    need consier missing case
+  //      pori at s already. need find another one => maybe cost lower than global min
+  // let { maxSum, minCost, max1, max2 } = _pickSMinimizeLoss(
+  //   farmerPoriesSortedByDecPower,
+  //   supporterMaxPowerOf2
+  // );
+
+  const max1 = farmerPoriesSortedByDecPower[0],
+    max2 = farmerPoriesSortedByDecPower[1];
+  const maxSum = max1.power + max2.power;
+  const minCost = max1.rewardLevel + max2.rewardLevel;
+
+  await ctx.ui.writeMessage(
+    `sbattle ${mineId}: max2Power power ${maxSum} cost ${minCost} pair ${max1.id} - ${max1.power} - ${max1.rewardLevel}, ${max2.id} - ${max2.power} - ${max2.rewardLevel}`
+  );
+
+  const sFarmer = sCellInfo.farmer.map((itm) => +itm);
+  const srcIds = [max1, max2]
+    .filter((itm) => !sFarmer.includes(itm.id))
+    .map((itm) => itm.id);
+  const desIds = sFarmer.filter((itm) => ![max1.id, max2.id].includes(itm));
+
+  // fill 0 for remaining
+  if (desIds.length != srcIds.length) {
+    const needToFill = srcIds.length - desIds.length;
+    for (let i = 0; i < needToFill; i++) {
+      desIds.push(0);
+    }
+  }
+
+  await ctx.ui.writeMessage(
+    `sbattle ${mineId}: move srcIds: ${srcIds.join(
+      ','
+    )} -> desIds: ${desIds.join(',')} `
+  );
+
+  return {
+    missionId: mineId,
+    srcIds,
+    desIds,
+    sTreasureIndex: sIndex,
+  };
 }
 
 async function sbattleSlotPickCase3({
@@ -193,8 +242,8 @@ function _parseMineInfo(mineInfo: AdventureInfoEx) {
     farmerPoriesSortedByDecPower[1].power;
 
   const supporterMaxPowerOf2 =
-    farmerPoriesSortedByDecPower[0].power +
-    farmerPoriesSortedByDecPower[1].power;
+    supporterPoriesSortedByDecPower[0].power +
+    supporterPoriesSortedByDecPower[1].power;
 
   return {
     mineId,
@@ -232,4 +281,39 @@ function _pickOneMinRewardLevelAndAtkGtXPori(
   const res = minBy(tmp, (itm) => itm.rewardLevel);
   if (!res) return null;
   return res;
+}
+
+function _pickSMinimizeLoss(
+  farmerPoriesSortedByDecPower: {
+    id: number;
+    index: number;
+    power: number;
+    rewardLevel: number;
+  }[],
+  supporterMaxPowerOf2: number
+) {
+  const arr = farmerPoriesSortedByDecPower.reverse();
+  let max1 = farmerPoriesSortedByDecPower[0],
+    max2 = farmerPoriesSortedByDecPower[1];
+  let maxSum = 0,
+    minCost = Number.MAX_VALUE;
+
+  for (let i = 0; i < arr.length - 1; i++) {
+    const p1 = arr[i];
+    for (let j = i + 1; j < arr.length; j++) {
+      const p2 = arr[j];
+
+      if (
+        maxSum < p1.power + p2.power &&
+        p1.power + p2.power > supporterMaxPowerOf2 &&
+        minCost > p1.rewardLevel + p2.rewardLevel
+      ) {
+        max1 = p1;
+        max2 = p2;
+        maxSum = p1.power + p2.power;
+        minCost = p1.rewardLevel + p2.rewardLevel;
+      }
+    }
+  }
+  return { maxSum, minCost, max1, max2 };
 }

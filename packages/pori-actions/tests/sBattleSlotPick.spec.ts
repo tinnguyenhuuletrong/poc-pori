@@ -251,4 +251,164 @@ describe('s_battle_slot_pick', () => {
 
     expect({ sCmd, logs: ctx._logs }).toMatchSnapshot();
   });
+
+  test(`assit has 4p - has s. farmer can win. p1 in s, p2 not`, async () => {
+    const mineInfo: AdventureInfoEx = {
+      ...BASE_MINE_INFO,
+
+      farmerPories: [225, 3830, 3560, 2257],
+      farmerRewardLevel: [3, 4, 1, 1],
+      farmerSlots: [3, 9, 7],
+
+      supporterPories: [5748, 5567, 5749, 5421],
+      supporterRewardLevel: [2, 2, 4, 1],
+      supporterSlots: [2, 4, 9, 1],
+
+      powers: {
+        '225': 311,
+        '2257': 318,
+        '3560': 310,
+        '3830': 312,
+        '5567': 303,
+        '5748': 308,
+        '5749': 300,
+        '5421': 200,
+      },
+    };
+
+    const sCellInfo: SCSCellInfo = {
+      farmer: ['3830'],
+      helper: ['5749'],
+    };
+
+    const sCmd = await sbattleSlotPick({
+      mineInfo,
+      sCellInfo,
+      isFarmer: true,
+      ctx,
+    });
+    console.log(sCmd);
+
+    expect({ sCmd, logs: ctx._logs }).toMatchSnapshot();
+  });
+
+  test(`assit has 4p - has s. farmer can win. p1 p2 not s`, async () => {
+    const mineInfo: AdventureInfoEx = {
+      ...BASE_MINE_INFO,
+
+      farmerPories: [225, 3830, 3560, 2257],
+      farmerRewardLevel: [3, 4, 1, 1],
+      farmerSlots: [3, 9, 7],
+
+      supporterPories: [5748, 5567, 5749, 5421],
+      supporterRewardLevel: [2, 2, 4, 1],
+      supporterSlots: [2, 4, 9, 1],
+
+      powers: {
+        '225': 311,
+        '2257': 318,
+        '3560': 310,
+        '3830': 280,
+        '5567': 303,
+        '5748': 308,
+        '5749': 300,
+        '5421': 200,
+      },
+    };
+
+    const sCellInfo: SCSCellInfo = {
+      farmer: ['3830'],
+      helper: ['5749'],
+    };
+
+    const sCmd = await sbattleSlotPick({
+      mineInfo,
+      sCellInfo,
+      isFarmer: true,
+      ctx,
+    });
+    console.log(sCmd);
+
+    expect({ sCmd, logs: ctx._logs }).toMatchSnapshot();
+  });
+
+  test(`assit has 4p - has s. farmer can win. p1 p2 not s 2`, async () => {
+    const mineInfo: AdventureInfoEx = {
+      ...BASE_MINE_INFO,
+
+      farmerPories: [225, 3830, 3560, 2257],
+      farmerRewardLevel: [3, 4, 4, 1],
+      farmerSlots: [3, 9, 9],
+
+      supporterPories: [5748, 5567, 5749, 5421],
+      supporterRewardLevel: [2, 2, 4, 1],
+      supporterSlots: [2, 4, 9, 1],
+
+      powers: {
+        '225': 311,
+        '2257': 318,
+        '3560': 270,
+        '3830': 280,
+        '5567': 303,
+        '5748': 308,
+        '5749': 300,
+        '5421': 200,
+      },
+    };
+
+    const sCellInfo: SCSCellInfo = {
+      farmer: ['3830', '3560'],
+      helper: ['5749'],
+    };
+
+    const sCmd = await sbattleSlotPick({
+      mineInfo,
+      sCellInfo,
+      isFarmer: true,
+      ctx,
+    });
+    console.log(sCmd);
+
+    expect({ sCmd, logs: ctx._logs }).toMatchSnapshot();
+  });
+
+  test(`assit has 4p - has s. farmer can not win`, async () => {
+    const mineInfo: AdventureInfoEx = {
+      ...BASE_MINE_INFO,
+
+      farmerPories: [225, 3830, 3560, 2257],
+      farmerRewardLevel: [3, 4, 4, 1],
+      farmerSlots: [3, 9, 9],
+
+      supporterPories: [5748, 5567, 5749, 5421],
+      supporterRewardLevel: [2, 2, 4, 1],
+      supporterSlots: [2, 4, 9, 1],
+
+      powers: {
+        '225': 211,
+        '2257': 218,
+        '3560': 270,
+        '3830': 280,
+        '5567': 303,
+        '5748': 308,
+        '5749': 300,
+        '5421': 200,
+      },
+    };
+
+    const sCellInfo: SCSCellInfo = {
+      farmer: ['3830', '3560'],
+      helper: ['5749'],
+    };
+
+    const sCmd = await sbattleSlotPick({
+      mineInfo,
+      sCellInfo,
+      isFarmer: true,
+      ctx,
+    });
+    console.log(sCmd);
+
+    expect({ sCmd, logs: ctx._logs }).toMatchSnapshot();
+  });
 });
