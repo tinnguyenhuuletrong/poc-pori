@@ -9,6 +9,8 @@ import { boolFromString } from '@pori-and-friends/utils';
 import type { ITxData } from '@walletconnect/types';
 import { uniq } from 'lodash';
 import { refreshAdventureStatsForAddress } from '../computed/myAdventure';
+import { SBattlerDecision, sbattleSlotPick } from '../auto/sbattleSlotPick';
+import { getPoriansAtSCellSc } from '../adventure';
 
 //------------------------------------------------------------------------//
 //
@@ -382,4 +384,87 @@ async function defaultSupportSlotPick({
     `roger that!. send pori ${pori} to support mineId:${mineInfo.mineId} at ${slotIndex} (bigRewardIndex: ${bigRewardIndex})`
   );
   return slotIndex;
+}
+
+//------------------------------------------------------------------------//
+//
+//------------------------------------------------------------------------//
+
+export async function cmdDoSBattle({
+  ctx,
+  realm,
+  args,
+}: {
+  ctx: Context;
+  realm: Realm;
+  args: string;
+}) {
+  if (!ctx.walletAcc) {
+    console.warn('wallet channel not ready. Please run wallet_unlock first');
+    return;
+  }
+
+  const tmp = args.split(' ');
+  const mineId = tmp[0];
+  if (!mineId) {
+    await ctx.ui.writeMessage('\tUsage: /sbattle <mineId>');
+    return;
+  }
+
+  const playerAddress = ctx.playerAddress || '';
+  const addvStats = await refreshAdventureStatsForAddress(
+    { realm, ctx },
+    playerAddress
+  );
+
+  const mineInfo = addvStats.mines[mineId];
+  if (!mineInfo) {
+    await ctx.ui.writeMessage(`opps. Mine not found`);
+    return;
+  }
+
+  await ctx.ui.writeMessage(`roger that!. SBattle for mine: ${mineId}`);
+
+  const sCellInfo = await getPoriansAtSCellSc(ctx, mineId);
+  const sbattleCmd = await sbattleSlotPick({
+    ctx,
+    mineInfo,
+    sCellInfo,
+    isFarmer: true,
+  });
+
+  if (!sbattleCmd) {
+    return;
+  }
+
+  // missionId
+  // srcIds
+  // desIds
+  // sTreasure
+  const callData = ctx.contract.methods
+    .swapPorians(
+      sbattleCmd.missionId,
+      sbattleCmd.srcIds,
+      sbattleCmd.desIds,
+      sbattleCmd.sTreasureIndex
+    )
+    .encodeABI();
+
+  const tx = {
+    from: ctx.walletAcc.address,
+    to: getIdleGameAddressSC(ctx.env).address,
+    data: callData, // Required
+  };
+
+  // Sign transaction
+  const txHash = await WalletActions.sendRequestForWalletConnectTx(
+    { ctx },
+    tx,
+    (r) => {
+      ctx.ui.writeMessage(`on Receipt: ${r.transactionHash}`);
+    }
+  );
+  if (txHash)
+    await ctx.ui.writeMessage(getChainExplorerTxHashLink(ctx.env, txHash));
+  else await ctx.ui.writeMessage(`Ố ồ..`);
 }

@@ -15,8 +15,10 @@ import moment from 'moment';
 import { queryMissiontOfPoriSc } from '../adventure';
 import { AdventureStatsComputed } from '../computed/myAdventure';
 import { supportSlotPick } from './supportSlotPick';
+
 export const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
 const MAX_PORI_ENGAGED_MISSION = 500;
+const SBATTLE_BEFORE_END_MS = 30 * 60 * 1000; // 30 mins
 
 export type AutoPlayOpenMineArgs = {
   type: 'bot';
@@ -190,7 +192,35 @@ export async function autoPlayV1({
         }
       }
 
-      // 3. do finish
+      // 3. do SBattle. before finish 30 mins
+      const sAt = activeMine.blockedTo.valueOf() - SBATTLE_BEFORE_END_MS;
+      const needToWaitForSMin =
+        sAt - Date.now() + ctx.setting.autoPlayMicroDelayMs;
+      if (needToWaitForSMin > 0) {
+        state.updateState(() => {
+          state.data['step'] = `waiting_for_s. Wakeup at ${new Date(
+            sAt
+          ).toLocaleString()} - ${moment(new Date(sAt)).fromNow()}`;
+        });
+
+        await state.promiseWithAbort(waitForMs(needToWaitForSMin));
+        await state.promiseWithAbort(checkGasPrice({ ctx, end, state }));
+
+        state.updateState(() => {
+          state.data['step'] = 'begin_s';
+        });
+
+        // CMD do SBattle
+        await state.promiseWithAbort(
+          Cmds.cmdDoSBattle({ ctx, realm, args: mineId.toString() })
+        );
+
+        state.updateState(() => {
+          state.data['step'] = 'end_s';
+        });
+      }
+
+      // 4. do finish
       addvStats = await refreshStatus(state, realm, ctx, playerAddress);
       activeMine = findActiveMine({ ctx, addvStats, args });
       if (activeMine) {
