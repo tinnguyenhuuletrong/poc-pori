@@ -17,6 +17,7 @@ import {
   WalletActions,
   Adventure,
   queryMarketItems,
+  Cmds,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
@@ -326,6 +327,13 @@ async function main() {
       const res = await Adventure.getPoriansAtSCellSc(ctx, '52332');
       console.log(res);
       return res;
+    },
+  });
+
+  server.defineCommand('sbattle', {
+    help: 'test s battle',
+    action: async (args) => {
+      await Cmds.cmdDoSBattle({ ctx, realm, args });
     },
   });
 
