@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`s_battle_slot_pick assit has 3p - has s. explorer power higher 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: explorer power higher 312 vs 300 and assit can not play s. nothing to do",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 0 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: explorer power higher 312 vs 0 and assit can not play s. nothing to do",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 1(higher) - don't have  1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: don't have pori atk > 320. nothing to do",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 1(higher) 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: move min rewardLevel -> S. 3560 - R:1 - Pw:330",
+  ],
+  "sCmd": Object {
+    "desIds": Array [
+      0,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 9,
+    "srcIds": Array [
+      3560,
+    ],
+  },
+}
+`;
+
+exports[`s_battle_slot_pick assit has 3p - not s 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: s not found",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 4p - has s. farmer can not win 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: max2Power lesser than supporter 550 < 611. do nothing for now. consider ebs lucky later",
+  ],
+  "sCmd": null,
+}
+`;
+
+exports[`s_battle_slot_pick assit has 4p - has s. farmer can win. p1 in s, p2 not 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: max2Power of supporter 611, farmer 630. sFarmer: 3830, sSupport: 5749",
+    "sbattle 36430: max2Power power 630 cost 5 pair 2257 - 318 - 1, 3830 - 312 - 4",
+    "sbattle 36430: move srcIds: 2257 -> desIds: 0 ",
+  ],
+  "sCmd": Object {
+    "desIds": Array [
+      0,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 9,
+    "srcIds": Array [
+      2257,
+    ],
+  },
+}
+`;
+
+exports[`s_battle_slot_pick assit has 4p - has s. farmer can win. p1 p2 not s 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: max2Power of supporter 611, farmer 629. sFarmer: 3830, sSupport: 5749",
+    "sbattle 36430: max2Power power 629 cost 4 pair 2257 - 318 - 1, 225 - 311 - 3",
+    "sbattle 36430: move srcIds: 2257,225 -> desIds: 3830,0 ",
+  ],
+  "sCmd": Object {
+    "desIds": Array [
+      3830,
+      0,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 9,
+    "srcIds": Array [
+      2257,
+      225,
+    ],
+  },
+}
+`;
+
+exports[`s_battle_slot_pick assit has 4p - has s. farmer can win. p1 p2 not s 2 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: max2Power of supporter 611, farmer 629. sFarmer: 3830,3560, sSupport: 5749",
+    "sbattle 36430: max2Power power 629 cost 4 pair 2257 - 318 - 1, 225 - 311 - 3",
+    "sbattle 36430: move srcIds: 2257,225 -> desIds: 3830,3560 ",
+  ],
+  "sCmd": Object {
+    "desIds": Array [
+      3830,
+      3560,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 9,
+    "srcIds": Array [
+      2257,
+      225,
+    ],
+  },
+}
+`;
