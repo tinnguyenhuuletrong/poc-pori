@@ -74,6 +74,10 @@ export async function sbattleSlotPick({
   isFarmer: boolean;
   ctx: Context;
 }): Promise<SBattlerDecision | null> {
+  if (!mineInfo.supporterAddress) {
+    await ctx.ui.writeMessage(`sbattle ${mineInfo.mineId}: empty supporter`);
+    return null;
+  }
   const parseMineInfo = _parseMineInfo(mineInfo);
   const {
     supporterPories,
@@ -97,11 +101,18 @@ export async function sbattleSlotPick({
   }
 
   if (supporterMaxPowerOf2 > farmerMaxPowerOf2) {
-    // TODO: try to calculate ebs -> rely on lucky
-    await ctx.ui.writeMessage(
-      `sbattle ${mineId}: max2Power lesser than supporter ${farmerMaxPowerOf2} < ${supporterMaxPowerOf2}. do nothing for now. consider ebs lucky later`
-    );
-    return null;
+    const esbCal = await ctx.contract.methods
+      .getESB(farmerMaxPowerOf2, supporterMaxPowerOf2)
+      .call();
+    const esbPercentage = Math.round(+esbCal / 100);
+    if (esbPercentage < ESB_P_THRESHOLD_KEEP_BIG_REWARD) {
+      await ctx.ui.writeMessage(
+        `sbattle ${mineId}: max2Power lesser than supporter ${farmerMaxPowerOf2} < ${supporterMaxPowerOf2}. And ebs too low ${esbPercentage}`
+      );
+      return null;
+    }
+
+    await ctx.ui.writeMessage(`sbattle ${mineId}: ebs ${esbPercentage}`);
   }
 
   await ctx.ui.writeMessage(
