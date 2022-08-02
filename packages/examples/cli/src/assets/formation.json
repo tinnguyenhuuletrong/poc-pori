@@ -12,11 +12,15 @@
       ],
       "supportPori": "1876",
       "usePortal": true
+    },
+    {
+      "minePories": [
+        "100508",
+        "5387",
+        "6060"
+      ],
+      "supportPori": "6266",
+      "usePortal": true
     }
-  ],
-  "waiting": [
-    "1529",
-    "6060",
-    "3923"
   ]
 }
