@@ -20,13 +20,23 @@ Object {
 }
 `;
 
-exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 1(higher) - don't have  1`] = `
+exports[`s_battle_slot_pick assit has 3p - has s. farmer 1 supporter 1(higher) - need swap 2 to win  1`] = `
 Object {
   "logs": Array [
     "sbattle 36430: assit have 3 pories case",
-    "sbattle 36430: don't have pori atk > 320. nothing to do",
+    "sbattle 36430: max2Power power 630 cost 5 pair 2257 - 318 - 1, 3830 - 312 - 4",
+    "sbattle 36430: move srcIds: 2257 -> desIds: 0 ",
   ],
-  "sCmd": null,
+  "sCmd": Object {
+    "desIds": Array [
+      0,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 9,
+    "srcIds": Array [
+      2257,
+    ],
+  },
 }
 `;
 
@@ -49,6 +59,28 @@ Object {
 }
 `;
 
+exports[`s_battle_slot_pick assit has 3p - mine power lower. but can swap 2 1`] = `
+Object {
+  "logs": Array [
+    "sbattle 36430: assit have 3 pories case",
+    "sbattle 36430: max2Power power 609 cost 3 pair 6266 - 305 - 1, 100508 - 304 - 2",
+    "sbattle 36430: move srcIds: 6266,100508 -> desIds: 5387,0 ",
+  ],
+  "sCmd": Object {
+    "desIds": Array [
+      5387,
+      0,
+    ],
+    "missionId": 36430,
+    "sTreasureIndex": 5,
+    "srcIds": Array [
+      6266,
+      100508,
+    ],
+  },
+}
+`;
+
 exports[`s_battle_slot_pick assit has 3p - not s 1`] = `
 Object {
   "logs": Array [
@@ -61,7 +93,7 @@ Object {
 exports[`s_battle_slot_pick assit has 4p - has s. farmer can not win 1`] = `
 Object {
   "logs": Array [
-    "sbattle 36430: max2Power lesser than supporter 550 < 611. do nothing for now. consider ebs lucky later",
+    "sbattle 36430: max2Power lesser than supporter 550 < 611. And ebs too low 3",
   ],
   "sCmd": null,
 }

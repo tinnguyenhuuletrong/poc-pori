@@ -131,6 +131,7 @@ async function main() {
   global.Services = {
     scheduler,
   };
+  global.Adventure = Adventure;
   global.test = getMobileWalletApplink;
 
   server = repl.start({
