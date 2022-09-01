@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "botTimeoutHours": 48,
+    "maxPoriEngagedMission": 500
+  },
+  "formations": [
+    {
+      "minePories": [
+        "100312",
+        "5374",
+        "5420"
+      ],
+      "supportPori": "1876",
+      "usePortal": true
+    },
+    {
+      "minePories": [
+        "100508",
+        "5387",
+        "6060"
+      ],
+      "supportPori": "6266",
+      "usePortal": true
+    }
+  ]
+}

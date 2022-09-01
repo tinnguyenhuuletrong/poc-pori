@@ -1,0 +1,9 @@
+@pori-and-friends/mongodb-data-store
+
+@pori-and-friends/pori-actions
+
+@pori-and-friends/pori-metadata
+
+@pori-and-friends/pori-repositories
+
+@pori-and-friends/utils
