@@ -92,6 +92,19 @@ export async function queryMissiontOfPoriSc(
   return parseInt(engagedMission);
 }
 
+export async function queryAgeOfPoriSc(ctx: Context, pori: string | number) {
+  const ageInfo = await ctx.contract.methods.getAgeOf(pori, '0').call();
+
+  // in format xxxx -> xx.xx%
+  const { agingClass, reducedPower, reducedReward } = ageInfo;
+
+  return {
+    agingClass,
+    reducedPower: parseInt(reducedPower) / 10000,
+    reducedReward: parseInt(reducedReward) / 10000,
+  };
+}
+
 export type SCPortalInfo = PromiseReturnType<
   ReturnType<typeof queryPortalInfoSc>
 >;

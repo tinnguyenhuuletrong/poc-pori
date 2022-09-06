@@ -325,7 +325,7 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const res = await Adventure.getPoriansAtSCellSc(ctx, '52332');
+      const res = await Adventure.queryAgeOfPoriSc(ctx, '5416');
       console.log(res);
       return res;
     },
