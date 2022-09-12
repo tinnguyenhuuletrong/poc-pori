@@ -202,7 +202,7 @@ export async function autoPlayV1({
       // 3. do SBattle. before finish 30 mins
       const beforeEndMs = args.usePortal
         ? SBATTLE_BEFORE_END_MS
-        : SBATTLE_BEFORE_END_MS - ONE_HOUR_IN_MS;
+        : SBATTLE_BEFORE_END_MS + ONE_HOUR_IN_MS;
       const sAt = activeMine.blockedTo.valueOf() - beforeEndMs;
       const needToWaitForSMin =
         sAt - Date.now() + ctx.setting.autoPlayMicroDelayMs;
