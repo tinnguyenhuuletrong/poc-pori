@@ -11,7 +11,7 @@ export enum ENV {
   Prod = 'PROD',
   ProdPorichain = 'PROD_PORICHAIN',
 }
-export type SendMessageHandler = (msg: string) => Promise<any>;
+export type SendMessageHandler = (msg: string, mode?: string) => Promise<any>;
 export type EditMessageHandler = (
   lastMsginfo: any,
   msg: string

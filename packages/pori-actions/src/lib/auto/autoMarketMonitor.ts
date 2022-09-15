@@ -126,7 +126,8 @@ async function checkMarketItems(
             }`
         )
         .join('\n')}
-      `
+      `,
+      'MarkdownV2'
     );
   }
 }

@@ -695,6 +695,7 @@ async function doStats(realm: Realm, ctx: Context, addr?: string) {
 }
 
 async function doUploadSnapshot(realm: Realm, ctx: Context) {
+  realm.compact();
   const stream = createReadStream(activeEnv.environment.dbPath);
   const backupKey = getDatastoreBackupKey(env);
   console.log(`upload snapshot - ${backupKey}`);
