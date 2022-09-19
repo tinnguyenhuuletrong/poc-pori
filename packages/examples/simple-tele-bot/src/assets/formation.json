@@ -5,19 +5,31 @@
   },
   "formations": [
     {
-      "minePories": ["636", "2445", "1380"],
+      "minePories": [
+        "636",
+        "2445",
+        "1380"
+      ],
       "supportPori": "2188",
-      "usePortal": true
+      "usePortal": false
     },
     {
-      "minePories": ["3719", "1263", "4214"],
+      "minePories": [
+        "3719",
+        "1263",
+        "4214"
+      ],
       "supportPori": "114",
-      "usePortal": true
+      "usePortal": false
     },
     {
-      "minePories": ["3602", "182", "1612"],
+      "minePories": [
+        "3602",
+        "182",
+        "1612"
+      ],
       "supportPori": "2173",
-      "usePortal": true
+      "usePortal": false
     }
   ]
 }
