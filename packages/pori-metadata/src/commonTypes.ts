@@ -5,6 +5,7 @@ import type WalletConnect from '@walletconnect/client';
 import type { WebsocketProvider, HttpProvider } from 'web3-core';
 import { EventEmitter } from 'stream';
 import { MongoClient } from 'mongodb';
+import { Storage } from '@google-cloud/storage';
 
 export enum ENV {
   Staging = 'STAG',
@@ -31,6 +32,7 @@ export type Context = {
   env: ENV;
   emiter?: EventEmitter;
   mongoClient?: MongoClient;
+  gcsStorage?: Storage;
   playerAddress?: string;
 
   ui: {

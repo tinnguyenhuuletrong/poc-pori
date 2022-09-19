@@ -18,6 +18,9 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
+      "@pori-and-friends/gcs-data-store": [
+        "packages/gcs-data-store/src/index.ts"
+      ],
       "@pori-and-friends/mongodb-data-store": [
         "packages/mongodb-data-store/src/index.ts"
       ],

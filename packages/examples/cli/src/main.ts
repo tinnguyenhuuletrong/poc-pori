@@ -43,9 +43,11 @@ import {
   createWriteStream,
   existsSync,
   readFileSync,
+  statSync,
   writeFileSync,
 } from 'fs';
 import os from 'os';
+import * as GCSDataStore from '@pori-and-friends/gcs-data-store';
 import repl, { REPLServer } from 'repl';
 import {
   RuntimeConfig,
@@ -110,6 +112,8 @@ async function main() {
       activeEnv.environment.mongodbDataStoreSSLCer
     );
   }
+
+  GCSDataStore.addGCSDataStore(ctx);
 
   let realm = await Repos.openRepo({
     path: activeEnv.environment.dbPath,
@@ -184,12 +188,13 @@ async function main() {
       const backupKey = getDatastoreBackupKey(env);
 
       console.log(`begin download - ${backupKey}`);
-      const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
-        ctx,
-        backupKey
-      );
-
-      const totalBytes = fileMeta.length;
+      // const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
+      //   ctx,
+      //   backupKey
+      // );
+      const fileMeta = await GCSDataStore.fetchBlobMetadata(ctx, backupKey);
+      const dataStream = await GCSDataStore.downloadBlob(ctx, backupKey);
+      const totalBytes = +fileMeta.size;
       let downloaded = 0;
       console.log(`metadata: revision:${fileMeta.metadata?.revision}`);
       console.log('totalBytes', totalBytes);
@@ -327,16 +332,10 @@ async function main() {
     action: async () => {
       // const res = await Adventure.queryAgeOfPoriSc(ctx, '5416');
       // console.log(res);
-      Auto.autoMonitorMarketItemPrices({
-        ctx,
-        realm,
-        args: {
-          type: 'market_items_monitor',
-          intervalMs: 5000,
-          minSeedToNotice: 1500,
-          minPotionToNotice: 2000,
-        },
-      });
+
+      const backupKey = getDatastoreBackupKey(env);
+      const meta = await GCSDataStore.fetchBlobMetadata(ctx, backupKey);
+      console.log(meta);
     },
   });
 
@@ -707,8 +706,26 @@ async function doUploadSnapshot(realm: Realm, ctx: Context) {
     revision: dbMetadata.updatedBlock,
   };
 
-  await MongoDataStore.waitForConnected(ctx);
+  // await MongoDataStore.waitForConnected(ctx);
 
-  await MongoDataStore.storeBlob(ctx, backupKey, stream, metadata);
+  // await MongoDataStore.storeBlob(ctx, backupKey, stream, metadata);
+  let uploaded = 0;
+  const totalBytes = statSync(activeEnv.environment.dbPath).size;
+  console.log(
+    `uploaded - revision:${metadata.revision} - file size ${totalBytes} bytes`
+  );
+  stream.prependListener('data', (chunk) => {
+    uploaded += chunk.length;
+    console.log('progress', uploaded / totalBytes);
+  });
+
+  await GCSDataStore.deleteBlob(ctx, backupKey);
+  await GCSDataStore.storeBlob(ctx, backupKey, stream, metadata);
+  // await GCSDataStore.storeFile(
+  //   ctx,
+  //   backupKey,
+  //   activeEnv.environment.dbPath,
+  //   metadata
+  // );
   console.log(`uploaded - revision:${metadata.revision}`);
 }

@@ -6,6 +6,7 @@
     "examples-play": "packages/examples/play",
     "examples-query-mine-info": "packages/examples/query-mine-info",
     "examples-simple-tele-bot": "packages/examples/simple-tele-bot",
+    "gcs-data-store": "packages/gcs-data-store",
     "mongodb-data-store": "packages/mongodb-data-store",
     "pori-actions": "packages/pori-actions",
     "pori-metadata": "packages/pori-metadata",
