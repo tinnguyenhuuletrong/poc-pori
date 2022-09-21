@@ -149,3 +149,59 @@ Object {
   },
 }
 `;
+
+exports[`data_view active_adv_debug 1`] = `
+Object {
+  "res": Object {
+    "activeAdventures": Object {
+      "91498": Object {
+        "farmerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+        "farmerEndTime": 2022-08-06T10:15:30.000Z,
+        "farmerPories": Array [
+          100508,
+          5387,
+          6060,
+          6266,
+        ],
+        "farmerRewardLevel": Array [
+          2,
+          2,
+          4,
+          1,
+        ],
+        "farmerSlots": Array [
+          3,
+          8,
+          5,
+          9,
+        ],
+        "isFarmer": true,
+        "isSupporter": false,
+        "mineId": 91498,
+        "startTime": 2022-08-06T07:15:30.000Z,
+        "state": "AdventureFortified",
+        "supporterAddress": "0xd88627151A38cD49877dCeaB4Bdf1e682Dfa4819",
+        "supporterEndTime": 2022-08-06T10:15:30.000Z,
+        "supporterPories": Array [
+          100766,
+          5131,
+          5425,
+        ],
+        "supporterRewardLevel": Array [
+          4,
+          3,
+          3,
+        ],
+        "supporterSlots": Array [
+          5,
+          7,
+          2,
+        ],
+      },
+    },
+    "finishedAdventures": Object {},
+    "note": Object {},
+    "playerAddress": "0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA",
+  },
+}
+`;

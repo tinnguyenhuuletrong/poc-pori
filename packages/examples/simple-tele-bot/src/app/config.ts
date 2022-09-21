@@ -5,7 +5,7 @@ import * as AppEnv from '../environments/environment';
 import * as AppEnvProd from '../environments/environment.prod';
 import * as AppEnvProdPorichain from '../environments/environment.prod.porichain';
 
-export const VERSION = '17';
+export const VERSION = '18';
 export const env = ENV.ProdPorichain;
 export const activeEnv = computeActiveEnv(env);
 export const playerAddress = process.env.PLAYER_ADDRESS;

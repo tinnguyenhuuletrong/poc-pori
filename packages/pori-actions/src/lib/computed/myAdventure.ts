@@ -103,14 +103,18 @@ export async function refreshAdventureStatsForAddress(
       value.farmerAddress === activeAddr ||
       value.supporterAddress === activeAddr
     )
-      humanView.mines[k] = DataView.humanrizeAdventureInfo(
+      humanView.mines[k] = await DataView.humanrizeAdventureInfo(
         ctx,
         realm,
         value,
         true
       );
     else if (value.state === 'AdventureStarted') {
-      humanView.targets[k] = DataView.humanrizeAdventureInfo(ctx, realm, value);
+      humanView.targets[k] = await DataView.humanrizeAdventureInfo(
+        ctx,
+        realm,
+        value
+      );
     }
   }
 

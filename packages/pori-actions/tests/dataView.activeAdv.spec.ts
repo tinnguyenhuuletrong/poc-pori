@@ -100,4 +100,24 @@ describe('data_view', () => {
       res,
     }).toMatchSnapshot();
   });
+
+  test('active_adv_debug', async () => {
+    // Not related
+    const Data = await import('./_mocks/active_adv_data_debug');
+    Repos.IdleGameSCEventRepo.tx(realm, () => {
+      for (const it of Data.EVENTS) {
+        Repos.IdleGameSCEventRepo.create(realm, it as any);
+      }
+    });
+
+    const res = await computePlayerAdventure({
+      playerAddress: '0xdF218Bd4414E0B1D581BDdF64498ABBa8cCe0EcA',
+      realm,
+      realmEventStore: await Repos.IdleGameSCEventRepo.findAll(realm),
+    });
+
+    expect({
+      res,
+    }).toMatchSnapshot();
+  });
 });

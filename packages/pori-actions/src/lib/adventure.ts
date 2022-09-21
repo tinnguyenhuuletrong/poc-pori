@@ -3,6 +3,7 @@ import {
   PromiseReturnType,
   TEN_POWER_10,
 } from '@pori-and-friends/pori-metadata';
+import { PoriRepo } from '@pori-and-friends/pori-repositories';
 import { byte2number } from '@pori-and-friends/utils';
 import { random } from 'lodash';
 
@@ -91,6 +92,19 @@ export async function queryMissiontOfPoriSc(
   return parseInt(engagedMission);
 }
 
+export async function queryAgeOfPoriSc(ctx: Context, pori: string | number) {
+  const ageInfo = await ctx.contract.methods.getAgeOf(pori, '0').call();
+
+  // in format xxxx -> xx.xx%
+  const { agingClass, reducedPower, reducedReward } = ageInfo;
+
+  return {
+    agingClass,
+    reducedPower: parseInt(reducedPower) / 10000,
+    reducedReward: parseInt(reducedReward) / 10000,
+  };
+}
+
 export type SCPortalInfo = PromiseReturnType<
   ReturnType<typeof queryPortalInfoSc>
 >;
@@ -144,4 +158,27 @@ export async function getPoriansAtSCellSc(ctx: Context, missionId: string) {
     farmer,
     helper,
   };
+}
+
+export function queryPowers({
+  ctx,
+  realm,
+  farmerPories,
+  supporterPories,
+}: {
+  ctx: Context;
+  realm: Realm;
+  farmerPories: string[];
+  supporterPories: string[];
+}) {
+  const powers: Record<string, number> = {};
+  for (const id of farmerPories) {
+    const info = PoriRepo.findOneSync(realm, id);
+    if (info) powers[id] = info.minePower;
+  }
+  for (const id of supporterPories) {
+    const info = PoriRepo.findOneSync(realm, id);
+    if (info) powers[id] = info.helpPower;
+  }
+  return powers;
 }

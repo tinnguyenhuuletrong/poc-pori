@@ -15,10 +15,14 @@ import moment from 'moment';
 import { queryMissiontOfPoriSc } from '../adventure';
 import { AdventureStatsComputed } from '../computed/myAdventure';
 import { supportSlotPick } from './supportSlotPick';
+import { AutoMonitorMarketItemPriceArgs } from './autoMarketMonitor';
+
+export { autoMonitorMarketItemPrices } from './autoMarketMonitor';
 
 export const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
-const MAX_PORI_ENGAGED_MISSION = 500;
+const MAX_PORI_ENGAGED_MISSION = 999;
 const SBATTLE_BEFORE_END_MS = 30 * 60 * 1000; // 30 mins
+const ONE_HOUR_IN_MS = 1 * 60 * 60 * 1000; // 1 hour
 
 export type AutoPlayOpenMineArgs = {
   type: 'bot';
@@ -32,7 +36,10 @@ export type AutoPlayRefreshStatusArg = {
   intervalMs: number;
 };
 
-export type AutoPlayArgs = AutoPlayOpenMineArgs | AutoPlayRefreshStatusArg;
+export type AutoPlayArgs =
+  | AutoPlayOpenMineArgs
+  | AutoPlayRefreshStatusArg
+  | AutoMonitorMarketItemPriceArgs;
 export const AutoPlayDb: Record<
   string,
   { args: AutoPlayArgs; state: Workflow.WorkflowState }
@@ -193,7 +200,10 @@ export async function autoPlayV1({
       }
 
       // 3. do SBattle. before finish 30 mins
-      const sAt = activeMine.blockedTo.valueOf() - SBATTLE_BEFORE_END_MS;
+      const beforeEndMs = args.usePortal
+        ? SBATTLE_BEFORE_END_MS
+        : SBATTLE_BEFORE_END_MS + ONE_HOUR_IN_MS;
+      const sAt = activeMine.blockedTo.valueOf() - beforeEndMs;
       const needToWaitForSMin =
         sAt - Date.now() + ctx.setting.autoPlayMicroDelayMs;
       if (needToWaitForSMin > 0) {
@@ -294,7 +304,10 @@ export function stopBot(id: string) {
   delete AutoPlayDb[id];
 }
 
-function captureStartedBot(state: Workflow.WorkflowState, args: AutoPlayArgs) {
+export function captureStartedBot(
+  state: Workflow.WorkflowState,
+  args: AutoPlayArgs
+) {
   const id = state.id;
   state.finishDefered.promise
     .then((res) => {
@@ -326,7 +339,7 @@ async function refreshStatus(
   );
 }
 
-async function takeABreak(
+export async function takeABreak(
   state: Workflow.WorkflowState,
   ctx: Context,
   sec?: number
