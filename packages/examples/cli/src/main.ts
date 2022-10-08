@@ -131,6 +131,7 @@ async function main() {
   global.Services = {
     scheduler,
   };
+  global.Adventure = Adventure;
   global.test = getMobileWalletApplink;
 
   server = repl.start({
@@ -324,9 +325,18 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      const res = await Adventure.getPoriansAtSCellSc(ctx, '52332');
-      console.log(res);
-      return res;
+      // const res = await Adventure.queryAgeOfPoriSc(ctx, '5416');
+      // console.log(res);
+      Auto.autoMonitorMarketItemPrices({
+        ctx,
+        realm,
+        args: {
+          type: 'market_items_monitor',
+          intervalMs: 5000,
+          minSeedToNotice: 1500,
+          minPotionToNotice: 2000,
+        },
+      });
     },
   });
 
@@ -466,7 +476,7 @@ async function main() {
   server.defineCommand('market.items', {
     help: 'marketplace items',
     action: async () => {
-      const sellingItems = await queryMarketItems({ ctx, pageSize: 10 });
+      const sellingItems = await queryMarketItems({ ctx, pageSize: 35 });
 
       const marketplaceBaseUrl = getMarketplayBaseLink(ctx.env);
 
@@ -474,6 +484,7 @@ async function main() {
         const { id, unitPrice, itemType, scOrderId } = itm;
         return {
           link: `${marketplaceBaseUrl}/item-orders/${scOrderId}`,
+          itemId: itm.itemType.id,
           name: itemType.name,
           price: (BigInt(unitPrice) / TEN_POWER_10_BN).toString() + ' RIGY',
         };
@@ -684,6 +695,7 @@ async function doStats(realm: Realm, ctx: Context, addr?: string) {
 }
 
 async function doUploadSnapshot(realm: Realm, ctx: Context) {
+  realm.compact();
   const stream = createReadStream(activeEnv.environment.dbPath);
   const backupKey = getDatastoreBackupKey(env);
   console.log(`upload snapshot - ${backupKey}`);

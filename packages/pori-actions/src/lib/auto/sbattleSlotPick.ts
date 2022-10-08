@@ -178,7 +178,13 @@ async function sbattleSlotPickCase3({
   ctx: Context;
 }): Promise<SBattlerDecision | null> {
   const parseMineInfo = _parseMineInfo(mineInfo);
-  const { mineId, sIndex, powerOf } = parseMineInfo;
+  const {
+    mineId,
+    sIndex,
+    powerOf,
+    farmerMaxPowerOf2,
+    farmerPoriesSortedByDecPower,
+  } = parseMineInfo;
   const sPowerFarmer = sum(sCellInfo.farmer.map((itm) => powerOf(itm)));
   const sPowerSupporter = sum(sCellInfo.helper.map((itm) => powerOf(itm)));
 
@@ -190,22 +196,62 @@ async function sbattleSlotPickCase3({
     return null;
   }
 
+  // swap 1 pori have power higher
   const minAtk = powerOf(sCellInfo.helper[0]);
   const poriInfo = _pickOneMinRewardLevelAndAtkGtXPori(parseMineInfo, minAtk);
-  if (!poriInfo) {
+  if (poriInfo) {
     await ctx.ui.writeMessage(
-      `sbattle ${mineId}: don't have pori atk > ${minAtk}. nothing to do`
+      `sbattle ${mineId}: move min rewardLevel -> S. ${poriInfo.id} - R:${poriInfo.rewardLevel} - Pw:${poriInfo.power}`
+    );
+    return {
+      missionId: mineId,
+      srcIds: [poriInfo.id],
+      desIds: [0],
+      sTreasureIndex: sIndex,
+    };
+  }
+
+  // swap 2 pories power -> s
+  if (minAtk > farmerMaxPowerOf2) {
+    await ctx.ui.writeMessage(
+      `sbattle ${mineId}: don't have 2 pories atk > ${minAtk}. nothing to do`
     );
     return null;
   }
 
+  const max1 = farmerPoriesSortedByDecPower[0],
+    max2 = farmerPoriesSortedByDecPower[1];
+  const maxSum = max1.power + max2.power;
+  const minCost = max1.rewardLevel + max2.rewardLevel;
+
   await ctx.ui.writeMessage(
-    `sbattle ${mineId}: move min rewardLevel -> S. ${poriInfo.id} - R:${poriInfo.rewardLevel} - Pw:${poriInfo.power}`
+    `sbattle ${mineId}: max2Power power ${maxSum} cost ${minCost} pair ${max1.id} - ${max1.power} - ${max1.rewardLevel}, ${max2.id} - ${max2.power} - ${max2.rewardLevel}`
   );
+
+  const sFarmer = sCellInfo.farmer.map((itm) => +itm);
+  const srcIds = [max1, max2]
+    .filter((itm) => !sFarmer.includes(itm.id))
+    .map((itm) => itm.id);
+  const desIds = sFarmer.filter((itm) => ![max1.id, max2.id].includes(itm));
+
+  // fill 0 for remaining
+  if (desIds.length != srcIds.length) {
+    const needToFill = srcIds.length - desIds.length;
+    for (let i = 0; i < needToFill; i++) {
+      desIds.push(0);
+    }
+  }
+
+  await ctx.ui.writeMessage(
+    `sbattle ${mineId}: move srcIds: ${srcIds.join(
+      ','
+    )} -> desIds: ${desIds.join(',')} `
+  );
+
   return {
     missionId: mineId,
-    srcIds: [poriInfo.id],
-    desIds: [0],
+    srcIds,
+    desIds,
     sTreasureIndex: sIndex,
   };
 }
