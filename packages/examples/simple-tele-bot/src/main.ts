@@ -36,7 +36,10 @@ import {
   writeFileSync,
 } from 'fs';
 import moment from 'moment';
-import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
+import TelegramBot, {
+  InlineKeyboardButton,
+  ParseMode,
+} from 'node-telegram-bot-api';
 import * as os from 'os';
 import process from 'process';
 import {
@@ -115,9 +118,15 @@ async function main() {
 
   // extend ctx UI
   // register send msg, edit msg
-  ctx.ui.writeMessage = async (msg) => {
+  ctx.ui.writeMessage = async (msg, mode) => {
     const chatId = Memory.activeChats[0];
-    if (chatId) return await bot.sendMessage(chatId, msg);
+    if (chatId) {
+      if (!mode) return await bot.sendMessage(chatId, msg);
+      else
+        return await bot.sendMessage(chatId, msg, {
+          parse_mode: mode as ParseMode,
+        });
+    }
   };
 
   ctx.ui.editMessage = async (lastMsg, msg) => {
@@ -490,6 +499,18 @@ ${protentialTarget
         playerAddress,
         args: { type: 'background_refresh', intervalMs: 2 * 60 * 1000 },
       });
+
+      // monitor items
+      await Auto.autoMonitorMarketItemPrices({
+        ctx,
+        realm,
+        args: {
+          type: 'market_items_monitor',
+          intervalMs: 5 * 60 * 1000,
+          minSeedToNotice: 1500,
+          minPotionToNotice: 2000,
+        },
+      });
     });
   });
 
@@ -522,6 +543,15 @@ ${protentialTarget
                 it: - ${itm.state.data['_it']} times
                 nextAt: - ${moment(itm.state.data['_nextAt']).fromNow()} 
                 `;
+            }
+            case 'market_items_monitor': {
+              return `  * background_refresh : ${itm.state.id} 
+              interval: - ${args.intervalMs} ms
+              it: - ${itm.state.data['_it']} times
+              nextAt: - ${moment(itm.state.data['_nextAt']).fromNow()} 
+              minSeedToNotice: - ${args.minSeedToNotice}
+              minPotionToNotice: - ${args.minPotionToNotice}
+              `;
             }
 
             default:
@@ -867,6 +897,8 @@ ${formatedData
   }
 
   async function doUploadSnapshot(realm: Realm, ctx: Context) {
+    realm.compact();
+
     const stream = createReadStream(activeEnv.environment.dbPath);
     const backupKey = getDatastoreBackupKey(env);
 

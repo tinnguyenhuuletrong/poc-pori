@@ -21,6 +21,7 @@ import {
   SBattleSwapData,
 } from '@pori-and-friends/pori-metadata';
 import moment from 'moment';
+import { queryAgeOfPoriSc } from '../adventure';
 
 const TOKEN_DECIMAL = 18;
 const TOKEN_CONVERT_CONSTANT = 10 ** TOKEN_DECIMAL;
@@ -350,12 +351,12 @@ function defaultViewData(
   };
 }
 
-export function humanrizeAdventureInfo(
+export async function humanrizeAdventureInfo(
   ctx: Context,
   realm: Realm,
   advIno: AdventureInfo,
   withPoriePower = false
-): AdventureInfoEx {
+): Promise<AdventureInfoEx> {
   const startTime = advIno.startTime
     ? new Date(advIno.startTime).toLocaleString()
     : undefined;
@@ -400,12 +401,18 @@ export function humanrizeAdventureInfo(
     const farmerPories = advIno.farmerPories ?? [];
     for (const id of farmerPories) {
       const info = PoriRepo.findOneSync(realm, id);
-      if (info) powers[id] = info.minePower;
+      const ageInfo = await queryAgeOfPoriSc(ctx, id);
+      const reducedPowerPercentage = ageInfo.reducedPower;
+      if (info)
+        powers[id] = info.minePower - info.minePower * reducedPowerPercentage;
     }
     const supportPories = advIno.supporterPories ?? [];
     for (const id of supportPories) {
       const info = PoriRepo.findOneSync(realm, id);
-      if (info) powers[id] = info.helpPower;
+      const ageInfo = await queryAgeOfPoriSc(ctx, id);
+      const reducedPowerPercentage = ageInfo.reducedPower;
+      if (info)
+        powers[id] = info.helpPower - info.helpPower * reducedPowerPercentage;
     }
   }
 

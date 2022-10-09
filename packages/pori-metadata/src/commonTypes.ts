@@ -11,12 +11,15 @@ export enum ENV {
   Prod = 'PROD',
   ProdPorichain = 'PROD_PORICHAIN',
 }
-export type SendMessageHandler = (msg: string) => Promise<any>;
+export type SendMessageHandler = (msg: string, mode?: string) => Promise<any>;
 export type EditMessageHandler = (
   lastMsginfo: any,
   msg: string
 ) => Promise<any>;
 export type CustomEstGasprice = (ctx: Context) => Promise<string>;
+
+export const NFTItemSeedIds = [2, 3, 4];
+export const NFTItemPotionIds = [5, 6, 7, 8];
 
 export type Context = {
   contract: Contract;
