@@ -10,13 +10,21 @@ export async function createVm() {
   const args = [
     `--project=${project}`,
     `--zone=${zone}`,
+
+    // container image
     `--container-image=${image}`,
     `--container-env-file=${evnFile}`,
+
+    // VMImage cos-stable
+    //    gcloud compute images list
+    '--image-family=cos-stable',
+    '--image-project=cos-cloud',
+
     '--machine-type=e2-micro',
     '--network-interface=network-tier=PREMIUM,subnet=default',
+
     '--maintenance-policy=MIGRATE',
     '--provisioning-model=STANDARD',
-    '--image=projects/cos-cloud/global/images/cos-stable-101-17162-40-5',
     '--boot-disk-size=10GB',
     '--boot-disk-type=pd-standard',
     `--boot-disk-device-name=${name}`,
@@ -26,6 +34,9 @@ export async function createVm() {
     '--shielded-vtpm',
     '--shielded-integrity-monitoring',
     '--labels=container-vm=cos-stable-101-17162-40-5',
+
+    // mount path
+    '--container-mount-host-path=host-path=/data/db,mode=rw,mount-path=/app/archived/repo/prodPoriChain',
   ];
 
   await $`gcloud compute instances create-with-container ${name} ${args}`;
