@@ -25,6 +25,7 @@ export type Context = {
   contract: Contract;
   contractPortal: Contract;
   web3: Web3;
+  web3Polygon: Web3;
   walletAcc?: Account;
   provider: WebsocketProvider | HttpProvider;
   walletConnectChannel?: WalletConnect;
