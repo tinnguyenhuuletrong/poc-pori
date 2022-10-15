@@ -15,6 +15,7 @@ export * from './lib/transformer/transformIdleGameEvent2Database';
 export * from './lib/wallet/walletConnect';
 export * from './lib/wallet/balance';
 export * from './lib/exchange/kyberPool';
+export * from './lib/exchange/kyberApi';
 export * from './lib/exchange/binance';
 export * from './lib/exchange/token2Usd';
 

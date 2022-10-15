@@ -18,6 +18,10 @@ import {
   Adventure,
   queryMarketItems,
   Cmds,
+  queryKyberSwapRoute,
+  COMMON_POLYGON_TOKEN,
+  routeExchangeMatic2USDT,
+  routeExchangeUSDT2Matic,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
@@ -325,18 +329,8 @@ async function main() {
   server.defineCommand('test', {
     help: 'test',
     action: async () => {
-      // const res = await Adventure.queryAgeOfPoriSc(ctx, '5416');
-      // console.log(res);
-      Auto.autoMonitorMarketItemPrices({
-        ctx,
-        realm,
-        args: {
-          type: 'market_items_monitor',
-          intervalMs: 5000,
-          minSeedToNotice: 1500,
-          minPotionToNotice: 2000,
-        },
-      });
+      const res = await routeExchangeMatic2USDT({ ctx, amountIn: 1 });
+      console.log(res.summary);
     },
   });
 
