@@ -474,20 +474,26 @@ ${protentialTarget
           `please call /wallet_unlock <.enveloped_key..> frist`
         );
 
+      const botMonitorDb: any = {};
+
       // update bot formations here
       for await (const iterator of RuntimeConfig.formations) {
-        await Auto.autoPlayV1({
-          ctx,
-          realm,
-          playerAddress,
-          args: {
-            type: 'bot',
-            minePories: iterator.minePories,
-            supportPori: iterator.supportPori,
-            timeOutHours: RuntimeConfig.settings.botTimeoutHours,
-            usePortal: iterator.usePortal,
-          },
-        });
+        const startFunc = async () =>
+          await Auto.autoPlayV1({
+            ctx,
+            realm,
+            playerAddress,
+            args: {
+              type: 'bot',
+              minePories: iterator.minePories,
+              supportPori: iterator.supportPori,
+              timeOutHours: RuntimeConfig.settings.botTimeoutHours,
+              usePortal: iterator.usePortal,
+            },
+          });
+
+        const st = await startFunc();
+        botMonitorDb[st.id] = startFunc;
 
         await waitForMs(20000);
       }
@@ -509,6 +515,17 @@ ${protentialTarget
           intervalMs: 5 * 60 * 1000,
           minSeedToNotice: 1500,
           minPotionToNotice: 2000,
+        },
+      });
+
+      // keepAliveBot
+      await Auto.autoKeepAliveBot({
+        ctx,
+        realm,
+        args: {
+          type: 'keep_alive_bot',
+          intervalMs: 30 * 60 * 1000, // every 30 mins
+          botDb: botMonitorDb,
         },
       });
     });
@@ -551,6 +568,13 @@ ${protentialTarget
               nextAt: - ${moment(itm.state.data['_nextAt']).fromNow()} 
               minSeedToNotice: - ${args.minSeedToNotice}
               minPotionToNotice: - ${args.minPotionToNotice}
+              `;
+            }
+            case 'keep_alive_bot': {
+              return `  * background_refresh : ${itm.state.id} 
+              interval: - ${args.intervalMs} ms
+              nextAt: - ${moment(itm.state.data['_nextAt']).fromNow()} 
+              monitor: - ${Object.keys(args.botDb).join(', ')}
               `;
             }
 
@@ -987,7 +1011,7 @@ async function getLocalRealmRevision(realm: Realm) {
     'default'
   );
   const localMetadata = {
-    revision: dbMetadata.updatedBlock,
+    revision: dbMetadata?.updatedBlock ?? 0,
   };
   return localMetadata;
 }

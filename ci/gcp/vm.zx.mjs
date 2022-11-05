@@ -36,7 +36,7 @@ export async function createVm() {
     '--labels=container-vm=cos-stable-101-17162-40-5',
 
     // mount path
-    '--container-mount-host-path=host-path=/data/db,mode=rw,mount-path=/app/archived/repo/prodPoriChain',
+    '--container-mount-host-path=host-path=/home/db,mode=rw,mount-path=/app/archived/repo/prodPoriChain',
   ];
 
   await $`gcloud compute instances create-with-container ${name} ${args}`;
@@ -62,7 +62,8 @@ export async function restartVm() {
   await $`gcloud compute instances start ${name} ${args}`;
 }
 
-const cmd = argv._[0];
+const cmd = argv._.pop();
+
 const ALL_CMDS = ['createVm', 'deleteVm', 'restartVm', 'updateVm'];
 switch (cmd) {
   case 'createVm':

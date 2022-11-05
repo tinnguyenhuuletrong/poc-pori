@@ -1,6 +1,6 @@
 {
   "settings": {
-    "botTimeoutHours": 48,
+    "botTimeoutHours": 500,
     "maxPoriEngagedMission": 500
   },
   "formations": [
