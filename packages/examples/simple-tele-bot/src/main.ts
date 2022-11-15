@@ -493,7 +493,7 @@ ${protentialTarget
           });
 
         const st = await startFunc();
-        botMonitorDb[st.id] = startFunc;
+        if (st) botMonitorDb[st.id] = startFunc;
 
         await waitForMs(20000);
       }
