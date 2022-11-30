@@ -18,6 +18,10 @@ import {
   Adventure,
   queryMarketItems,
   Cmds,
+  queryKyberSwapRoute,
+  COMMON_POLYGON_TOKEN,
+  routeExchangeMatic2USDT,
+  routeExchangeUSDT2Matic,
 } from '@pori-and-friends/pori-actions';
 import {
   Context,
@@ -373,20 +377,26 @@ async function main() {
           `please call .wallet.unlock <.enveloped_key..> frist`
         );
 
+      const botMonitorDb = {};
+
       // update bot formations here
       for await (const iterator of RuntimeConfig.formations) {
-        await Auto.autoPlayV1({
-          ctx,
-          realm,
-          playerAddress,
-          args: {
-            type: 'bot',
-            minePories: iterator.minePories,
-            supportPori: iterator.supportPori,
-            timeOutHours: RuntimeConfig.settings.botTimeoutHours,
-            usePortal: iterator.usePortal,
-          },
-        });
+        const startFunc = async () =>
+          await Auto.autoPlayV1({
+            ctx,
+            realm,
+            playerAddress,
+            args: {
+              type: 'bot',
+              minePories: iterator.minePories,
+              supportPori: iterator.supportPori,
+              timeOutHours: RuntimeConfig.settings.botTimeoutHours,
+              usePortal: iterator.usePortal,
+            },
+          });
+
+        const st = await startFunc();
+        botMonitorDb[st.id] = startFunc;
 
         await waitForMs(20000);
       }
@@ -397,6 +407,29 @@ async function main() {
         realm,
         playerAddress,
         args: { type: 'background_refresh', intervalMs: 2 * 60 * 1000 },
+      });
+
+      // monitor items
+      await Auto.autoMonitorMarketItemPrices({
+        ctx,
+        realm,
+        args: {
+          type: 'market_items_monitor',
+          intervalMs: 5 * 60 * 1000,
+          minSeedToNotice: 1500,
+          minPotionToNotice: 2000,
+        },
+      });
+
+      // keepAliveBot
+      await Auto.autoKeepAliveBot({
+        ctx,
+        realm,
+        args: {
+          type: 'keep_alive_bot',
+          intervalMs: 2 * 60 * 1000, // every 30 mins
+          botDb: botMonitorDb,
+        },
       });
     },
   });

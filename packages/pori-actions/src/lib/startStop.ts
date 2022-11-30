@@ -6,6 +6,7 @@ import {
   getPortalAddressSC,
   getWeb3NodeUri,
   getWeb3NodeUriHttp,
+  getWeb3NodeUriPolygonHttp,
 } from '@pori-and-friends/pori-metadata';
 import { EventEmitter } from 'stream';
 import Web3 from 'web3';
@@ -13,6 +14,7 @@ import Web3 from 'web3';
 export async function init(env: ENV): Promise<Context> {
   const uriws = getWeb3NodeUri(env);
   const urihttp = getWeb3NodeUriHttp(env);
+  const uriPolygonHttp = getWeb3NodeUriPolygonHttp();
 
   if (!uriws && !urihttp) {
     console.error(`missing env NODE_URI_${env} or NODE_URI_${env}_HTTP`);
@@ -39,10 +41,13 @@ export async function init(env: ENV): Promise<Context> {
 
   const { setting, custom } = getContextSetting(env);
 
+  const web3Polygon = new Web3(new Web3.providers.HttpProvider(uriPolygonHttp));
+
   const ctx: Context = {
     contract,
     contractPortal,
     web3,
+    web3Polygon,
     provider,
     env,
     emiter: new EventEmitter(),

@@ -16,8 +16,10 @@ import { queryMissiontOfPoriSc } from '../adventure';
 import { AdventureStatsComputed } from '../computed/myAdventure';
 import { supportSlotPick } from './supportSlotPick';
 import { AutoMonitorMarketItemPriceArgs } from './autoMarketMonitor';
+import { AutoKeepAliveBotArgs } from './autoKeepAliveBot';
 
 export { autoMonitorMarketItemPrices } from './autoMarketMonitor';
+export { autoKeepAliveBot } from './autoKeepAliveBot';
 
 export const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
 const MAX_PORI_ENGAGED_MISSION = 999;
@@ -39,6 +41,7 @@ export type AutoPlayRefreshStatusArg = {
 export type AutoPlayArgs =
   | AutoPlayOpenMineArgs
   | AutoPlayRefreshStatusArg
+  | AutoKeepAliveBotArgs
   | AutoMonitorMarketItemPriceArgs;
 export const AutoPlayDb: Record<
   string,
