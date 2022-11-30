@@ -12,21 +12,27 @@ export async function queryBinancePrice({
   ctx: Context;
   pair: string;
 }): Promise<BinancePriceInfo> {
+  try {
+    const baseURL = 'https://api.binance.com';
+
+    const res = await axiosIns.request({
+      method: 'get',
+      baseURL,
+      url: `/api/v3/ticker/price`,
+      params: {
+        symbol: pair.toUpperCase(),
+      },
+    });
+    if (res.status !== 200)
+      throw new Error(`Request failed status ${res.status} - ${res.data}`);
+
+    const data = JSON.parse(res.data) as BinancePriceInfo;
+    return data;
+  } catch (error) {
+    return {
+      symbol: 'err',
+      price: '0',
+    };
+  }
   // https://api.binance.com/api/v3/ticker/price?symbol=LUNAUSDT
-
-  const baseURL = 'https://api.binance.com';
-
-  const res = await axiosIns.request({
-    method: 'get',
-    baseURL,
-    url: `/api/v3/ticker/price`,
-    params: {
-      symbol: pair.toUpperCase(),
-    },
-  });
-  if (res.status !== 200)
-    throw new Error(`Request failed status ${res.status} - ${res.data}`);
-
-  const data = JSON.parse(res.data) as BinancePriceInfo;
-  return data;
 }
