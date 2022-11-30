@@ -1,4 +1,3 @@
-import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
 import {
   addWalletConnectToContext,
   Auto,
@@ -108,14 +107,6 @@ async function main() {
   ctx.ui.writeMessage = async (msg) => {
     loggerInfo(msg);
   };
-
-  if (activeEnv.environment.mongodbDataStoreUri) {
-    MongoDataStore.addMongodbDataStore(
-      ctx,
-      activeEnv.environment.mongodbDataStoreUri,
-      activeEnv.environment.mongodbDataStoreSSLCer
-    );
-  }
 
   GCSDataStore.addGCSDataStore(ctx);
 

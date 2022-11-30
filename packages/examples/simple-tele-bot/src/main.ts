@@ -1,4 +1,4 @@
-import * as MongoDataStore from '@pori-and-friends/mongodb-data-store';
+import * as GCSDataStore from '@pori-and-friends/gcs-data-store';
 import {
   Auto,
   Cmds,
@@ -33,6 +33,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  statSync,
   writeFileSync,
 } from 'fs';
 import moment from 'moment';
@@ -100,18 +101,8 @@ async function main() {
   const bot = new TelegramBot(token, { polling: true });
   bot.on('polling_error', console.log);
 
-  // mongodb data store
-  if (activeEnv.environment.mongodbDataStoreUri) {
-    MongoDataStore.addMongodbDataStore(
-      ctx,
-      activeEnv.environment.mongodbDataStoreUri,
-      activeEnv.environment.mongodbDataStoreSSLCer
-    ).then((res) => {
-      ctx.ui.writeMessage('🤖 mongodb datastore connected!');
-      const chatId = Memory.activeChats[0];
-      if (chatId) doFetchSnapshotDb(bot, parseInt(chatId), ctx, realm);
-    });
-  }
+  // GCS data store
+  GCSDataStore.addGCSDataStore(ctx);
 
   // worker register
   registerWorkerNotify({ ctx, realm, scheduler, bot });
@@ -798,18 +789,14 @@ ${formatedData
         });
       };
 
-      await MongoDataStore.waitForConnected(ctx);
-
       const tmpDir = './tmp/';
       if (!existsSync(tmpDir)) mkdirSync(tmpDir);
 
-      const [fileMeta, dataStream] = await MongoDataStore.downloadBlob(
-        ctx,
-        backupKey
-      );
-
-      const totalBytes = fileMeta.length;
+      const fileMeta = await GCSDataStore.fetchBlobMetadata(ctx, backupKey);
+      const dataStream = await GCSDataStore.downloadBlob(ctx, backupKey);
+      const totalBytes = +fileMeta.size;
       let downloaded = 0;
+
       await updateText(`download begin. totalBytes ${totalBytes}`);
       dataStream.prependListener('data', async (chunk) => {
         downloaded += chunk.length;
@@ -936,10 +923,18 @@ ${formatedData
       revision: dbMetadata.updatedBlock,
     };
 
-    await MongoDataStore.waitForConnected(ctx);
+    let uploaded = 0;
+    const totalBytes = statSync(activeEnv.environment.dbPath).size;
+    console.log(
+      `uploaded - revision:${metadata.revision} - file size ${totalBytes} bytes`
+    );
+    stream.prependListener('data', (chunk) => {
+      uploaded += chunk.length;
+      console.log('progress', uploaded / totalBytes);
+    });
 
-    await MongoDataStore.storeBlob(ctx, backupKey, stream, metadata);
-    console.log(`uploaded - revision:${metadata.revision}`);
+    await GCSDataStore.deleteBlob(ctx, backupKey);
+    await GCSDataStore.storeBlob(ctx, backupKey, stream, metadata);
     return metadata.revision;
   }
 
@@ -973,9 +968,7 @@ async function doFetchSnapshotDb(
     `🗄 ${backupKey} - checking...`
   );
 
-  await MongoDataStore.waitForConnected(ctx);
-
-  const metadata = await MongoDataStore.fetchBolb(ctx, backupKey);
+  const metadata = await GCSDataStore.fetchBlobMetadata(ctx, backupKey);
 
   const localMetadata = await getLocalRealmRevision(realm);
 

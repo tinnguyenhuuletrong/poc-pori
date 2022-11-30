@@ -64,7 +64,7 @@ export async function deleteBlob(ctx: Context, key: string) {
   const storage = ctx.gcsStorage;
   const bucket = storage.bucket(BUCKET_NAME);
 
-  bucket.file(key).delete({ ignoreNotFound: true });
+  await bucket.file(key).delete({ ignoreNotFound: true });
 }
 
 export async function downloadBlob(ctx: Context, key: string) {
