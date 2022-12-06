@@ -404,7 +404,9 @@ export async function humanrizeAdventureInfo(
       const ageInfo = await queryAgeOfPoriSc(ctx, id);
       const reducedPowerPercentage = ageInfo.reducedPower;
       if (info)
-        powers[id] = info.minePower - info.minePower * reducedPowerPercentage;
+        powers[id] = Math.round(
+          info.minePower - info.minePower * reducedPowerPercentage
+        );
     }
     const supportPories = advIno.supporterPories ?? [];
     for (const id of supportPories) {
@@ -412,7 +414,9 @@ export async function humanrizeAdventureInfo(
       const ageInfo = await queryAgeOfPoriSc(ctx, id);
       const reducedPowerPercentage = ageInfo.reducedPower;
       if (info)
-        powers[id] = info.helpPower - info.helpPower * reducedPowerPercentage;
+        powers[id] = Math.round(
+          info.helpPower - info.helpPower * reducedPowerPercentage
+        );
     }
   }
 
