@@ -12,24 +12,6 @@
       ],
       "supportPori": "1876",
       "usePortal": true
-    },
-    {
-      "minePories": [
-        "100508",
-        "5387",
-        "6060"
-      ],
-      "supportPori": "6266",
-      "usePortal": true
-    },
-    {
-      "minePories": [
-        "1346",
-        "1529",
-        "3923"
-      ],
-      "supportPori": "101065",
-      "usePortal": false
     }
   ]
 }

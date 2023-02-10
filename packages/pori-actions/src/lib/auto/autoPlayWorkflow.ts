@@ -22,7 +22,7 @@ export { autoMonitorMarketItemPrices } from './autoMarketMonitor';
 export { autoKeepAliveBot } from './autoKeepAliveBot';
 
 export const ESB_P_THRESHOLD_KEEP_BIG_REWARD = 15;
-const MAX_PORI_ENGAGED_MISSION = 999;
+const MAX_PORI_ENGAGED_MISSION = 9999;
 const SBATTLE_BEFORE_END_MS = 30 * 60 * 1000; // 30 mins
 const ONE_HOUR_IN_MS = 1 * 60 * 60 * 1000; // 1 hour
 
